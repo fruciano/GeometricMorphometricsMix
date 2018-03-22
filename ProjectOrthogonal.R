@@ -3,7 +3,7 @@
 
 ### This is the approach used in Burnaby's (1966 - Biometrics) method for size correction
 ### and in Valentin et al. (2008 - Journal of Fish Biology) to remove the effect of dorso-ventral arching in fish
-### (see also Fruciano 2016 - Development Genes and Evolution for a discussion and other example of use)
+### (see also Fruciano 2016 - Development Genes and Evolution for a discussion and other examples of use)
 
 ### Usage: ProjectOrthogonal(Data,vector)
 ### Data is the original data matrix
