@@ -3,5 +3,6 @@
 export(EscoufierRV)
 export(Kmultparallel)
 export(ProjectOrthogonal)
+export(RVcomparison)
 export(RVrarefied)
 export(reversePCA)
