@@ -4,6 +4,7 @@ Miscellaneous geometric morphometric functions
 
 This repository contains a few useful and fairly diverse geometric morphometric functions which may be useful to others.
 All the functions are reasonably well commented with information on usage and similar.
+It started as a simple set of function that I distributed as help to the students of my course in [Geometric Morphometrics](https://www.physalia-courses.org/courses-workshops/course22/) (organized by Physalia Courses 
 They are incorporated into an R package to facilitate distribution and use.
 
 ## Currently available functions
@@ -13,6 +14,7 @@ They are incorporated into an R package to facilitate distribution and use.
 - **reversePCA** : Simple function to obtain the original variables (e.g., shape) from PC scores (and mean)
 - **RVrarefied** : Computation of rarefied estimates of Escoufier RV (see Fruciano et al. 2013 - Plos One)
 - **RVcomparison** : Permutation test for the difference in Escoufier RV (see Fruciano et al. 2013 - Plos One)
+- **TestOfAngle** : Test of angle between two vectors, optionally allowing "flipping" of one of the two
 
 ## Installation
 From Github, using devtools
