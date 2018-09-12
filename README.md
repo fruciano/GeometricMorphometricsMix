@@ -4,7 +4,7 @@ Miscellaneous geometric morphometric functions
 
 This repository contains a few useful and fairly diverse geometric morphometric functions which may be useful to others.
 All the functions are reasonably well commented with information on usage and similar.
-It started as a simple set of function that I distributed as help to the students of my course in [Geometric Morphometrics](https://www.physalia-courses.org/courses-workshops/course22/) (organized by Physalia Courses 
+It started as a simple set of function that I distributed as help to the students of my course in [Geometric Morphometrics](https://www.physalia-courses.org/courses-workshops/course22/) (organized by Physalia Courses).
 They are incorporated into an R package to facilitate distribution and use.
 
 ## Currently available functions
