@@ -42,9 +42,11 @@ This is an updated and improved version of the function included in Fruciano et 
 }
 \section{Notice}{
 
-Under Windows, this implementation installs (if not yet installed)
-the package 'parallelsugar' from Github
-To this aim, the package devtools should be installed prior to using the function.
+Under Windows, this implementation needs the package 'parallelsugar'
+if one wants to run it with multiple cores in parallel.
+The package 'parallelsugar' can be installed from Github with the command
+devtools::install_github("nathanvan/parallelsugar")
+This, in turn, requires the package devtools to be installed.
 Notice also that the reason why the value of iter is set to 0 by default is that
 using permutations slows down sensibly the computation and it is of doubtful utility
 in most cases (as one would get a distribution of p-values not independent from each other).
