@@ -75,6 +75,9 @@
 #'
 #' @export
 RVrarefied = function(Block1, Block2, rep = 1000, samplesize) {
+         if (nrow(Block1) != nrow(Block2)) {
+           stop(paste("Error: the two blocks should have the same number of rows (observations)"))
+            }
     BothBlocks = cbind(Block1, Block2)
     endB1 = ncol(Block1)
     startB2 = endB1 + 1
@@ -136,8 +139,8 @@ EscoufierRV = function(Block1, Block2) {
         BothBlocks = cbind(Block1, Block2)
         nvarB1 = ncol(Block1)
         COV = cov(BothBlocks)
-        RV = sum(diag(COV[1:nvarB1, (nvarB1 + 1):ncol(COV)] %*% COV[(nvarB1 + 1):nrow(COV), 1:nvarB1]))/(sqrt(sum(diag(COV[1:nvarB1, 
-            1:nvarB1] %*% COV[1:nvarB1, 1:nvarB1])) * sum(diag(COV[(nvarB1 + 1):ncol(COV), (nvarB1 + 1):ncol(COV)] %*% COV[(nvarB1 + 
+        RV = sum(diag(COV[1:nvarB1, (nvarB1 + 1):ncol(COV)] %*% COV[(nvarB1 + 1):nrow(COV), 1:nvarB1]))/(sqrt(sum(diag(COV[1:nvarB1,
+            1:nvarB1] %*% COV[1:nvarB1, 1:nvarB1])) * sum(diag(COV[(nvarB1 + 1):ncol(COV), (nvarB1 + 1):ncol(COV)] %*% COV[(nvarB1 +
             1):ncol(COV), (nvarB1 + 1):ncol(COV)]))))
         return(RV)
     }

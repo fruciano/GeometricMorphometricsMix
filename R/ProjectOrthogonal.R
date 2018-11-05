@@ -14,6 +14,9 @@
 #'   \item Removing variation due to sexual dimorphism on a set of individuals with
 #'   unknown sex (Fruciano et al. 2014)
 #' }
+#' Optionally, vector can also be a matrix with more than one column
+#' (in this case the Data is projected to the subspace orthogonal to the space
+#' spanned by all dimensions in vector)
 #'
 #'
 #' @param Data matrix n x p of n observation for p variables,
@@ -62,6 +65,12 @@
 #'
 #' @export
 ProjectOrthogonal = function(Data, vector) {
+    if (is.vector(vector) & !is.list(vector)) {
+        vector=cbind(vector)
+    }
+    if (nrow(vector)!=ncol(Data)) {
+      stop(paste("The number of columns of Data (variables) doesn't match the number of variables implied by vector"))
+    }
     Ip = diag(nrow(vector))
     F = vector
     L = Ip - F %*% (solve(t(F) %*% F)) %*% t(F)

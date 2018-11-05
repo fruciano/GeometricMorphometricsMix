@@ -31,6 +31,9 @@ It has been used extensively for many applications, such as
   \item Removing variation due to sexual dimorphism on a set of individuals with
   unknown sex (Fruciano et al. 2014)
 }
+Optionally, vector can also be a matrix with more than one column
+(in this case the Data is projected to the subspace orthogonal to the space
+spanned by all dimensions in vector)
 }
 \examples{
 library(MASS)
