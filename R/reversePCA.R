@@ -50,8 +50,7 @@ reversePCA = function(Scores, Eigenvectors, Mean) {
     ZEt = Scores %*% t(Eigenvectors)
     # Multiply the scores by the transpose of the eigenvectors
     rows = nrow(Scores)
-    X = matrix(data = NA, nrow = rows, ncol = ncol(ZEt))
-    X = X + rep.row(Mean, rows)
+    X = ZEt + rep.row(Mean, rows)
     # Add to the mean
     return(X)
 }
