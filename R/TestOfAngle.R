@@ -65,8 +65,4 @@ return(AngleTest)
 }
 
 
-rad2deg <- function(rad) {(rad * 180) / (pi)}
-# Function to convert radians to degrees
-# (not exported)
-
 
