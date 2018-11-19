@@ -15,3 +15,16 @@ rep.col=function(x,n){
 # and degrees to radians
 rad2deg = function(rad) {(rad * 180) / (pi)}
 deg2rad = function(deg) {(deg * pi) / (180)}
+
+
+# Function to compute "multivariate variance"
+# (trace of the covariance matrix)
+muvar=function(X) {
+  sum(diag(cov(X)))
+}
+
+# Function to compute mean pairwise Euclidean distances
+meanpairwiseEuclideanD=function(X) {
+  mean(dist(X,method = "euclidean"))
+}
+
