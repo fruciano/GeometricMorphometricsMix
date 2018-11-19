@@ -1,4 +1,4 @@
-#' Rarefied estimates of disparity
+#' Rarefied estimates of disparity/morphospace occupation
 #'
 #' Computes rarefied estimates of multivariate variance
 #' (i.e., the trace of the covariance matrix) and
@@ -23,6 +23,7 @@
 #' (observations in rows, variables in columns).
 #' @param rep number of resamplings to obtain the rarefied estimate
 #' @param samplesize sample size to which the rarefaction procedure is carried out
+#' @seealso \code{\link{rarefied_convex_hull}}, \code{\link{BTailTest}}
 #'
 #' @return The function outputs a list with the following elements:
 #'  \describe{
@@ -36,17 +37,17 @@
 #' @references Fruciano C, Franchini P, Raffini F, Fan S, Meyer A. 2016. Are sympatrically speciating Midas cichlid fish special? Patterns of morphological and genetic variation in the closely related species Archocentrus centrarchus. Ecology and Evolution 6:4102-4114.
 #' @references Fruciano C, Pappalardo AM, Tigano C, Ferrito V. 2014. Phylogeographical relationships of Sicilian brown trout and the effects of genetic introgression on morphospace occupation. Biological Journal of the Linnean Society 112:387-398.
 #' @export
-RarefiedDisparity=function(Data,rep=1000,samplesize) {
+rarefied_disparity=function(Data,rep=1000,samplesize) {
 
-RarefiedSamples=lapply(seq(rep),function(x) Data[sample(1:nrow(Data),samplesize,replace=TRUE),])
+    RarefiedSamples=lapply(seq(rep),function(x) Data[sample(1:nrow(Data),samplesize,replace=TRUE),])
 
-DisparityEst=lapply(RarefiedSamples, function(x) c(muvar(x),meanpairwiseEuclideanD(x)))
-DisparityEst=do.call(rbind,DisparityEst)
-colnames(DisparityEst)=c("Multivariate variance","Mean pairwise Euclidean distance")
+    DisparityEst=lapply(RarefiedSamples, function(x) c(muvar(x),meanpairwiseEuclideanD(x)))
+    DisparityEst=do.call(rbind,DisparityEst)
+    colnames(DisparityEst)=c("Multivariate variance","Mean pairwise Euclidean distance")
 
-Descriptives=apply(DisparityEst, 2, function (x)
-c(Mean=mean(x), SD=sd(x), Median=quantile(x,0.5), Min=quantile(x,0.025), Max=quantile(x,0.975) )
-)
-Results=list(RarefiedSamplesEstimates=DisparityEst,Descriptives=Descriptives)
+    Descriptives=apply(DisparityEst, 2, function (x)
+    c(Mean=mean(x), SD=sd(x), Median=quantile(x,0.5), Min=quantile(x,0.025), Max=quantile(x,0.975) )
+    )
+    Results=list(RarefiedSamplesEstimates=DisparityEst,Descriptives=Descriptives)
 return(Results)
 }
