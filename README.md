@@ -13,6 +13,7 @@ They are incorporated into an R package to facilitate distribution and use.
 - **ProjectOrthogonal** : Projects data to subspace orthogonal to a given vector (for use in allometric correction, see Burnaby 1966 - Biometrics; Rohlf & Bookstein 1987 - Systematic Zoology; for use in dealing with measurement error, see Valentin et al. 2008 - Journal of Fish Biology; Fruciano 2016 - Development Genes and Evolution)
 - **reversePCA** : Simple function to obtain the original variables (e.g., shape) from PC scores (and mean)
 - **rotate_landmarks**: Apply a user-defined rotation of a landmark configuration about the origin
+- **RarefiedDisparity** : Computation of rarefied estimates of multivariate variance and mean pairwise Euclidean distance (measures of disparity/morphospace occupation)
 - **RVrarefied** : Computation of rarefied estimates of Escoufier RV (see Fruciano et al. 2013 - Plos One)
 - **RVcomparison** : Permutation test for the difference in Escoufier RV (see Fruciano et al. 2013 - Plos One)
 - **TestOfAngle** : Test of angle between two vectors, optionally allowing "flipping" of one of the two
