@@ -16,6 +16,7 @@ They are incorporated into an R package to facilitate distribution and use.
 - **rotate_landmarks**: Apply a user-defined rotation of a landmark configuration about the origin
 - **rarefied_convex_hull** : Computation of rarefied estimates of n-dimensional convex hull volume (a measure of disparity/morphospace occupation)
 - **rarefied_disparity** : Computation of rarefied estimates of multivariate variance and mean pairwise Euclidean distance (measures of disparity/morphospace occupation)
+- **repeated_measures_test** : Test of difference between two repeated measures
 - **RVrarefied** : Computation of rarefied estimates of Escoufier RV (see Fruciano et al. 2013 - Plos One)
 - **RVcomparison** : Permutation test for the difference in Escoufier RV (see Fruciano et al. 2013 - Plos One)
 - **TestOfAngle** : Test of angle between two vectors, optionally allowing "flipping" of one of the two
