@@ -13,7 +13,7 @@
 #'
 #' This function is useful in various contexts, such as:
 #'  \itemize{
-#'   \item testing the effect of preservation
+#'   \item testing the effect of preservation (Fruciano et al. - under review)
 #'   \item testing for variation through time
 #' }
 #'
@@ -40,6 +40,8 @@
 #' to the subspace orthogonal to the vector
 #'
 #' @references Fruciano C. 2016. Measurement error in geometric morphometrics. Development Genes and Evolution 226:139-158.
+#' @references Fruciano C., Schmidt, I., Ramirez Sanchez, M.M., Morek, W., Avila Valle, Z.A., Talijancic, I., Pecoraro, C., Schermann Legionnet, A. under review.
+#' Geometric morphometric analyses can be affected by tissue preservation: a case study using fish body shape.
 #' @references Ledoit O, Wolf M. 2004. A well-conditioned estimator for large-dimensional covariance matrices. Journal of Multivariate Analysis 88:365-411.
 #'
 #' @examples
