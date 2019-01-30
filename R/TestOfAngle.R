@@ -20,7 +20,7 @@
 #' computed from the vectors provided (x, y). This means that significant values indicate that the two
 #' provided vectors are "significantly similar", whereas non-significant values means that the two vectors
 #' are substantially different
-#' 
+#'
 #' @param x,y numerical vectors
 #' @param flip logical stating whether (TRUE, default) axes should be "flipped" in case the angle is larger than 90 degrees (see Details)
 #'
@@ -58,7 +58,7 @@
 TestOfAngle=function(x,y, flip=TRUE) {
 AngleTest=Morpho::angleTest(x,y)
 if (all(c(flip, AngleTest$angle > pi/2))) {
-AngleTest=angleTest((-1*x),y)
+AngleTest=Morpho::angleTest((-1*x),y)
 }
 AngleTest$angle_deg=rad2deg(AngleTest$angle)
 return(AngleTest)
