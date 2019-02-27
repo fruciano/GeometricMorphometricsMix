@@ -25,8 +25,8 @@
 #'
 #' @return The function outputs a list with the following elements:
 #'  \describe{
-#'   \item{RarefiedSamplesEstimates}{Estimates of both multivariate variance and
-#'         mean pairwise Euclidean distance for each of the rarefied samples}
+#'   \item{BootstrappedSamplesEstimates}{Estimates of both multivariate variance and
+#'         mean pairwise Euclidean distance for each of the bootstrapped samples}
 #'   \item{pvalues}{p values obtained for the test}
 #' }
 #'
@@ -54,7 +54,7 @@ pvalues=do.call(rbind,pvalues)
 colnames(pvalues)=c("Upper tail","Lower tail","Two-tail")
 rownames(pvalues)=c("Multivariate variance","Mean pairwise Euclidean distance")
 
-Results=list(RarefiedSamplesEstimates=DisparityEst,pvalues=pvalues)
+Results=list(BootstrappedSamplesEstimates=DisparityEst,pvalues=pvalues)
 return(Results)
 }
 
