@@ -35,6 +35,10 @@
 #' @references Fruciano C, Pappalardo AM, Tigano C, Ferrito V. 2014. Phylogeographical relationships of Sicilian brown trout and the effects of genetic introgression on morphospace occupation. Biological Journal of the Linnean Society 112:387-398.
 #' @export
 BTailTest=function(Reference,Test,boot=1000) {
+	
+	Reference=scale(Reference, center=TRUE, scale=FALSE)
+	Test=scale(Test, center=TRUE, scale=FALSE)
+	
 ObservedTestStats=c(muvar(Test),meanpairwiseEuclideanD(Test))
 
 BootstrappedSamples=lapply(seq(boot),function(x) Reference[sample(1:nrow(Reference),nrow(Reference),replace=TRUE),])

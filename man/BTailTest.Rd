@@ -18,8 +18,8 @@ BTailTest(Reference, Test, boot = 1000)
 \value{
 The function outputs a list with the following elements:
  \describe{
-  \item{RarefiedSamplesEstimates}{Estimates of both multivariate variance and
-        mean pairwise Euclidean distance for each of the rarefied samples}
+  \item{BootstrappedSamplesEstimates}{Estimates of both multivariate variance and
+        mean pairwise Euclidean distance for each of the bootstrapped samples}
   \item{pvalues}{p values obtained for the test}
 }
 }
