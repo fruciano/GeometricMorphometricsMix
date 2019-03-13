@@ -85,7 +85,7 @@ RVrarefied = function(Block1, Block2, rep = 1000, samplesize) {
     RV = vector(length = rep)
     for (i in 1:rep) {
         NewSamp = cbind(Block1, Block2)[sample(1:nrow(Block1), samplesize, replace = TRUE), ]
-        RV[i] = EscoufierRV(NewSamp[, 1:endB1], NewSamp[, startB2:sizeboth])
+        RV[i] = EscoufierRV(cbind(NewSamp[, 1:endB1]), cbind(NewSamp[, startB2:sizeboth]))
     }
     Results = list(Rarefied_RV = mean(RV), Quantiles = quantile(RV, c(0.025, 0.5, 0.975)), AllRarefiedSamples = RV)
     return(Results)
