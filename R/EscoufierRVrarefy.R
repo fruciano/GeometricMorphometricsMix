@@ -26,7 +26,7 @@
 #'#' @param Block1,Block2 Matrices or data frames
 #' containing each block of variables
 #' (observations in rows, variables in columns).
-#' @param rep number of resamplings to obtain the rarefied estimate
+#' @param reps number of resamplings to obtain the rarefied estimate
 #' @param samplesize sample size to which the rarefaction procedure is carried out
 #'
 #' @seealso \code{\link{EscoufierRV}}
@@ -74,7 +74,7 @@
 #' # And their intevals clearly overlap
 #'
 #' @export
-RVrarefied = function(Block1, Block2, rep = 1000, samplesize) {
+RVrarefied = function(Block1, Block2, reps = 1000, samplesize) {
          if (nrow(Block1) != nrow(Block2)) {
            stop(paste("Error: the two blocks should have the same number of rows (observations)"))
             }
@@ -82,12 +82,24 @@ RVrarefied = function(Block1, Block2, rep = 1000, samplesize) {
     endB1 = ncol(Block1)
     startB2 = endB1 + 1
     sizeboth = ncol(BothBlocks)
-    RV = vector(length = rep)
-    for (i in 1:rep) {
+    RV = vector(length = reps)
+    for (i in 1:reps) {
         NewSamp = cbind(Block1, Block2)[sample(1:nrow(Block1), samplesize, replace = TRUE), ]
         RV[i] = EscoufierRV(cbind(NewSamp[, 1:endB1]), cbind(NewSamp[, startB2:sizeboth]))
     }
-    Results = list(Rarefied_RV = mean(RV), Quantiles = quantile(RV, c(0.025, 0.5, 0.975)), AllRarefiedSamples = RV)
+	
+	if(TRUE %in% is.na(RV)) {
+	warning(paste("Some of the rarefied RV have given NA \n
+		This might be due to random samples all with the same observations\n
+		Please, inspect your data and how frequent it is in the RV computed for rarefied samples\n
+		to ensure that the results are still meaningful
+		"))
+	}
+	
+	RV2=na.omit(RV)
+	# remove any NAs
+	
+    Results = list(Rarefied_RV = mean(RV2), Quantiles = quantile(RV2, c(0.025, 0.5, 0.975)), AllRarefiedSamples = RV)
     return(Results)
 }
 
