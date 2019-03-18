@@ -62,13 +62,21 @@ Kmultparallel = function(data, trees, ncores = 1, burninpercent = 0, iter = 0) {
         prunedtree = ape::drop.tip(tree, droplist)
         return(prunedtree)
     }
-	
+
 	# If a single core is used, use lapply,
 	# otherwise use mclapply (possibly with the parallelsugar implementation)
 	if (ncores==1) {
-					mclapply=lapply
-					} else {	
-    if (Sys.info()["sysname"] == "Windows") {	
+	  prunedtrees = lapply(trees, pruning)
+	  class(prunedtrees) = "multiPhylo"
+	  datareordered = lapply(prunedtrees, function(x) data[x$tip, ])
+	  # Reorder data with the same order of the tips
+
+	  ntrees = seq_len(length(prunedtrees))
+	  kmulttrees = lapply(ntrees, function(x) Test_Kmult(datareordered[[x]], prunedtrees[[x]], iter = iter))
+
+
+					} else {
+    if (Sys.info()["sysname"] == "Windows") {
         if (!requireNamespace("parallelsugar", quietly = T)) {
 		stop("Package \"parallelsugar\" needed for this function to work under Windows.\names
 		Please install it from Github devtools::install_github(\"nathanvan/parallelsugar\") .",
@@ -83,8 +91,8 @@ Kmultparallel = function(data, trees, ncores = 1, burninpercent = 0, iter = 0) {
     }, Darwin = {
         parallel::mclapply
     })
-	 
-	} 
+
+
 	prunedtrees = mclapply(trees, pruning, mc.cores = ncores)
     class(prunedtrees) = "multiPhylo"
     # Use mclapply for speeding up the pruning of the trees Note that under Windows, it will install the package parallelsugar
@@ -95,6 +103,7 @@ Kmultparallel = function(data, trees, ncores = 1, burninpercent = 0, iter = 0) {
 
     ntrees = seq_len(length(prunedtrees))
     kmulttrees = mclapply(ntrees, mc.cores = ncores, function(x) Test_Kmult(datareordered[[x]], prunedtrees[[x]], iter = iter))
+					}
 
     kmulttreesmatrix = t(matrix(simplify2array(unlist(kmulttrees, recursive = F)), 2))
     rownames(kmulttreesmatrix) = names(prunedtrees)
