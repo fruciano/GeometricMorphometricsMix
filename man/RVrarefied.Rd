@@ -4,10 +4,10 @@
 \alias{RVrarefied}
 \title{Rarefied version of Escoufier RV coefficient}
 \usage{
-RVrarefied(Block1, Block2, rep = 1000, samplesize)
+RVrarefied(Block1, Block2, reps = 1000, samplesize)
 }
 \arguments{
-\item{rep}{number of resamplings to obtain the rarefied estimate}
+\item{reps}{number of resamplings to obtain the rarefied estimate}
 
 \item{samplesize}{sample size to which the rarefaction procedure is carried out}
 }

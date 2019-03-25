@@ -28,3 +28,8 @@ meanpairwiseEuclideanD=function(X) {
   mean(dist(X,method = "euclidean"))
 }
 
+# Function to compute the Euclidean distance
+# between two observations
+pdistance=function(X1, X2) {
+  dist(rbind(X1, X2),method = "euclidean")
+}
