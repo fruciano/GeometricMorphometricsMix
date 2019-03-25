@@ -151,6 +151,6 @@ Test_Kmult <- function(x, phy, iter = 999) {
     P.val <- P.val/(iter + 1)
     K.val[iter + 1] = K.obs
     # hist(K.val, 30, freq = TRUE, col = "gray", xlab = "Phylogenetic Signal")
-    arrows(K.obs, 50, K.obs, 5, length = 0.1, lwd = 2)
+    # arrows(K.obs, 50, K.obs, 5, length = 0.1, lwd = 2)
     return(list(phy.signal = K.obs, pvalue = P.val))
 }
