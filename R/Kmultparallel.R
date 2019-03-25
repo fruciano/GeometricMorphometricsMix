@@ -110,7 +110,9 @@ Kmultparallel = function(data, trees, ncores = 1, burninpercent = 0, iter = 0) {
     colnames(kmulttreesmatrix) = c("Phylogenetic signal (K mult)", "p value")
     # Produce a matrix with the results, which gets returned to the user
     if (iter == 0) {
-        return(cbind(kmulttreesmatrix[, 1]))
+      res=as.data.frame(cbind(kmulttreesmatrix[, 1]))
+      colnames(res)="Phylogenetic signal (K mult)"
+        return(res)
     } else {
         return(kmulttreesmatrix)
     }
