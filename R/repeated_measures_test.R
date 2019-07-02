@@ -39,9 +39,11 @@
 #' @return The function outputs a matrix n x p of the original data projected
 #' to the subspace orthogonal to the vector
 #'
+#' @section Citation:
+#' If you use this function please cite Fruciano et al. in press
+#'
 #' @references Fruciano C. 2016. Measurement error in geometric morphometrics. Development Genes and Evolution 226:139-158.
-#' @references Fruciano C., Schmidt, I., Ramirez Sanchez, M.M., Morek, W., Avila Valle, Z.A., Talijancic, I., Pecoraro, C., Schermann Legionnet, A. under review.
-#' Geometric morphometric analyses can be affected by tissue preservation: a case study using fish body shape.
+#' @references Fruciano C., Schmidt, I., Ramirez Sanchez, M.M., Morek, W., Avila Valle, Z.A., Talijancic, I., Pecoraro, C., Schermann Legionnet, A. in press. Tissue preservation can affect geometric morphometric analyses: a case study using fish body shape. Zoological Journal of the Linnean Society
 #' @references Ledoit O, Wolf M. 2004. A well-conditioned estimator for large-dimensional covariance matrices. Journal of Multivariate Analysis 88:365-411.
 #'
 #' @examples
