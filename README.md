@@ -8,6 +8,7 @@ It started as a simple set of function that I distributed as help to the student
 They are incorporated into an R package to facilitate distribution and use.
 
 ## Currently available functions
+- **adjRand_test** : Permutation test of the adjusted Rand index, which quantifies the agreement between two partitions (e.g., classification of specimens obtained using different methods)
 - **BTailTest** : Comparison of disparity between two groups
 - **disparity_test** : Comparison of disparity between two groups
 - **EscoufierRV** : Computation of Escoufier RV, which quantifies levels of association between blocks of variables (Escoufier 1973 - Biometrics)
