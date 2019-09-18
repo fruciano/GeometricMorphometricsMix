@@ -13,7 +13,7 @@
 #'
 #' This function is useful in various contexts, such as:
 #'  \itemize{
-#'   \item testing the effect of preservation (Fruciano et al. - under review)
+#'   \item testing the effect of preservation (Fruciano et al. - in press)
 #'   \item testing for variation through time
 #' }
 #'
