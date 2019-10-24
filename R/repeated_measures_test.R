@@ -64,6 +64,9 @@
 #' # The comparison is not significant
 #' # (this is the expected result, as we have simulated
 #' # the case of no effect between the two repeated measures)
+#'
+#' @import stats
+#' @importFrom Morpho vecx
 #' @export
 repeated_measures_test=function(T1, T2, rnames=TRUE, shrink=FALSE) {
 	if (class(T1)=="array") {

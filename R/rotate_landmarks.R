@@ -41,6 +41,8 @@
 #' theme_classic()
 #' # Plot the two polygons (landmarks are numbered for ease of visualization)
 #'
+#'
+#' @import stats
 #' @export
 rotate_landmarks=function(LMdata, rotation, radians=TRUE) {
 	if (ncol(LMdata)==2 & length(rotation)!=1) {

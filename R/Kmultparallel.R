@@ -48,6 +48,10 @@
 #' @references Adams DC. 2014. A Generalized K Statistic for Estimating Phylogenetic Signal from Shape and Other High-Dimensional Multivariate Data. Systematic Biology 63:685-697.
 #' @references Fruciano C, Celik MA, Butler K, Dooley T, Weisbecker V, Phillips MJ. 2017. Sharing is caring? Measurement error and the issues arising from combining 3D morphometric datasets. Ecology and Evolution 7:7034-7046.
 #'
+#'
+#' @import stats
+#' @import parallel
+#' @importFrom ape drop.tip vcv.phylo
 #' @export
 Kmultparallel = function(data, trees, ncores = 1, burninpercent = 0, iter = 0) {
     trees = trees[round((length(trees)/100) * burninpercent):length(trees)]

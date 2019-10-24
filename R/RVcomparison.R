@@ -87,6 +87,7 @@
 #' RVrarefied(A[,1:20], A[,21:ncol(A)], samplesize=40)$Rarefied_RV
 #' RVrarefied(B[,1:20], B[,21:ncol(B)], samplesize=40)$Rarefied_RV
 #'
+#' @import stats
 #' @export
 RVcomparison=function(Group1Block1,Group1Block2,Group2Block1,Group2Block2, perm=999, center=TRUE) {
   

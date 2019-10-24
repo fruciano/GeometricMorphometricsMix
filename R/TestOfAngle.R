@@ -53,7 +53,7 @@
 #' TestOfAngle(PCA_A$rotation[,1],PCA_B$rotation[,1], flip=TRUE)
 #' # Test for the angle between the two first eigenvectors
 #'
-#'
+#' @importFrom Morpho angleTest
 #' @export
 TestOfAngle=function(x,y, flip=TRUE) {
 AngleTest=Morpho::angleTest(x,y)

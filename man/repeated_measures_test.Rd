@@ -77,6 +77,7 @@ repeated_measures_test(T1=A, T2=B, rnames=FALSE)
 # The comparison is not significant
 # (this is the expected result, as we have simulated
 # the case of no effect between the two repeated measures)
+
 }
 \references{
 Fruciano C. 2016. Measurement error in geometric morphometrics. Development Genes and Evolution 226:139-158.

@@ -15,6 +15,8 @@
 #' @return The function outputs an array k x p x n of rescaled landmark coordinates
 #'
 #'
+#'
+#' @import stats
 #' @export
 rescale_by_landmark_distance=function(Data, lm1, lm2, lengths) {
   original_distances=unlist(lapply(seq_len(dim(Data)[3]), function(i)

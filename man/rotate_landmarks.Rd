@@ -53,4 +53,5 @@ coord_fixed(ratio=1, xlim=GraphLims, ylim=GraphLims)+
 theme_classic()
 # Plot the two polygons (landmarks are numbered for ease of visualization)
 
+
 }

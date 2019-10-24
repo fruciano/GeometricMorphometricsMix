@@ -45,6 +45,8 @@
 #' # Check that all the results are the same
 #' # (rounding to the 10th decimal because of numerical precision)
 #'
+#'
+#' @import stats
 #' @export
 reversePCA = function(Scores, Eigenvectors, Mean) {
     ZEt = Scores %*% t(Eigenvectors)

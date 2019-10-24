@@ -61,7 +61,6 @@ PCA_B=prcomp(B)
 TestOfAngle(PCA_A$rotation[,1],PCA_B$rotation[,1], flip=TRUE)
 # Test for the angle between the two first eigenvectors
 
-
 }
 \references{
 Klingenberg CP. 2011. MorphoJ: an integrated software package for geometric morphometrics. Mol Ecol Resour 11:353-357.

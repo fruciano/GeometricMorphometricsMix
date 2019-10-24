@@ -63,6 +63,7 @@
 #'
 #'
 #'
+#' @import stats
 #' @export
 ProjectOrthogonal = function(Data, vector) {
     if (is.vector(vector) & !is.list(vector)) {
