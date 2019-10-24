@@ -58,9 +58,9 @@ and Escoufier 1973 (because the procedure is based on Escoufier RV)
 }
 
 \examples{
-library(MASS)
+
 if(!require(lmf)){ install.packages("lmf") }
-library(lmf)
+# Install package lmf if not available
 
 set.seed(123)
 
@@ -74,12 +74,12 @@ lower=S2[lower.tri(S2)]
 S2=t(S2)
 S2[lower.tri(S2)]=lower
 diag(S2)=1
-S2=nearPD(S2)
+S2=lmf::nearPD(S2)
 # Create an ad hoc covariance matrix for the second group
 
 
-A=mvrnorm(50, mu=rep(0,100), Sigma=S1)
-B=mvrnorm(100, mu=rep(10,100), Sigma=S2)
+A=MASS::mvrnorm(50, mu=rep(0,100), Sigma=S1)
+B=MASS::mvrnorm(100, mu=rep(10,100), Sigma=S2)
 # Create two multivariate normal random datasets
 # using the covariance matrices above
 # We are going to use the first 20 variables as block 1

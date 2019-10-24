@@ -7,6 +7,10 @@
 RVrarefied(Block1, Block2, reps = 1000, samplesize)
 }
 \arguments{
+\item{Block1, Block2}{Matrices or data frames
+containing each block of variables
+(observations in rows, variables in columns).}
+
 \item{reps}{number of resamplings to obtain the rarefied estimate}
 
 \item{samplesize}{sample size to which the rarefaction procedure is carried out}
@@ -46,10 +50,6 @@ In many cases, it will probably not make much difference
 If you use this function please cite both
 Fruciano et al. 2013 (for using the rarefaction procedure)
 and Escoufier 1973 (because the procedure is based on Escoufier RV)
-
-#' @param Block1,Block2 Matrices or data frames
-containing each block of variables
-(observations in rows, variables in columns).
 }
 
 \examples{
