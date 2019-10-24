@@ -47,7 +47,6 @@
 #' @references Smilde AK, Kiers HA, Bijlsma S, Rubingh CM, van Erk MJ. 2009. Matrix correlations for high-dimensional data: the modified RV-coefficient. Bioinformatics 25:401-405.
 #' @examples
 #' library(MASS)
-#' library(lmf)
 #' set.seed(123)
 #' S1=diag(100)
 #' # Use uncorrelated variables for the first group
