@@ -1,4 +1,5 @@
 language: r
+warnings_are_errors: false
 before_install:
   - sudo apt-get install libcgal-dev libglu1-mesa-dev libglu1-mesa-dev
   - sudo apt-get install xorg 
