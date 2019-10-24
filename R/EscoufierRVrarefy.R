@@ -23,7 +23,7 @@
 #' Fruciano et al. 2013 (for using the rarefaction procedure)
 #' and Escoufier 1973 (because the procedure is based on Escoufier RV)
 #'
-#'#' @param Block1,Block2 Matrices or data frames
+#' @param Block1,Block2 Matrices or data frames
 #' containing each block of variables
 #' (observations in rows, variables in columns).
 #' @param reps number of resamplings to obtain the rarefied estimate

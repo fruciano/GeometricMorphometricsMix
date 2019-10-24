@@ -59,8 +59,11 @@ and Escoufier 1973 (because the procedure is based on Escoufier RV)
 
 \examples{
 library(MASS)
+if(!require(lmf)){ install.packages("lmf") }
 library(lmf)
+
 set.seed(123)
+
 S1=diag(100)
 # Use uncorrelated variables for the first group
 

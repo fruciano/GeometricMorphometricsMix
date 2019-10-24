@@ -46,9 +46,9 @@
 #' @references Fruciano C, Franchini P, Meyer A. 2013. Resampling-Based Approaches to Study Variation in Morphological Modularity. PLoS ONE 8:e69376.
 #' @references Smilde AK, Kiers HA, Bijlsma S, Rubingh CM, van Erk MJ. 2009. Matrix correlations for high-dimensional data: the modified RV-coefficient. Bioinformatics 25:401-405.
 #' @examples
-#' library(MASS)
+#' 
 #' if(!require(lmf)){ install.packages("lmf") }
-#' library(lmf)
+#' # Install package lmf if not available
 #'
 #' set.seed(123)
 #'
@@ -62,12 +62,12 @@
 #' S2=t(S2)
 #' S2[lower.tri(S2)]=lower
 #' diag(S2)=1
-#' S2=nearPD(S2)
+#' S2=lmf::nearPD(S2)
 #' # Create an ad hoc covariance matrix for the second group
 #' 
 #' 
-#' A=mvrnorm(50, mu=rep(0,100), Sigma=S1)
-#' B=mvrnorm(100, mu=rep(10,100), Sigma=S2)
+#' A=MASS::mvrnorm(50, mu=rep(0,100), Sigma=S1)
+#' B=MASS::mvrnorm(100, mu=rep(10,100), Sigma=S2)
 #' # Create two multivariate normal random datasets
 #' # using the covariance matrices above
 #' # We are going to use the first 20 variables as block 1

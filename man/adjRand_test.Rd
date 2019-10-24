@@ -39,7 +39,9 @@ The function requires internally the package mclust.
 
 \section{Citation}{
 
-If you use this function in the context of integrative taxonomy or similar, please cite all the papers in the references
+If you use this function in the context of integrative taxonomy or similar
+(comparison of classification/unsupervised clustering with biological data), please cite all the papers in the references
+(otherwise, please use the relevant citations for the context).
 }
 
 \examples{
@@ -60,8 +62,8 @@ adjustedRandIndex(mclustBIC_classification, original_classification)
 # compared to the null hypothesis of independence between the two classification schemes
 
 adjRand_test(mclustBIC_classification, original_classification, perm = 999)
-For that, we use the function adjRand_test, which performs the permutation test
-of Qannari et al. 2014 (in this case p<0.001, as 1000 permutations have been used).
+# For that, we use the function adjRand_test, which performs the permutation test
+# of Qannari et al. 2014 (in this case p<0.001, as 1000 permutations have been used).
 
 adjRand_test(original_classification, original_classification, perm = 999)
 # As it can be seen, in the ideal case of the exact same grouping,
