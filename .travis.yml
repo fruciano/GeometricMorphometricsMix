@@ -1,6 +1,8 @@
 language: r
 before_install:
   - sudo apt-get install libcgal-dev libglu1-mesa-dev libglu1-mesa-dev
+  - sudo apt-get install xorg 
+  - sudo apt-get install libx11-dev 
 r:
   - oldrel
   - release
