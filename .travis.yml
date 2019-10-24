@@ -1,4 +1,6 @@
 language: r
+before_install:
+  - sudo apt-get install libcgal-dev libglu1-mesa-dev libglu1-mesa-dev
 r:
   - oldrel
   - release
