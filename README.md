@@ -36,3 +36,6 @@ install_github("fruciano/GeometricMorphometricsMix")
 Currently, and for the foreseeable future, there are no plans to publish a proper paper describing the package.
 Each function, however, provides reasonable comments and references to the methods, which can (and should) be used when using the functions in the package (in addition to the usual citation to the package itself)
 
+
+
+"[![Last-changedate](https://img.shields.io/badge/last%20change-`r gsub('-', '--', Sys.Date())`-yellowgreen.svg)](/commits/master)"
