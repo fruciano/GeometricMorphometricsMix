@@ -22,6 +22,7 @@ They are incorporated into an R package to facilitate distribution and use.
 - **repeated_measures_test** : Test of difference between two repeated measures
 - **RVrarefied** : Computation of rarefied estimates of Escoufier RV (see Fruciano et al. 2013 - Plos One)
 - **RVcomparison** : Permutation test for the difference in Escoufier RV (see Fruciano et al. 2013 - Plos One)
+- **scaled_variance_of_eigenvalues** : Compute estimates of the scaled variance of eigenvalues (a commonly used measure of integration)
 - **TestOfAngle** : Test of angle between two vectors, optionally allowing "flipping" of one of the two
 
 ## Installation
