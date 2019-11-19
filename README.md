@@ -10,6 +10,7 @@ They are incorporated into an R package to facilitate distribution and use.
 ## Currently available functions
 - **adjRand_test** : Permutation test of the adjusted Rand index, which quantifies the agreement between two partitions (e.g., classification of specimens obtained using different methods)
 - **BTailTest** : Comparison of disparity between two groups
+- **critical_angle** : Critical angle for the test of difference between two vectors
 - **disparity_test** : Comparison of disparity between two groups
 - **EscoufierRV** : Computation of Escoufier RV, which quantifies levels of association between blocks of variables (Escoufier 1973 - Biometrics)
 - **Kmultparallel** : Parallelised computation of Adams' Kmult (useful for distributions of trees, see Fruciano et al. 2017 - Ecology and Evolution)
@@ -24,6 +25,7 @@ They are incorporated into an R package to facilitate distribution and use.
 - **RVcomparison** : Permutation test for the difference in Escoufier RV (see Fruciano et al. 2013 - Plos One)
 - **scaled_variance_of_eigenvalues** : Compute estimates of the scaled variance of eigenvalues (a commonly used measure of integration)
 - **TestOfAngle** : Test of angle between two vectors, optionally allowing "flipping" of one of the two
+
 
 ## Installation
 From Github, using devtools

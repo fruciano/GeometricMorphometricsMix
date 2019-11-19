@@ -16,7 +16,8 @@ The function outputs a list with
 \item{angle}{angle between vectors in radians}
 \item{angle_deg}{angle between vectors in degrees}
 \item{p.value}{p value}
-to the subspace orthogonal to the vector
+\item{critical_angle}{angle below which two vectors of the same number of dimensions
+ as the ones being tested would be significant}
 }
 \description{
 This function performs a test for the angle between two multivariate vector, optionally allowing for "flipping" one of the axes
@@ -68,4 +69,7 @@ Klingenberg CP. 2011. MorphoJ: an integrated software package for geometric morp
 Li S. 2011. Concise formulas for the area and volume of a hyperspherical cap. Asian Journal of Mathematics and Statistics 4:66-70.
 
 Schlager S. 2016. Morpho: Calculations and Visualisations Related to Geometric Morphometrics.
+}
+\seealso{
+\code{\link{critical_angle}}
 }

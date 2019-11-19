@@ -28,12 +28,14 @@
 #' \item{angle}{angle between vectors in radians}
 #' \item{angle_deg}{angle between vectors in degrees}
 #' \item{p.value}{p value}
-
-#' to the subspace orthogonal to the vector
+#' \item{critical_angle}{angle below which two vectors of the same number of dimensions
+#'  as the ones being tested would be significant}
 #'
 #' @references Klingenberg CP. 2011. MorphoJ: an integrated software package for geometric morphometrics. Mol Ecol Resour 11:353-357.
 #' @references Li S. 2011. Concise formulas for the area and volume of a hyperspherical cap. Asian Journal of Mathematics and Statistics 4:66-70.
 #' @references Schlager S. 2016. Morpho: Calculations and Visualisations Related to Geometric Morphometrics.
+#'
+#' @seealso \code{\link{critical_angle}}
 #'
 #' @examples
 #' library(MASS)
@@ -61,6 +63,7 @@ if (all(c(flip, AngleTest$angle > pi/2))) {
 AngleTest=Morpho::angleTest((-1*x),y)
 }
 AngleTest$angle_deg=rad2deg(AngleTest$angle)
+AngleTest$critical_angle=critical_angle(length(x))
 return(AngleTest)
 }
 
