@@ -18,10 +18,21 @@ deg2rad = function(deg) {(deg * pi) / (180)}
 
 
 # Function to compute "multivariate variance"
-# (trace of the covariance matrix)
+# (sum of univariate variances)
 muvar=function(X) {
-  sum(diag(cov(X)))
+  sum(apply(X, 2, var))
 }
+
+# Function to compute "Proper variance" as described in
+# Claramunt 2010 - Evolution
+# It uses a linear shrinkage estimator of the covariance matrix
+claramunt_proper_variance=function(X) {
+  covX=nlshrink::linshrink_cov(as.matrix(X))
+  eigenv=eigen(covX)$values
+  proper_variance=(sum(sqrt(eigenv)))^2
+return(proper_variance)
+}
+
 
 # Function to compute mean pairwise Euclidean distances
 meanpairwiseEuclideanD=function(X) {
@@ -33,3 +44,4 @@ meanpairwiseEuclideanD=function(X) {
 pdistance=function(X1, X2) {
   dist(rbind(X1, X2),method = "euclidean")
 }
+
