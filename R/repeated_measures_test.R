@@ -112,18 +112,6 @@ return(Results)
 }
 
 
-# Function to resample within subjects
-# (not exported)
-resamplewithin2=function(A1, A2) {
-id1=sample(1:2, nrow(A1), replace=TRUE)
-id2=sapply(id1, function(x) if (x==1) 2 else 1)
-Alist=list(A1,A2)
-A1res=do.call("rbind", lapply(seq_len(length(id1)), function(x) Alist[[id1[x]]][x,]))
-A2res=do.call("rbind", lapply(seq_len(length(id2)), function(x) Alist[[id2[x]]][x,]))
-Ares=list(A1res,A2res)
-return(Ares)
-}
-
 
 # Function to compute Hotteling T squared
 # with repeated measures data
