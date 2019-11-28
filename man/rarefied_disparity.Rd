@@ -4,7 +4,7 @@
 \alias{rarefied_disparity}
 \title{Rarefied estimates of disparity/morphospace occupation}
 \usage{
-rarefied_disparity(Data, rep = 1000, samplesize, claramunt_pv = FALSE)
+rarefied_disparity(Data, rep = 1000, samplesize)
 }
 \arguments{
 \item{Data}{Matrix or data frame containing data
@@ -13,8 +13,6 @@ rarefied_disparity(Data, rep = 1000, samplesize, claramunt_pv = FALSE)
 \item{rep}{number of resamplings to obtain the rarefied estimate}
 
 \item{samplesize}{sample size to which the rarefaction procedure is carried out}
-
-\item{claramunt_pv}{if TRUE, compute an estimate of "Proper variance" (Claramunt 2010)}
 }
 \value{
 The function outputs a list with the following elements:
@@ -39,30 +37,18 @@ Matlab package MDA (Navarro 2003).
 
 Examples of these approaches abound in the literature
 (e.g., Drake & Klingenberg 2010; Fruciano et al. 2014, 2016)
-
-Optionally, the function also computes "Proper Variance" (Claramunt 2010)
-using linear shrinkage estimates of the covariance matrix.
 }
 \section{Notice}{
 
 the function does NOT perform GPA on each rarefied sample
 this may or may not make a difference in estimates.
 In many cases, it will probably not make much difference
-
-
-If claramunt_pv=TRUE the package nlshrink should be installed.
-As this computation is based on linear shrinkage estimates of the covariance matrix
-it can be computational intensive.
-Please, also insure to check (and cite) the original publication (Claramunt 2010)
-to understand better this estimator.
 }
 
 \references{
 Navarro N. 2003. MDA: a MATLAB-based program for morphospace-disparity analysis. Computers & Geosciences 29:655-664.
 
 Drake AG, Klingenberg CP. 2010. Large-scale diversification of skull shape in domestic dogs: disparity and modularity. American Naturalist 175:289-301.
-
-Claramunt S. 2010. Discovering exceptional diversifications at continental scales: the case of the endemic families of Neotropical Suboscine passerines. Evolution 64:2004-2019.
 
 Fruciano C, Franchini P, Raffini F, Fan S, Meyer A. 2016. Are sympatrically speciating Midas cichlid fish special? Patterns of morphological and genetic variation in the closely related species Archocentrus centrarchus. Ecology and Evolution 6:4102-4114.
 
