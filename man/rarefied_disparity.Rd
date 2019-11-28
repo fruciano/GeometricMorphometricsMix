@@ -19,8 +19,7 @@ rarefied_disparity(Data, rep = 1000, samplesize, claramunt_pv = FALSE)
 \value{
 The function outputs a list with the following elements:
  \describe{
-  \item{RarefiedSamplesEstimates}{Estimates of both multivariate variance and
-        mean pairwise Euclidean distance for each of the rarefied samples}
+  \item{RarefiedSamplesEstimates}{Estimates for each of the rarefied samples}
   \item{Descriptives}{Mean, standard deviation, median and 2.5\% (Min) and 97.5\% (Max) across the rarefied samples}
 }
 }
