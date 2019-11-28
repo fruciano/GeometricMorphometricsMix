@@ -69,10 +69,10 @@
 #' @importFrom Morpho vecx
 #' @export
 repeated_measures_test=function(T1, T2, rnames=TRUE, shrink=FALSE) {
-	if (class(T1)=="array") {
+	if ("array" %in% class(T1)) {
 		T1=Morpho::vecx(T1)
 			}
-	if (class(T2)=="array") {
+	if ("array" %in% class(T2)) {
 		T2=Morpho::vecx(T2)
 			}
 	# If an array, transform in a 2D matrix
