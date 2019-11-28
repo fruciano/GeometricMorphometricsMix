@@ -59,26 +59,6 @@ However, in this case, the package nlshrink should have been installed.
 If you use this function please cite Fruciano et al. in press
 }
 
-\examples{
-library(MASS)
-set.seed(123)
-A=mvrnorm(50,mu=rep(1,10),Sigma=diag(10))
-# Generate a random dataset from a multivariate normal distribution
-# (50 observations, 10 variables)
-NoEff=do.call("cbind", lapply(1:ncol(A), function(x)
-                       rnorm(nrow(A), mean=0, sd=0.1)) )
-# Generate some random noise at each variable
-
-B=A+NoEff
-# Create a new matrix by summing the original matrix to the random noise
-# (simulating the case of no effect)
-
-repeated_measures_test(T1=A, T2=B, rnames=FALSE)
-# The comparison is not significant
-# (this is the expected result, as we have simulated
-# the case of no effect between the two repeated measures)
-
-}
 \references{
 Fruciano C. 2016. Measurement error in geometric morphometrics. Development Genes and Evolution 226:139-158.
 

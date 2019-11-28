@@ -46,25 +46,6 @@
 #' @references Fruciano C., Schmidt, I., Ramirez Sanchez, M.M., Morek, W., Avila Valle, Z.A., Talijancic, I., Pecoraro, C., Schermann Legionnet, A. in press. Tissue preservation can affect geometric morphometric analyses: a case study using fish body shape. Zoological Journal of the Linnean Society
 #' @references Ledoit O, Wolf M. 2004. A well-conditioned estimator for large-dimensional covariance matrices. Journal of Multivariate Analysis 88:365-411.
 #'
-#' @examples
-#' library(MASS)
-#' set.seed(123)
-#' A=mvrnorm(50,mu=rep(1,10),Sigma=diag(10))
-#' # Generate a random dataset from a multivariate normal distribution
-#' # (50 observations, 10 variables)
-#' NoEff=do.call("cbind", lapply(1:ncol(A), function(x)
-#'                        rnorm(nrow(A), mean=0, sd=0.1)) )
-#' # Generate some random noise at each variable
-#'
-#' B=A+NoEff
-#' # Create a new matrix by summing the original matrix to the random noise
-#' # (simulating the case of no effect)
-#'
-#' repeated_measures_test(T1=A, T2=B, rnames=FALSE)
-#' # The comparison is not significant
-#' # (this is the expected result, as we have simulated
-#' # the case of no effect between the two repeated measures)
-#'
 #' @import stats
 #' @importFrom Morpho vecx
 #' @export
