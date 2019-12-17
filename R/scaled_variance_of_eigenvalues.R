@@ -133,6 +133,7 @@ return(Result)
 sveig_fastsvd=function(data_matrix) {
   eigenvalues=corpcor::fast.svd(
   scale(data_matrix, center = TRUE, scale=FALSE))$d^2
+  eigenvalues=eigenvalues/length(eigenvalues)
   veig=var(eigenvalues)
   dimensions=length(eigenvalues)
   max_theoric_veig=((sum(eigenvalues)^2)*(dimensions-1))/(dimensions^2)
