@@ -117,7 +117,8 @@
 #'
 #' @export
 pls=function(X, Y, perm=999) {
-  if (any(c(!(class(X) %in% c("matrix", "data.frame"))), (!(class(Y) %in% c("matrix", "data.frame"))))) {
+  if (!(length(intersect(class(X), c("matrix", "data.frame")))==1 &&
+        length(intersect(class(Y), c("matrix", "data.frame")))==1)) {
     stop("X and Y should be matrices or data.frames (observations in rows, variables in columns)")
   }
   if (nrow(X)!=nrow(Y)) {
