@@ -77,8 +77,8 @@ predicted by each pair of axis, please cite Fruciano et al. under review
 
 library(MASS)
 set.seed(123)
-A=mvrnorm(100,mu=rep(0,20), Sigma=diag(20))
-B=mvrnorm(100,mu=rep(0,10), Sigma=diag(10))
+A=as.data.frame(mvrnorm(100,mu=rep(0,20), Sigma=diag(20)))
+B=as.data.frame(mvrnorm(100,mu=rep(0,10), Sigma=diag(10)))
 # Create two blocks of, respectively, 20 and 10 variables
 # for 100 observations.
 # This simulates two different blocks of data (shape or otherwise) measured on the same individuals.
