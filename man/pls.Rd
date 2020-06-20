@@ -85,8 +85,9 @@ B=mvrnorm(100,mu=rep(0,10), Sigma=diag(10))
 # Note that, as we are simulating them independently,
 # we don't expect substantial covariation between blocks
 
-PLS_AB=pls(A, B, perm=999)
-# Perform PLS analysis and use 999 permutations for testing
+PLS_AB=pls(A, B, perm=99)
+# Perform PLS analysis and use 99 permutations for testing
+# (notice that in a real analysis, normally one uses more permutations)
 print(PLS_AB)
 # As expected, we do not find significant covariation between the two blocks
 
@@ -113,8 +114,9 @@ versicolor_data=iris[iris$Species=="versicolor",]
 versicolor_sepal=versicolor_data[,grep("Sepal", colnames(versicolor_data))]
 versicolor_petal=versicolor_data[,grep("Petal", colnames(versicolor_data))]
 # Separate sepal and petal data
-PLS_sepal_petal=pls(versicolor_sepal, versicolor_petal, perm=999)
+PLS_sepal_petal=pls(versicolor_sepal, versicolor_petal, perm=99)
 # Perform PLS with permutation test
+# (again, chosen few permutations)
 
 print(PLS_sepal_petal)
 summary(PLS_sepal_petal)

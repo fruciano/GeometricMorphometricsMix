@@ -77,8 +77,9 @@
 #' # Note that, as we are simulating them independently,
 #' # we don't expect substantial covariation between blocks
 #'
-#' PLS_AB=pls(A, B, perm=999)
-#' # Perform PLS analysis and use 999 permutations for testing
+#' PLS_AB=pls(A, B, perm=99)
+#' # Perform PLS analysis and use 99 permutations for testing
+#' # (notice that in a real analysis, normally one uses more permutations)
 #' print(PLS_AB)
 #' # As expected, we do not find significant covariation between the two blocks
 #'
@@ -105,8 +106,9 @@
 #'versicolor_sepal=versicolor_data[,grep("Sepal", colnames(versicolor_data))]
 #'versicolor_petal=versicolor_data[,grep("Petal", colnames(versicolor_data))]
 #'# Separate sepal and petal data
-#'PLS_sepal_petal=pls(versicolor_sepal, versicolor_petal, perm=999)
+#'PLS_sepal_petal=pls(versicolor_sepal, versicolor_petal, perm=99)
 #'# Perform PLS with permutation test
+#'# (again, chosen few permutations)
 #'
 #'print(PLS_sepal_petal)
 #'summary(PLS_sepal_petal)
@@ -115,7 +117,7 @@
 #'
 #' @export
 pls=function(X, Y, perm=999) {
-  if (!(class(X) %in% c("matrix", "data.frame")) |  (!(class(X) %in% c("matrix", "data.frame")))) {
+  if (!(class(X) %in% c("matrix", "data.frame")) |  (!(class(Y) %in% c("matrix", "data.frame")))) {
     stop("X and Y should be matrices or data.frames (observations in rows, variables in columns)")
   }
   if (nrow(X)!=nrow(Y)) {
@@ -410,7 +412,7 @@ pls_perm = function (x, y, perm=999) {
 #' # Separate sepal and petal data for I. versicolor
 #'
 #'
-#' PLS_sepal_petal_versicolor=pls(versicolor_sepal, versicolor_petal)
+#' PLS_sepal_petal_versicolor=pls(versicolor_sepal, versicolor_petal, perm=99)
 #' summary(PLS_sepal_petal_versicolor)
 #' # Compute the PLS for I. versicolor
 #'

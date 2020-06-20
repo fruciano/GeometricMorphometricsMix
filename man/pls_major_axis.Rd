@@ -123,7 +123,7 @@ versicolor_petal=versicolor_data[,grep("Petal", colnames(versicolor_data))]
 # Separate sepal and petal data for I. versicolor
 
 
-PLS_sepal_petal_versicolor=pls(versicolor_sepal, versicolor_petal)
+PLS_sepal_petal_versicolor=pls(versicolor_sepal, versicolor_petal, perm=99)
 summary(PLS_sepal_petal_versicolor)
 # Compute the PLS for I. versicolor
 
