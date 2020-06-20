@@ -4,8 +4,13 @@
 \alias{LM_relativepos_check}
 \title{Check the relative positions for a set of landmarks, compared to a reference specimen}
 \usage{
-LM_relativepos_check(Dataset, LM_to_check, reference_specimen = 1,
-  only_by_landmark_order = FALSE, use_specimen_names = TRUE)
+LM_relativepos_check(
+  Dataset,
+  LM_to_check,
+  reference_specimen = 1,
+  only_by_landmark_order = FALSE,
+  use_specimen_names = TRUE
+)
 }
 \arguments{
 \item{Dataset}{k x p x n array

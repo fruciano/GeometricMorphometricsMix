@@ -4,8 +4,14 @@
 \alias{RVcomparison}
 \title{Compare Escoufier RV coefficient between two groups}
 \usage{
-RVcomparison(Group1Block1, Group1Block2, Group2Block1, Group2Block2,
-  perm = 999, center = TRUE)
+RVcomparison(
+  Group1Block1,
+  Group1Block2,
+  Group2Block1,
+  Group2Block2,
+  perm = 999,
+  center = TRUE
+)
 }
 \arguments{
 \item{Group1Block1, Group1Block2, Group2Block1, Group2Block2}{Matrices or data frames

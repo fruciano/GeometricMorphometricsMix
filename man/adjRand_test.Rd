@@ -26,6 +26,7 @@ and values approaching one as the two partitions become more similar to each oth
  This function implements the permutation test proposed by Qannari et al. (2014)
 to obtain a p value against the null hypothesis of independence of the two partitions.
 
+
 This function is useful in various contexts, such as in integrative taxonomy
 when comparing the classification of individual specimens obtained using different data
 (e.g., sequence data and morphometric data).

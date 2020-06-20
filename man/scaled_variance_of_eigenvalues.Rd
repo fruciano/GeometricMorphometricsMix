@@ -4,8 +4,12 @@
 \alias{scaled_variance_of_eigenvalues}
 \title{Compute scaled variance of eigenvalues}
 \usage{
-scaled_variance_of_eigenvalues(data_matrix, boot = 999, rarefy = FALSE,
-  shrinkage = FALSE)
+scaled_variance_of_eigenvalues(
+  data_matrix,
+  boot = 999,
+  rarefy = FALSE,
+  shrinkage = FALSE
+)
 }
 \arguments{
 \item{data_matrix}{Matrix or data frame containing the original data
@@ -39,6 +43,7 @@ The scaled variance of eigenvalues is a commonly used index of morphological int
 Its value is comprised between 0 and 1, with larger values suggesting stronger integration.
 
 Only positive eigenvalues are used in the computations used in this function.
+
 
 The function employes two possible strategies to obtain eigenvalues:
 
