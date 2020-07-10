@@ -4,7 +4,7 @@
 \alias{pls}
 \title{Partial least squares (PLS) analysis}
 \usage{
-pls(X, Y, perm = 999)
+pls(X, Y, perm = 999, global_RV_test = TRUE)
 }
 \arguments{
 \item{X, Y}{Matrices or data frames
@@ -12,6 +12,8 @@ containing each block of variables
 (observations in rows, variables in columns).}
 
 \item{perm}{number of permutations to use for hypothesis testing}
+
+\item{global_RV_test}{logical - whether global significance of the association should be tested}
 }
 \value{
 The function outputs an object of class "pls_fit" and "list" with the following elements:
@@ -22,7 +24,7 @@ The function outputs an object of class "pls_fit" and "list" with the following 
   \item{V}{Right singular axes}
   \item{D}{Singular values}
   \item{percentage_squared_covariance}{Percented squared covariance accounted by each pair of axes}
-  \item{global_significance_RV}{(only if perm>0) Observed value of Escoufier RV coefficient and p value obtained from the permutation test}
+  \item{global_significance_RV}{(only if perm>0 and global_RV_test is TRUE) Observed value of Escoufier RV coefficient and p value obtained from the permutation test}
   \item{singular_axis_significance}{(only if perm>0) For each pair of singular (PLS) axis, the singular value, the correlation between scores, their significance level based on permutation, and the proportion of squared covariance accounted are reported}
   \item{OriginalData}{Data used in the analysis}
   \item{x_center}{Values used to center data in the X block}

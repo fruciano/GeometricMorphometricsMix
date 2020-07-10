@@ -38,6 +38,7 @@
 #' containing each block of variables
 #' (observations in rows, variables in columns).
 #' @param perm number of permutations to use for hypothesis testing
+#' @param global_RV_test logical - whether global significance of the association should be tested
 #'
 #' @seealso \code{\link{RVrarefied}}
 #' @return The function outputs an object of class "pls_fit" and "list" with the following elements:
@@ -48,7 +49,7 @@
 #'   \item{V}{Right singular axes}
 #'   \item{D}{Singular values}
 #'   \item{percentage_squared_covariance}{Percented squared covariance accounted by each pair of axes}
-#'   \item{global_significance_RV}{(only if perm>0) Observed value of Escoufier RV coefficient and p value obtained from the permutation test}
+#'   \item{global_significance_RV}{(only if perm>0 and global_RV_test is TRUE) Observed value of Escoufier RV coefficient and p value obtained from the permutation test}
 #'   \item{singular_axis_significance}{(only if perm>0) For each pair of singular (PLS) axis, the singular value, the correlation between scores, their significance level based on permutation, and the proportion of squared covariance accounted are reported}
 #'   \item{OriginalData}{Data used in the analysis}
 #'   \item{x_center}{Values used to center data in the X block}
@@ -116,7 +117,7 @@
 #'
 #'
 #' @export
-pls=function(X, Y, perm=999) {
+pls=function(X, Y, perm=999, global_RV_test=TRUE) {
   if (!(length(intersect(class(X), c("matrix", "data.frame")))==1 &&
         length(intersect(class(Y), c("matrix", "data.frame")))==1)) {
     stop("X and Y should be matrices or data.frames (observations in rows, variables in columns)")
@@ -127,7 +128,7 @@ pls=function(X, Y, perm=999) {
   # Checks of class and consistent number of rows
 
   if (perm>0) {
-    Results=pls_perm(X, Y, perm=perm)
+    Results=pls_perm(X, Y, perm=perm, global_RV_test=global_RV_test)
   } else {
     Results=pls_base(X, Y)
   }
@@ -239,7 +240,7 @@ return(PLS)
 
 
 # Function to run permutation tests
-pls_perm = function (x, y, perm=999) {
+pls_perm = function (x, y, perm=999, global_RV_test=TRUE) {
   ObsPLS=pls_base(x,y)
   # Observed PLS analysis
 
@@ -278,6 +279,7 @@ pls_perm = function (x, y, perm=999) {
   }
   # Same for the correlation between X scores and Y scores
 
+  if (global_RV_test==TRUE) {
   ObsRV=EscoufierRV(x, y)
   permRV=unlist(lapply(Yperm, function(Y) EscoufierRV(cbind(x),cbind(Y))))
   RV_p_value=(length(which(permRV>=ObsRV))+1)/(perm+1)
@@ -289,15 +291,38 @@ pls_perm = function (x, y, perm=999) {
                CorrXScoresYScores=ObsPLS$CorrXScoresYScores,
                global_significance_RV=c(observed_RV=ObsRV, RV_p_value=RV_p_value),
                singular_axis_significance=data.frame(correlation_PLS_scores=ObsPLS$CorrXScoresYScores,
-                                       pvalue_correlation_PLS_scores=CorrXScoresYScores_p.values,
-                                       singular_values=ObsPLS$D,
-                                       pvalue_singular_values=D_p.values,
-                                       percentage_squared_covariance=(ObsPLS$D^2/sum(ObsPLS$D^2))*100
-                                       ),
+                                                     pvalue_correlation_PLS_scores=CorrXScoresYScores_p.values,
+                                                     singular_values=ObsPLS$D,
+                                                     pvalue_singular_values=D_p.values,
+                                                     percentage_squared_covariance=(ObsPLS$D^2/sum(ObsPLS$D^2))*100
+               ),
                OriginalData=list(x=ObsPLS$OriginalData$x, y=ObsPLS$OriginalData$y),
                x_center=ObsPLS$x_center,
                y_center=ObsPLS$y_center
-               )
+  )
+
+  } else {
+    ObsRV=NA
+    RV_p_value=NA
+
+    Results=list(XScores = ObsPLS$XScores,
+                 YScores = ObsPLS$YScores,
+                 U=ObsPLS$U, V=ObsPLS$V, D=ObsPLS$D,
+                 CorrXScoresYScores=ObsPLS$CorrXScoresYScores,
+                 singular_axis_significance=data.frame(correlation_PLS_scores=ObsPLS$CorrXScoresYScores,
+                                                       pvalue_correlation_PLS_scores=CorrXScoresYScores_p.values,
+                                                       singular_values=ObsPLS$D,
+                                                       pvalue_singular_values=D_p.values,
+                                                       percentage_squared_covariance=(ObsPLS$D^2/sum(ObsPLS$D^2))*100
+                 ),
+                 OriginalData=list(x=ObsPLS$OriginalData$x, y=ObsPLS$OriginalData$y),
+                 x_center=ObsPLS$x_center,
+                 y_center=ObsPLS$y_center
+    )
+
+  }
+
+
   class(Results)=c("pls_fit", "list")
   return(Results)
 }
