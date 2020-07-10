@@ -157,7 +157,7 @@ print.pls_fit = function (x, ...) {
     cat("\n")
   } else {
     Res=data.frame(Axis=seq(length(x$D)),
-                   percentage_squared_covariance=x$percentage_squared_covariance,
+                   percentage_squared_covariance=x$singular_axis_significance$percentage_squared_covariance,
                    singular_value=x$D,
                    correlation_between_scores=x$CorrXScoresYScores)
     print(Res)
