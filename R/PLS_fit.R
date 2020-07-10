@@ -156,10 +156,19 @@ print.pls_fit = function (x, ...) {
     cat("For axis-specific results, please use summary()")
     cat("\n")
   } else {
+    if ("percentage_squared_covariance" %in% names (x)) {
+      Res=data.frame(Axis=seq(length(x$D)),
+                     percentage_squared_covariance=x$percentage_squared_covariance,
+                     singular_value=x$D,
+                     correlation_between_scores=x$CorrXScoresYScores)
+
+    } else {
+
     Res=data.frame(Axis=seq(length(x$D)),
                    percentage_squared_covariance=x$singular_axis_significance$percentage_squared_covariance,
                    singular_value=x$D,
                    correlation_between_scores=x$CorrXScoresYScores)
+    }
     print(Res)
   }
 
@@ -187,6 +196,8 @@ summary.pls_fit = function(object, ...) {
     cat("\n")
     cat("======================")
     cat("\n")
+  }
+  if ("percentage_squared_covariance" %in% names (x)) {
     cat("Significance of each singular axis")
     cat("\n")
     SA_sign=object$singular_axis_significance
