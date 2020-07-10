@@ -197,7 +197,7 @@ summary.pls_fit = function(object, ...) {
     cat("======================")
     cat("\n")
   }
-  if ("percentage_squared_covariance" %in% names (x)) {
+  if (!("percentage_squared_covariance" %in% names (object))) {
     cat("Significance of each singular axis")
     cat("\n")
     SA_sign=object$singular_axis_significance
