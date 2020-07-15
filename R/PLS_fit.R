@@ -30,9 +30,8 @@
 #' If you use this function to perform the PLS analysis and test for significance,
 #' cite Rohlf & Corti 2000 (or earlier references outside of geometric morphometrics).
 #' If you report the test of significance based on the Escoufier RV coefficient, also cite Escoufier 1975.
-#' If you also use the predict() method to obtain estimates of the shape (or other variable)
-#' predicted by each pair of axis, please cite Fruciano et al. under review
-#' (contact Carmelo Fruciano for the most recent reference)
+#' If you also use the major axis approach to obtain estimates of the shape (or other variable)
+#' predicted by each pair of axes, please cite Fruciano et al. in press
 #'
 #' @param X,Y Matrices or data frames
 #' containing each block of variables
@@ -60,7 +59,7 @@
 #'
 #'
 #' @references Escoufier Y. 1973. Le Traitement des Variables Vectorielles. Biometrics 29:751-760.
-#' @references Fruciano C, Colangelo P, Castiglia R, Franchini P. under review. Does divergence from normal patterns of integration increase as chromosomal fusions increase in number? A test on a house mouse hybrid zone.
+#' @references Fruciano C, Colangelo P, Castiglia R, Franchini P. in press. Does divergence from normal patterns of integration increase as chromosomal fusions increase in number? A test on a house mouse hybrid zone. Current Zoology
 #' @references Rohlf FJ, Corti M. 2000. Use of Two-Block Partial Least-Squares to Study Covariation in Shape. Systematic Biology 49:740-753.
 #' @examples
 #'
@@ -424,7 +423,7 @@ pls_perm = function (x, y, perm=999, global_RV_test=TRUE) {
 #'
 #'
 #'
-#' @references Fruciano C, Colangelo P, Castiglia R, Franchini P. under review. Does divergence from normal patterns of integration increase as chromosomal fusions increase in number? A test on a house mouse hybrid zone.
+#' @references Fruciano C, Colangelo P, Castiglia R, Franchini P. in press. Does divergence from normal patterns of integration increase as chromosomal fusions increase in number? A test on a house mouse hybrid zone. Current Zoology
 #'
 #' @section Notice:
 #' \itemize{

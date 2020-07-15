@@ -213,7 +213,7 @@ boxplot(Euc_dist_from_predictions~iris$Species,
 
 }
 \references{
-Fruciano C, Colangelo P, Castiglia R, Franchini P. under review. Does divergence from normal patterns of integration increase as chromosomal fusions increase in number? A test on a house mouse hybrid zone.
+Fruciano C, Colangelo P, Castiglia R, Franchini P. in press. Does divergence from normal patterns of integration increase as chromosomal fusions increase in number? A test on a house mouse hybrid zone. Current Zoology
 }
 \seealso{
 \code{\link{pls}}
