@@ -17,7 +17,8 @@ scaled_variance_of_eigenvalues(
 
 \item{boot}{number of bootstrap resamples (no bootstrap if 0)}
 
-\item{rarefy}{logical on whether a rarefaction to a smaller sample size should be performed}
+\item{rarefy}{either a logical to determine whether rarefaction will be performed
+or a number indicating the sample size at which the samples will be rarefied}
 
 \item{shrinkage}{logical on whether the analysis should be based on a covariance matrix obtained through linear shrinkage}
 }

@@ -42,7 +42,8 @@
 #' @param data_matrix Matrix or data frame containing the original data
 #' (observations in rows, variables in columns).
 #' @param boot number of bootstrap resamples (no bootstrap if 0)
-#' @param rarefy logical on whether a rarefaction to a smaller sample size should be performed
+#' @param rarefy either a logical to determine whether rarefaction will be performed
+#' or a number indicating the sample size at which the samples will be rarefied
 #' @param shrinkage logical on whether the analysis should be based on a covariance matrix obtained through linear shrinkage
 #'
 #'
