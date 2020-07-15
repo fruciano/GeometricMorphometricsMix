@@ -15,6 +15,7 @@ They are incorporated into an R package to facilitate distribution and use.
 - **EscoufierRV** : Computation of Escoufier RV, which quantifies levels of association between blocks of variables (Escoufier 1973 - Biometrics)
 - **Kmultparallel** : Parallelised computation of Adams' Kmult (useful for distributions of trees, see Fruciano et al. 2017 - Ecology and Evolution)
 - **LM_relativepos_check** : Check relative position of landmarks, comparing it to a reference specimen (useful to identify switched landmarks and similar in raw data)
+- **parallel_analysis** : Perform parallel analysis (useful to choose a number of principal components for dimensionality reduction)
 - **pls** : Perform partial least squares (PLS) analysis
 - **pls_major_axis** : For a partial least squares (PLS) analysis, compute the major axis of PLS scores, project data onto the axis and compute predicted shapes for the major axis scores thus obtained.
 - **ProjectOrthogonal** : Projects data to subspace orthogonal to a given vector (for use in allometric correction, see Burnaby 1966 - Biometrics; Rohlf & Bookstein 1987 - Systematic Zoology; for use in dealing with measurement error, see Valentin et al. 2008 - Journal of Fish Biology; Fruciano 2016 - Development Genes and Evolution)
