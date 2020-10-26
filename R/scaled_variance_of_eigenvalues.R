@@ -132,8 +132,9 @@ return(Result)
 # positive eigenvalues from a data matrix
 # and then compute relative variance of eigenvalues
 sveig_fastsvd=function(data_matrix) {
-  eigenvalues=corpcor::fast.svd(
-  scale(data_matrix, center = TRUE, scale=FALSE))$d^2
+  sample_size=nrow(data_matrix)
+  eigenvalues=(corpcor::fast.svd(
+  scale(data_matrix, center = TRUE, scale=FALSE))$d^2)/(sample_size-1)
   eigenvalues=eigenvalues/length(eigenvalues)
   veig=var(eigenvalues)
   dimensions=length(eigenvalues)
