@@ -136,7 +136,7 @@ sveig_fastsvd=function(data_matrix) {
   eigenvalues=(corpcor::fast.svd(
   scale(data_matrix, center = TRUE, scale=FALSE))$d^2)/(sample_size-1)
   eigenvalues=eigenvalues/sum(eigenvalues)
-  veig=var(eigenvalues)
+  veig=var_pop(eigenvalues)
   dimensions=length(eigenvalues)
   max_theoric_veig=(dimensions-1)/(dimensions^2)
   scal_var_eig=veig/max_theoric_veig
@@ -152,11 +152,19 @@ sveig_covmat=function(covmat) {
   eigenvalues=eigenvalues[eigenvalues>0]
   eigenvalues=eigenvalues/sum(eigenvalues)
   dimensions=length(eigenvalues)
-  veig=var(eigenvalues)
+  veig=var_pop(eigenvalues)
   max_theoric_veig=(dimensions-1)/(dimensions^2)
   scal_var_eig=veig/max_theoric_veig
   res=c(scal_var_eig, dimensions)
   names(res)=c("Scaled_variance_of_eigenvalues", "dimensions")
   return(res)
 return(res)
+}
+
+# Function to compute population-level variance
+# (by dividing the sum of squares for the number of observations
+# rather than the number of observations minus one)
+var_pop=function(x) {
+  sqdev=(x-mean(x))^2
+  sum(sqdev)/length(x)
 }
