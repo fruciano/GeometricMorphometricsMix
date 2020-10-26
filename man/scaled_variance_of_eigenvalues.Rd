@@ -76,8 +76,23 @@ Also notice that using the shrinkage-based estimation of the covariance matrix r
 This option requires the package \emph{nlshrink}
 }
 
+\section{Computational details}{
+
+For the computation, this function uses only positive eigenvalues (which are also used to identify data dimensionality).
+The eigenvalues are first scaled by dividing them by their sum (Young 2006),
+then their variance is computed as population variance (rather than sample variance; see Haber 2011).
+Finally, this value is standardized to a scale between 0 and 1 by dividing it by its maximum theoretical value
+of (p-1)/p^2 (where p is the number of dimensions) - this is the same scaling used in the software MorphoJ (Klingenberg 2011).
+}
+
 \references{
 Ledoit O, Wolf M. 2004. A well-conditioned estimator for large-dimensional covariance matrices. Journal of Multivariate Analysis 88:365-411.
 
-Pavlicev, M., Cheverud, J. M., Wagner, G. P. Measuring Morphological Integration Using Eigenvalue Variance. Evolutionary Biology 36(1):157–170.
+Young NM. 2006. Function, ontogeny and canalization of shape variance in the primate scapula. Journal of Anatomy 209:623-636.
+
+Pavlicev M, Cheverud JM, Wagner GP. Measuring Morphological Integration Using Eigenvalue Variance. Evolutionary Biology 36(1):157–170.
+
+Haber A. 2011. A Comparative Analysis of Integration Indices. Evolutionary Biology 38:476-488.
+
+Klingenberg CP. 2011. MorphoJ: an integrated software package for geometric morphometrics. Molecolar Ecology Resources 11:353-357.
 }
