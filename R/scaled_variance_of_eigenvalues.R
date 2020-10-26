@@ -135,10 +135,10 @@ sveig_fastsvd=function(data_matrix) {
   sample_size=nrow(data_matrix)
   eigenvalues=(corpcor::fast.svd(
   scale(data_matrix, center = TRUE, scale=FALSE))$d^2)/(sample_size-1)
-  eigenvalues=eigenvalues/length(eigenvalues)
+  eigenvalues=eigenvalues/sum(eigenvalues)
   veig=var(eigenvalues)
   dimensions=length(eigenvalues)
-  max_theoric_veig=((sum(eigenvalues)^2)*(dimensions-1))/(dimensions^2)
+  max_theoric_veig=(dimensions-1)/(dimensions^2)
   scal_var_eig=veig/max_theoric_veig
   res=c(scal_var_eig, dimensions)
   names(res)=c("Scaled_variance_of_eigenvalues", "dimensions")
@@ -150,14 +150,13 @@ return(res)
 sveig_covmat=function(covmat) {
   eigenvalues=eigen(covmat)$values
   eigenvalues=eigenvalues[eigenvalues>0]
+  eigenvalues=eigenvalues/sum(eigenvalues)
   dimensions=length(eigenvalues)
   veig=var(eigenvalues)
-  max_theoric_veig=((sum(eigenvalues)^2)*(dimensions-1))/(dimensions^2)
+  max_theoric_veig=(dimensions-1)/(dimensions^2)
   scal_var_eig=veig/max_theoric_veig
   res=c(scal_var_eig, dimensions)
   names(res)=c("Scaled_variance_of_eigenvalues", "dimensions")
   return(res)
 return(res)
 }
-
-
