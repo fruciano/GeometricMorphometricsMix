@@ -34,7 +34,7 @@ are in the same order.
 
 This function is useful in various contexts, such as:
  \itemize{
-  \item testing the effect of preservation (Fruciano et al. - in press)
+  \item testing the effect of preservation (Fruciano et al. 2020)
   \item testing for variation through time
 }
 
@@ -52,17 +52,19 @@ To overcome some situations where a singular matrix can occurr, the function can
 use internally a shrinkage estimator of the covariance matrix (Ledoit & Wolf 2004).
 This is called setting shrink = TRUE.
 However, in this case, the package nlshrink should have been installed.
+Also, notice that if the matrices T1 and T2 are provided as arrays, this requires
+the package Morpho to be installed.
 }
 
 \section{Citation}{
 
-If you use this function please cite Fruciano et al. in press
+If you use this function please cite Fruciano et al. 2020
 }
 
 \references{
 Fruciano C. 2016. Measurement error in geometric morphometrics. Development Genes and Evolution 226:139-158.
 
-Fruciano C., Schmidt, I., Ramirez Sanchez, M.M., Morek, W., Avila Valle, Z.A., Talijancic, I., Pecoraro, C., Schermann Legionnet, A. in press. Tissue preservation can affect geometric morphometric analyses: a case study using fish body shape. Zoological Journal of the Linnean Society
+Fruciano C., Schmidt, I., Ramirez Sanchez, M.M., Morek, W., Avila Valle, Z.A., Talijancic, I., Pecoraro, C., Schermann Legionnet, A. 2020. Tissue preservation can affect geometric morphometric analyses: a case study using fish body shape. Zoological Journal of the Linnean Society 188:148-162.
 
 Ledoit O, Wolf M. 2004. A well-conditioned estimator for large-dimensional covariance matrices. Journal of Multivariate Analysis 88:365-411.
 }

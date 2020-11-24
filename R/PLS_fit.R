@@ -31,7 +31,7 @@
 #' cite Rohlf & Corti 2000 (or earlier references outside of geometric morphometrics).
 #' If you report the test of significance based on the Escoufier RV coefficient, also cite Escoufier 1975.
 #' If you also use the major axis approach to obtain estimates of the shape (or other variable)
-#' predicted by each pair of axes, please cite Fruciano et al. in press
+#' predicted by each pair of axes, please cite Fruciano et al. 2020
 #'
 #' @param X,Y Matrices or data frames
 #' containing each block of variables
@@ -59,7 +59,7 @@
 #'
 #'
 #' @references Escoufier Y. 1973. Le Traitement des Variables Vectorielles. Biometrics 29:751-760.
-#' @references Fruciano C, Colangelo P, Castiglia R, Franchini P. in press. Does divergence from normal patterns of integration increase as chromosomal fusions increase in number? A test on a house mouse hybrid zone. Current Zoology
+#' @references Fruciano C, Colangelo P, Castiglia R, Franchini P. 2020. Does divergence from normal patterns of integration increase as chromosomal fusions increase in number? A test on a house mouse hybrid zone. Current Zoology 66:527–538.
 #' @references Rohlf FJ, Corti M. 2000. Use of Two-Block Partial Least-Squares to Study Covariation in Shape. Systematic Biology 49:740-753.
 #' @examples
 #'
@@ -352,13 +352,13 @@ pls_perm = function (x, y, perm=999, global_RV_test=TRUE) {
 #'   \item{(optionally) If new data is provided, these data is first projected in the original PLS space and then the two operations above are performed on the new data}
 #' }
 #' A more in-depth explanation with a figure which allows for a more intuitive understanding
-#' is provided in Fruciano et al under review (kindly contact Carmelo Fruciano to receive the figure and relevant text prior to publication)
+#' is provided in Fruciano et al 2020
 #' The idea is to obtain individual-level estimates of the shape predicted by a PLS model.
 #' This can be useful, for instance, to quantify to which extent the shape of a given individual from one group
 #' resembles the shape that individual would have according to the model computed in another group.
 #' This can be done by obtaining predictions with this function and then computing the distance between
 #' the actual shape observed for each individual and its prediction obtained from this function.
-#' This is, indeed, how this approach has been used in Fruciano et al (under review).
+#' This is, indeed, how this approach has been used in Fruciano et al 2020.
 #'
 #' The function returns a list with two or three main elements which are themselves lists.
 #' The most useful elements for the final user are highlighted in boldface.
@@ -399,8 +399,7 @@ pls_perm = function (x, y, perm=999, global_RV_test=TRUE) {
 #'
 #'
 #' @section Citation:
-#' If you use this function, please cite Fruciano et al. under review
-#' (contact Carmelo Fruciano for the most recent reference)
+#' If you use this function, please cite Fruciano et al. 2020.
 #'
 #' @param pls_object object of class "pls_fit" obtained from the function pls
 #' @param new_data_x,new_data_y (optional) matrices or data frames containing new data
@@ -423,7 +422,7 @@ pls_perm = function (x, y, perm=999, global_RV_test=TRUE) {
 #'
 #'
 #'
-#' @references Fruciano C, Colangelo P, Castiglia R, Franchini P. in press. Does divergence from normal patterns of integration increase as chromosomal fusions increase in number? A test on a house mouse hybrid zone. Current Zoology
+#' @references Fruciano C, Colangelo P, Castiglia R, Franchini P. 2020. Does divergence from normal patterns of integration increase as chromosomal fusions increase in number? A test on a house mouse hybrid zone. Current Zoology 66:527–538.
 #'
 #' @section Notice:
 #' \itemize{

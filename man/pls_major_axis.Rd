@@ -47,13 +47,13 @@ More in detail, the function:
   \item{(optionally) If new data is provided, these data is first projected in the original PLS space and then the two operations above are performed on the new data}
 }
 A more in-depth explanation with a figure which allows for a more intuitive understanding
-is provided in Fruciano et al under review (kindly contact Carmelo Fruciano to receive the figure and relevant text prior to publication)
+is provided in Fruciano et al 2020
 The idea is to obtain individual-level estimates of the shape predicted by a PLS model.
 This can be useful, for instance, to quantify to which extent the shape of a given individual from one group
 resembles the shape that individual would have according to the model computed in another group.
 This can be done by obtaining predictions with this function and then computing the distance between
 the actual shape observed for each individual and its prediction obtained from this function.
-This is, indeed, how this approach has been used in Fruciano et al (under review).
+This is, indeed, how this approach has been used in Fruciano et al 2020.
 
 The function returns a list with two or three main elements which are themselves lists.
 The most useful elements for the final user are highlighted in boldface.
@@ -94,8 +94,7 @@ analyses obtained using a previous PLS model on new data and, in particular:
 }
 \section{Citation}{
 
-If you use this function, please cite Fruciano et al. under review
-(contact Carmelo Fruciano for the most recent reference)
+If you use this function, please cite Fruciano et al. 2020.
 }
 
 \section{Notice}{
@@ -213,7 +212,7 @@ boxplot(Euc_dist_from_predictions~iris$Species,
 
 }
 \references{
-Fruciano C, Colangelo P, Castiglia R, Franchini P. in press. Does divergence from normal patterns of integration increase as chromosomal fusions increase in number? A test on a house mouse hybrid zone. Current Zoology
+Fruciano C, Colangelo P, Castiglia R, Franchini P. 2020. Does divergence from normal patterns of integration increase as chromosomal fusions increase in number? A test on a house mouse hybrid zone. Current Zoology 66:527–538.
 }
 \seealso{
 \code{\link{pls}}

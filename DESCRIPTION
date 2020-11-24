@@ -7,11 +7,11 @@ Description: This is a collection of functions, which I have developed for my ow
 Depends: R (>= 3.4.0),
   ape,
   parallel,
-  Morpho,
   stats,
   corpcor
 Imports:
 Suggests: parallelsugar,
+  Morpho,
   utils,
   geometry,
   nlshrink,
