@@ -12,6 +12,7 @@ They are incorporated into an R package to facilitate distribution and use.
 - **BTailTest** : Comparison of disparity between two groups
 - **critical_angle** : Critical angle for the test of difference between two vectors
 - **disparity_test** : Comparison of disparity between two groups
+- **dist_mean_boot** : Bootstrap estimates of the distance between group means
 - **EscoufierRV** : Computation of Escoufier RV, which quantifies levels of association between blocks of variables (Escoufier 1973 - Biometrics)
 - **Kmultparallel** : Parallelised computation of Adams' Kmult (useful for distributions of trees, see Fruciano et al. 2017 - Ecology and Evolution)
 - **LM_relativepos_check** : Check relative position of landmarks, comparing it to a reference specimen (useful to identify switched landmarks and similar in raw data)
