@@ -87,7 +87,7 @@ RVrarefied = function(Block1, Block2, reps = 1000, samplesize) {
         NewSamp = cbind(Block1, Block2)[sample(1:nrow(Block1), samplesize, replace = TRUE), ]
         RV[i] = EscoufierRV(cbind(NewSamp[, 1:endB1]), cbind(NewSamp[, startB2:sizeboth]))
     }
-	
+
 	if(TRUE %in% is.na(RV)) {
 	warning(paste("Some of the rarefied RV have given NA \n
 		This might be due to random samples all with the same observations\n
@@ -95,10 +95,10 @@ RVrarefied = function(Block1, Block2, reps = 1000, samplesize) {
 		to ensure that the results are still meaningful
 		"))
 	}
-	
+
 	RV2=na.omit(RV)
 	# remove any NAs
-	
+
     Results = list(Rarefied_RV = mean(RV2), Quantiles = quantile(RV2, c(0.025, 0.5, 0.975)), AllRarefiedSamples = RV)
     return(Results)
 }
@@ -148,12 +148,10 @@ EscoufierRV = function(Block1, Block2) {
     if (nrow(Block1) != nrow(Block2)) {
         stop(paste("Error: the two blocks should have the same number of rows (observations)"))
     } else {
-        BothBlocks = cbind(Block1, Block2)
-        nvarB1 = ncol(Block1)
-        COV = cov(BothBlocks)
-        RV = sum(diag(COV[1:nvarB1, (nvarB1 + 1):ncol(COV)] %*% COV[(nvarB1 + 1):nrow(COV), 1:nvarB1]))/(sqrt(sum(diag(COV[1:nvarB1,
-            1:nvarB1] %*% COV[1:nvarB1, 1:nvarB1])) * sum(diag(COV[(nvarB1 + 1):ncol(COV), (nvarB1 + 1):ncol(COV)] %*% COV[(nvarB1 +
-            1):ncol(COV), (nvarB1 + 1):ncol(COV)]))))
+      tS1S1=sum(cov(Block1)^2)
+      tS2S2=sum(cov(Block2)^2)
+      S1S2=cov(Block1, Block2)
+      RV=sum(S1S2^2)/sqrt(tS1S1*tS2S2)
         return(RV)
     }
 }
