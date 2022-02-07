@@ -46,3 +46,6 @@ Each function, however, provides reasonable comments and references to the metho
 
 ## Badges
 [![R-CMD-check Actions Status](https://github.com/fruciano/GeometricMorphometricsMix/workflows/R-CMD-check/badge.svg)](https://github.com/fruciano/GeometricMorphometricsMix/actions)
+[![pkgcheck](https://github.com/fruciano/GeometricMorphometricsMix/workflows/pkgcheck/badge.svg)](https://github.com/fruciano/GeometricMorphometricsMix/actions?query=workflow%3Apkgcheck)
+
+
