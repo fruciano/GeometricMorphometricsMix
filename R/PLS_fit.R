@@ -491,7 +491,7 @@ pls_perm = function (x, y, perm=999, global_RV_test=TRUE) {
 #'
 #' Pred_major_axis_versicolor_newdata=pls_major_axis(pls_object=PLS_sepal_petal_versicolor,
 #'                                           new_data_x = all_sepal,
-#'                                           new_data_y = all_sepal,
+#'                                           new_data_y = all_petal,
 #'                                           axes_to_use=1)
 #' # Perform the major axis computation using new data
 #' # Notice that:
@@ -609,7 +609,7 @@ pls_major_axis=function(pls_object, new_data_x=NULL, new_data_y=NULL, axes_to_us
                                                              Block2=Block2_revert)
   )
 
-  # Now the analysis in case there is new data to project in the original
+  # Now the analysis in case there is new data to project on the original
   # PLS
 
   if(!is.null(new_data_x) && !is.null(new_data_y)) {
@@ -632,6 +632,12 @@ pls_major_axis=function(pls_object, new_data_x=NULL, new_data_y=NULL, axes_to_us
     new_data_major_axis_proj=lapply(seq(axes_to_use), function(i)
     {
       PLS_scores_temp=cbind(new_data_Xscores[,i], new_data_Yscores[,i])
+      if (scale_PLS==TRUE){
+      PLS_scores_temp=do.call("cbind", lapply(seq(ncol(PLS_scores_temp)), function(cl){
+          (PLS_scores_temp[,cl]/PLS_scores_major_axis_find[[i]]$pls_scale[cl])-
+            PLS_scores_major_axis_find[[i]]$mean_pls_scores[cl]
+        }))
+      }
       new_data_mjp=PLS_scores_temp %*% PLS_scores_major_axis_find[[i]]$major_axis_rotation
     })
     names(new_data_major_axis_proj)=paste0("PLS_axis_pair_", seq(axes_to_use))
@@ -643,6 +649,13 @@ pls_major_axis=function(pls_object, new_data_x=NULL, new_data_y=NULL, axes_to_us
                  Mean = PLS_scores_major_axis_find[[i]]$mean_pls_scores
       )
     })
+    if (scale_PLS==TRUE){
+      new_data_revertPCAPLS=lapply(seq(length(new_data_revertPCAPLS)), function(i){
+        do.call("cbind", lapply(seq(ncol(new_data_revertPCAPLS[[i]])), function(cl){
+          (new_data_revertPCAPLS[[i]][,cl]*PLS_scores_major_axis_find[[i]]$pls_scale[cl])
+        }))
+      })
+    }
     # Get back scores in the PLS space for the major axis projections of new data
 
     new_data_revertPCAPLS_major_axis_X=do.call("cbind", lapply(new_data_revertPCAPLS, function(X) X[,1]))

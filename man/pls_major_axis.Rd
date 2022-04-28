@@ -166,7 +166,7 @@ all_petal=iris[,grep("Petal", colnames(iris))]
 
 Pred_major_axis_versicolor_newdata=pls_major_axis(pls_object=PLS_sepal_petal_versicolor,
                                           new_data_x = all_sepal,
-                                          new_data_y = all_sepal,
+                                          new_data_y = all_petal,
                                           axes_to_use=1)
 # Perform the major axis computation using new data
 # Notice that:
