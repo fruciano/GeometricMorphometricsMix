@@ -46,15 +46,15 @@
 #' @references Fruciano C, Franchini P, Meyer A. 2013. Resampling-Based Approaches to Study Variation in Morphological Modularity. PLoS ONE 8:e69376.
 #' @references Smilde AK, Kiers HA, Bijlsma S, Rubingh CM, van Erk MJ. 2009. Matrix correlations for high-dimensional data: the modified RV-coefficient. Bioinformatics 25:401-405.
 #' @examples
-#' 
-#' if(!require(lmf)){ install.packages("lmf") }
+#'
+#' if(!require(lmf)){ install.packages("lmf", repos="https://cran.mirror.garr.it/CRAN/") }
 #' # Install package lmf if not available
 #'
 #' set.seed(123)
 #'
 #' S1=diag(100)
 #' # Use uncorrelated variables for the first group
-#' 
+#'
 #' S2=diag(100)
 #' S2[21:100,21:100]=rnorm((100-20)^2, 0.1, 0.03^2)
 #' S2[1:20,1:20]=rnorm(20^2,0.01,0.03^2)
@@ -64,21 +64,21 @@
 #' diag(S2)=1
 #' S2=lmf::nearPD(S2)
 #' # Create an ad hoc covariance matrix for the second group
-#' 
-#' 
+#'
+#'
 #' A=MASS::mvrnorm(50, mu=rep(0,100), Sigma=S1)
 #' B=MASS::mvrnorm(100, mu=rep(10,100), Sigma=S2)
 #' # Create two multivariate normal random datasets
 #' # using the covariance matrices above
 #' # We are going to use the first 20 variables as block 1
 #' # and the subsequent variables as block 2
-#' 
+#'
 #' EscoufierRV(A[,1:20], A[,21:ncol(A)])
 #' EscoufierRV(B[,1:20], B[,21:ncol(B)])
 #' # Notice that the two observed Escoufier RV are different
 #' # However, this difference might be due to the
 #' # different number of observations for the two groups
-#' 
+#'
 #' RVcomparison(A[,1:20], A[,21:ncol(A)], B[,1:20], B[,21:ncol(B)])
 #' # One of the solutions is to perform a permutation test,
 #' # which shows us that these differences are actually significant
@@ -90,7 +90,7 @@
 #' @import stats
 #' @export
 RVcomparison=function(Group1Block1,Group1Block2,Group2Block1,Group2Block2, perm=999, center=TRUE) {
-  
+
   ngrp1=nrow(Group1Block1)
   ngrp2=nrow(Group2Block1)
   nvarblk1=ncol(Group1Block1)
@@ -98,10 +98,10 @@ RVcomparison=function(Group1Block1,Group1Block2,Group2Block1,Group2Block2, perm=
   obstot=ngrp1+ngrp2
   vartot=nvarblk1+nvarblk2
   # Compute a few useful quantities
-  
+
   if (nrow(Group1Block1)!=nrow(Group1Block2)) {
     stop("The first group has different number of observations (specimens) across the two blocks")
-    } 
+    }
   if (nrow(Group2Block1)!=nrow(Group2Block2)) {
     stop("The second group has different number of observations (specimens) across the two blocks")
     }
@@ -112,7 +112,7 @@ RVcomparison=function(Group1Block1,Group1Block2,Group2Block1,Group2Block2, perm=
     stop("The two groups must have the same number of variables in each block")
   }
  #  Checks that the data is consistent across blocks/groups
-  
+
   if (center==TRUE) {
     Group1=scale(cbind(Group1Block1, Group1Block2), center=TRUE, scale=FALSE)
     Group2=scale(cbind(Group2Block1, Group2Block2), center=TRUE, scale=FALSE)
@@ -121,7 +121,7 @@ RVcomparison=function(Group1Block1,Group1Block2,Group2Block1,Group2Block2, perm=
     Group1Block2=Group1[,(nvarblk1+1):vartot]
     Group2Block1=Group2[,1:nvarblk1]
     Group2Block2=Group2[,(nvarblk1+1):vartot]
-    # Scale and prepare data    
+    # Scale and prepare data
     } else {
       Both=cbind(rbind(Group1Block1,Group2Block1),rbind(Group1Block2,Group2Block2))
     # Combine data and compute basic info
@@ -129,7 +129,7 @@ RVcomparison=function(Group1Block1,Group1Block2,Group2Block1,Group2Block2, perm=
 
   ObsRVgrp1=EscoufierRV(Group1Block1, Group1Block2)
   ObsRVgrp2=EscoufierRV(Group2Block1, Group2Block2)
-  obsAbsDiffRV=abs(ObsRVgrp1-ObsRVgrp2)    
+  obsAbsDiffRV=abs(ObsRVgrp1-ObsRVgrp2)
   # Observed RV and their difference
 
   PermutedSets=lapply(seq_len(perm), function(x)
@@ -139,8 +139,8 @@ RVcomparison=function(Group1Block1,Group1Block2,Group2Block1,Group2Block2, perm=
   RVdiffperm=unlist(lapply(PermutedSets, function(x)
               abs(
                 EscoufierRV(x[1:ngrp1,1:nvarblk1],x[1:ngrp1,(nvarblk1+1):vartot])-
-                  EscoufierRV(x[(ngrp1+1):obstot,1:nvarblk1],x[(ngrp1+1):obstot,(nvarblk1+1):vartot])  
-                )              
+                  EscoufierRV(x[(ngrp1+1):obstot,1:nvarblk1],x[(ngrp1+1):obstot,(nvarblk1+1):vartot])
+                )
               ))
 
   pvalue=length(which(RVdiffperm>obsAbsDiffRV))/(perm+1)

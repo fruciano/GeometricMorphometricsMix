@@ -65,7 +65,7 @@ and Escoufier 1973 (because the procedure is based on Escoufier RV)
 
 \examples{
 
-if(!require(lmf)){ install.packages("lmf") }
+if(!require(lmf)){ install.packages("lmf", repos="https://cran.mirror.garr.it/CRAN/") }
 # Install package lmf if not available
 
 set.seed(123)

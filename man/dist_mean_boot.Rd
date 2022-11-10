@@ -4,7 +4,7 @@
 \alias{dist_mean_boot}
 \title{Bootstrapped distance between two arrays}
 \usage{
-dist_mean_boot(A, B, boot = 1000, ci = 0.95)
+dist_mean_boot(A, B, boot = 1000, ci = 0.95, nA = nrow(A), nB = nrow(B))
 }
 \arguments{
 \item{A, B}{Matrices or data frames containing data
@@ -13,6 +13,8 @@ dist_mean_boot(A, B, boot = 1000, ci = 0.95)
 \item{boot}{number of bootstrap resamples}
 
 \item{ci}{width of the confidence interval}
+
+\item{nA, nB}{sample sizes for each bootstrapped group (defaults to original sample size)}
 }
 \value{
 The function outputs a named vector with the mean, median, upper and lower confidence interval bounds
@@ -34,6 +36,8 @@ for the two populations having different levels of sexual dimorphism.
 The computation performs bootstrap by resampling with replacement
 within each of the two groups and at each round computing the Euclidean distance
 between the two groups.
+It is also possible to resample at a different sample size than the one in the data
+using the attributes nA and nB.
 
 Notice that the confidence interval is expressed on a scale between 0 and 1 and not
 as a percentage (e.g., 0.95 means 95% confidence interval)

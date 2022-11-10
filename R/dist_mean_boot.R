@@ -14,6 +14,8 @@
 #' The computation performs bootstrap by resampling with replacement
 #' within each of the two groups and at each round computing the Euclidean distance
 #' between the two groups.
+#' It is also possible to resample at a different sample size than the one in the data
+#' using the attributes nA and nB.
 #'
 #' Notice that the confidence interval is expressed on a scale between 0 and 1 and not
 #' as a percentage (e.g., 0.95 means 95% confidence interval)
@@ -23,7 +25,7 @@
 #' (observations in rows, variables in columns).
 #' @param boot number of bootstrap resamples
 #' @param ci width of the confidence interval
-#'
+#' @param nA,nB sample sizes for each bootstrapped group (defaults to original sample size)
 #'
 #' @return The function outputs a named vector with the mean, median, upper and lower confidence interval bounds
 #' obtained from the bootstrapped samples
@@ -32,18 +34,17 @@
 #' @import stats
 #' @export
 
-dist_mean_boot=function(A, B, boot=1000, ci=0.95){
+dist_mean_boot=function(A, B, boot=1000, ci=0.95, nA=nrow(A), nB=nrow(B)){
   if (any(ci<=0, ci>=1)){stop("The width of the confidence interval should be higher than 0 and lower than 1")}
   if (any(nrow(A)<=1, nrow(B)<=1)){stop("Both matrices should have more than one row and more than one column")}
   if (any(ncol(A)<=1, ncol(B)<=1)){stop("Both matrices should have more than one row and more than one column")}
   if (ncol(A)!=ncol(B)){stop("The number of columns of the two matrices is not the same, cannot compute distances")}
 
-  nA=nrow(A)
-  nB=nrow(B)
+  ssA=nrow(A) ; ssB=nrow(B)
 
   boot_idx=lapply(seq(boot), function(i)
-                  list(Aboot=sample(seq(nA), nA, replace = TRUE),
-                       Bboot=sample(seq(nB), nB, replace = TRUE)))
+                  list(Aboot=sample(seq(ssA), nA, replace = TRUE),
+                       Bboot=sample(seq(ssB), nB, replace = TRUE)))
   boot_dist=unlist(lapply(seq(boot), function(i){
     dist(rbind(colMeans(A[boot_idx[[i]]$Aboot,]),
          colMeans(B[boot_idx[[i]]$Bboot,])))
