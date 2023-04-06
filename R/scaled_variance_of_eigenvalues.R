@@ -72,6 +72,7 @@
 #' @references Klingenberg CP. 2011. MorphoJ: an integrated software package for geometric morphometrics. Molecolar Ecology Resources 11:353-357.
 #'
 #' @importFrom corpcor fast.svd
+#' @importFrom  methods is
 #' @import stats
 #'
 #' @export
@@ -79,7 +80,8 @@
 scaled_variance_of_eigenvalues=function(data_matrix, boot=999,
                                         rarefy=FALSE, shrinkage=FALSE) {
 
-	if (class(data_matrix) %in% c("data.frame", "matrix")==FALSE) {stop("data_matrix should be either a matrix or a data frame")}
+	if (length(intersect(is(data_matrix), c("data.frame", "matrix")))==0) {
+	  stop("data_matrix should be either a matrix or a data frame")}
 
   # The first option is the normal scaled variance of eigenvalues,
   # but based only on the positive eigenvalues obtained from corpcor::fast.svd
