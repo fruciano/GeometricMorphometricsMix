@@ -85,7 +85,7 @@ parallel_analysis=function(X, perm=999, fun=c("prcomp", "fastSVD", "shrink")) {
   }
   # Initial checks
 
-  Results=pa_PCA(X, perm=99, method=fun)
+  Results=pa_PCA(X, perm=perm, method=fun)
 
 return(Results)
 }
