@@ -117,6 +117,19 @@
 #'
 #' @export
 pls=function(X, Y, perm=999, global_RV_test=TRUE) {
+
+  X = as.matrix(X)
+  Y = as.matrix(Y)
+  # Convert to matrix, ensuring 2D
+
+  if (is.null(dim(X))) X = matrix(X, ncol=1)
+  if (is.null(dim(Y))) Y = matrix(Y, ncol=1)
+  # If X or Y is a vector, convert it to a single-column matrix
+
+  if (nrow(X) != nrow(Y)) stop("X and Y must have the same number of rows")
+  if (ncol(X) == 0 || ncol(Y) == 0) stop("X and Y must have at least one column")
+
+
   if (!(length(intersect(class(X), c("matrix", "data.frame")))==1 &&
         length(intersect(class(Y), c("matrix", "data.frame")))==1)) {
     stop("X and Y should be matrices or data.frames (observations in rows, variables in columns)")
@@ -260,7 +273,8 @@ pls_perm = function (x, y, perm=999, global_RV_test=TRUE) {
   nvarY=ncol(y)
   # Number of observations and singular values
 
-    Yperm=lapply(seq_len(perm), function(k) y[sample(seq_len(nobs),nobs),])
+  Yperm = lapply(seq_len(perm), function(k)
+    as.matrix(y)[sample(seq_len(nobs),nobs),, drop=FALSE])
   # Generate permuted samples for one of the two blocks
   # (the second)
 

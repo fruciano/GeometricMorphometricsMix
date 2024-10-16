@@ -45,6 +45,7 @@ Currently, and for the foreseeable future, there are no plans to publish a prope
 Each function, however, provides reasonable comments and references to the methods, which can (and should) be used when using the functions in the package (in addition to the usual citation to the package itself)
 
 ## Badges
-[![R-CMD-check Actions Status](https://github.com/fruciano/GeometricMorphometricsMix/workflows/R-CMD-check/badge.svg)](https://github.com/fruciano/GeometricMorphometricsMix/actions)
-
+<!-- badges: start -->
+  [![R-CMD-check](https://github.com/fruciano/GeometricMorphometricsMix/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/fruciano/GeometricMorphometricsMix/actions/workflows/R-CMD-check.yaml)
+  <!-- badges: end -->
 
