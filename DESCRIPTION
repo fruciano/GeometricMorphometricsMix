@@ -9,13 +9,13 @@ Depends: R (>= 3.4.0),
   stats,
   corpcor
 Imports:
-  methods
+  methods,
+  mclust
 Suggests: parallelsugar,
   Morpho,
   utils,
   geometry,
   nlshrink,
-  mclust,
   lmf,
   MASS,
   clusterGeneration,

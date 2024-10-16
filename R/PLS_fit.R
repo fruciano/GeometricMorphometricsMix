@@ -53,8 +53,7 @@
 #'   \item{OriginalData}{Data used in the analysis}
 #'   \item{x_center}{Values used to center data in the X block}
 #'   \item{y_center}{Values used to center data in the Y block}
-#'
-#' }
+#'}
 #'
 #'
 #'

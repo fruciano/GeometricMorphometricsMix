@@ -61,6 +61,8 @@
 #' # the adjusted Rand index takes a value of 1 (which is obviously significant)
 #'
 #'
+#' @importFrom mclust adjustedRandIndex
+#'
 #' @export
 adjRand_test=function(A, B, perm=999) {
   if (length(A)!=length(B)) { stop("A and B should have the same length") }
@@ -86,7 +88,7 @@ adjRand_test=function(A, B, perm=999) {
   NARIo=(ARIo-m)/sqrt(v)
   # compute observed NARI
 
-  p_value=(length(which(NARI>NARIo))+1)/(perm+1)
+  p_value <- (sum(NARI > NARIo) + 1) / (perm + 1)
   # Compute p value as proportion of permuted NARI larger than the observed
 
 Results=c(ARIo, p_value)
