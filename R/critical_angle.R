@@ -45,6 +45,19 @@
 #'
 #' @export
 critical_angle=function(dimensions, alpha=0.05, prec="normal") {
+
+  # Validate inputs
+  if (!is.numeric(dimensions) || dimensions <= 0 || dimensions %% 1 != 0) {
+    stop("dimensions must be a positive integer")
+  }
+  if (!is.numeric(alpha) || alpha <= 0 || alpha >= 1) {
+    stop("alpha must be between 0 and 1")
+  }
+  if (!prec %in% c("normal", "mpfr")) {
+    stop("prec must be either 'normal' or 'mpfr'")
+  }
+
+
   n=dimensions
   if(prec=="mpfr") {
   SP=areaSphere_mpfr(n)
