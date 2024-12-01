@@ -2,6 +2,8 @@ MorphoMender_projection=function(data, models, method=c("Fruciano2020", "Valenti
 
 }
 
+# Function to perform input validation for the models
+# Returns messages and warnings to help the user or errors if the input is not correct
 model_input_validation=function(models){
   # Models should be provided as a list
   if(!is.list(models)){
@@ -59,9 +61,18 @@ model_input_validation=function(models){
   # Otherwise if each model is a matrix or a data frame, make sure that they have the same number of columns
   # and that they have the same number of rows
   else if(is.matrix(models[[1]]) | is.data.frame(models[[1]])){
+
     model_format="general_data"
     data_dims=ncol(models[[1]])
     landmark_dims=0
+
+    # If the models are matrices or data frames, return a message that
+    # the models are not recognised as landmark data and will be treated
+    # as general models
+    message("Models are not recognised as landmark data
+            and will be treated as general models")
+
+    # Check that the number of columns is the same for all models
     for(i in 2:length(models)){
       if(ncol(models[[i]])!=ncol(models[[1]])){
         stop("All models must have the same number of columns")
