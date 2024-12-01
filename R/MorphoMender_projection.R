@@ -71,5 +71,3 @@ model_input_validation=function(models){
   return(list(model_format=model_format, data_dims=data_dims, landmark_dims=landmark_dims))
 }
 
-
-models=list(NAM=array(NA, dim=c(4,3,1)), NAM2=array(NA, dim=c(4,3,1)))
