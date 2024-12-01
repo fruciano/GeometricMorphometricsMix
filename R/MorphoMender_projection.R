@@ -1,4 +1,4 @@
-MorphoMender_projection=function(data, models, method=c("Fruciano2020", "Valentin2008")){
+MorphoMender_projection=function(data_to_correct, models, method=c("Fruciano2020", "Valentin2008")){
 
 }
 
@@ -81,4 +81,44 @@ model_input_validation=function(models){
   }
   return(list(model_format=model_format, data_dims=data_dims, landmark_dims=landmark_dims))
 }
+
+# Function to perform input validation for the data to correct
+# it returns messages and warnings to help the user or errors if the input is not correct
+data_input_validation=function(data_to_correct){
+  # Data should be provided as a three-dimensional array, a data frame or a matrix
+  if(!is.array(data_to_correct) & !is.data.frame(data_to_correct) & !is.matrix(data_to_correct)){
+    stop("data must be a three-dimensional array, a data frame or a matrix")
+  }
+  # If the data is a three-dimensional array, make sure that it has three dimensions
+  if(is.array(data_to_correct)){
+    data_format="landmark_array"
+    if(dim(data_to_correct)[3]!=3){
+      stop("If arrays, data must be three-dimensional arrays")
+    }
+  # If the data
+    # If the first model has two columns, return a message that the data is 2D
+    if(dim(data_to_correct)[2]==2){
+      message("2D landmark data has been detected for the data to be corrected")
+      landmark_dims=2
+    } else if (dim(data_to_correct)[2]==3){
+      message("3D landmark data has been detected for the data to be corrected")
+      landmark_dims=3
+    }
+    data_dims=dim(data_to_correct)[1]*landmark_dims
+  } else if (is.matrix(data_to_correct) | is.data.frame(data_to_correct)){
+
+    data_format="general_data"
+    data_dims=ncol(data_to_correct)
+    landmark_dims=0
+
+    # If the data to correct are in a matrix or data frames, return a message that
+    # the data are not recognised as landmark data and will be treated
+    # as general models
+    message("Data to correct not recognised as landmark data
+            and will be treated as general data")
+
+  }
+  return(list(data_format=data_format, data_dims=data_dims, landmark_dims=landmark_dims))
+  }
+
 
