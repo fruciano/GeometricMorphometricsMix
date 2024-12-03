@@ -1,6 +1,3 @@
-data_to_correct=pupfish$coords
-models=list(pupfish$coords[,,seq(5)], pupfish$coords[,,8:20])
-
 MorphoMender_projection=function(data_to_correct, models=NULL, user_defined_vec=NULL,
                                  model_align_method=c("Fruciano2020", "Valentin2008")){
   valid_model= model_input_validation(models)
