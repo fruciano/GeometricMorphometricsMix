@@ -1,4 +1,23 @@
-MorphoMender_projection=function(data_to_correct, models, method=c("Fruciano2020", "Valentin2008")){
+data_to_correct=pupfish$coords
+models=list(pupfish$coords[,,seq(5)], pupfish$coords[,,8:20])
+
+MorphoMender_projection=function(data_to_correct, models=NULL, user_defined_vec=NULL,
+                                 model_align_method=c("Fruciano2020", "Valentin2008")){
+  valid_model= model_input_validation(models)
+  valid_data= data_input_validation(data_to_correct)
+  model_align_method=model_align_method[1]
+  # Validation for the data and models provided
+
+  # In case both models and data to correct are landmarks,
+  # perform alignment according to the choice set by the attribute model_align_method
+  if (valid_data$data_format=="landmark_array" && valid_model$model_format=="landmark_array"){
+    if (model_align_method=="Fruciano2020"){
+      aligned_data_models=dt_model_align_OPA(data_to_correct, models)
+    } else if (model_align_method=="Valentin2008"){
+      aligned_data_models=dt_model_align_GPA(data_to_correct, models)
+    }
+  }
+
 
 }
 
@@ -31,11 +50,11 @@ model_input_validation=function(models){
   # and columns
   if(is.array(models[[1]])){
     model_format="landmark_array"
-    if(dim(models[[1]])[3]!=3){
+    if(length(dim(models[[1]]))!=3){
       stop("If arrays, models must be three-dimensional arrays")
     }
     for(i in 2:length(models)){
-      if(dim(models[[i]])[3]!=3){
+      if(length(dim(models[[1]]))!=3){
         stop("All models must be three-dimensional arrays")
       }
       if(dim(models[[i]])[1]!=dim(models[[1]])[1] | dim(models[[i]])[2]!=dim(models[[1]])[2]){
@@ -92,7 +111,7 @@ data_input_validation=function(data_to_correct){
   # If the data is a three-dimensional array, make sure that it has three dimensions
   if(is.array(data_to_correct)){
     data_format="landmark_array"
-    if(dim(data_to_correct)[3]!=3){
+    if(length(dim(models[[1]]))!=3){
       stop("If arrays, data must be three-dimensional arrays")
     }
   # If the data
@@ -121,4 +140,85 @@ data_input_validation=function(data_to_correct){
   return(list(data_format=data_format, data_dims=data_dims, landmark_dims=landmark_dims))
   }
 
+
+
+# Funtion to perform alignment using OPA
+# Following Fruciano et al 2020 - ZJLS
+# To align the models to the consensus of the data to correct
+# So that models do not influence the alignment of data
+#' @importFrom shapes procOPA procGPA
+dt_model_align_OPA=function(Data_to_correct, Models_Landmarks){
+
+  n_land=ncol(Data_to_correct[,,1])
+  n_models=length(Models_Landmarks)
+  # Number of models
+
+  # First align each model and the dataset to correct separately
+  Models_Landmarks_GPA=lapply(Models_Landmarks,procGPA)
+  Data_to_correct_GPA=procGPA(Data_to_correct)
+
+  Rotation_matrices_OPA_meanmodels_to_meandata=lapply(Models_Landmarks_GPA, function(X)
+    shapes::procOPA(A=Data_to_correct_GPA$mshape,
+                    B=X$mshape)$R )
+  # Compute rotation matrices to align the consensus of each of the models
+  # to the consensus of the data to correct
+
+  # Now apply the rotation to the models to align them to the
+  # consensus of the dataset to correct
+  Models_Landmarks_GPA_Rotated=lapply(seq_len(n_models), function(i) {
+    rotated_models=array(NA, dim = dim(Models_Landmarks_GPA[[i]]$rotated))
+    for (sp in seq_len(dim(rotated_models)[3])) {
+      rotated_models[,,sp]=Models_Landmarks_GPA[[i]]$rotated[,,sp]%*%
+        Rotation_matrices_OPA_meanmodels_to_meandata[[i]]
+    }
+    return(rotated_models)
+  })
+return(list(rotated_data=Data_to_correct_GPA$rotated,
+            rotated_models=Models_Landmarks_GPA_Rotated))
+}
+
+
+# Function to perform alignment using GPA following
+# Valentin et al 2008 - Journal of Fish Biology
+# This aligns both data and models with a single GPA
+# Usually, not the preferred option as in principle the models
+# will affect the GPA consensus and alignment of the dataset to correct
+dt_model_align_GPA=function(Data_to_correct, Models_Landmarks){
+
+  n_models=length(Models_Landmarks)
+  # Number of models
+
+  n_obs_data=dim(Data_to_correct)[3]
+  n_obs_models=sapply(Models_Landmarks, function(X) dim(X)[3])
+  # Number of observations in the data to correct and in the models
+
+  combined_dt=array(NA, dim=c(dim(Data_to_correct)[seq(2)],n_obs_data+sum(n_obs_models)))
+  # Pre-allocate array
+
+  combined_idxs=data.frame(type=c(rep("data", n_obs_data),
+                                  unlist(lapply(seq(n_obs_models), function(i){
+                                    rep(paste0("model_",i), n_obs_models[i])
+                                  }))))
+  combined_idxs$idx=seq(nrow(combined_idxs))
+
+
+  combined_dt[,,seq(n_obs_data)]=Data_to_correct
+  # Add the data to correct to the first portion of the combined array
+
+  for(i in seq(n_models)){
+    tmp_idxs=combined_idxs[combined_idxs$type==paste0("model_",i),]$idx
+    combined_dt[,,tmp_idxs]=Models_Landmarks[[i]]
+  }
+  # Add the models to the second portion of the combined array
+
+  # Perform GPA on the combined dataset
+  combined_dt_GPA=procGPA(combined_dt)
+  rotated_data=combined_dt_GPA$rotated[,,seq(n_obs_data)]
+  rotated_models=lapply(seq(n_models), function(i) {
+    tmp_idxs=combined_idxs[combined_idxs$type==paste0("model_",i),]$idx
+    return(combined_dt_GPA$rotated[,,tmp_idxs])
+  })
+  return(list(rotated_data=rotated_data,
+              rotated_models=rotated_models))
+}
 
