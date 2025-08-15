@@ -35,6 +35,9 @@
 #' @examples
 #' # Simulate a tree and traits
 #' library(phytools)
+#'
+#' set.seed(123)
+#'
 #' tree = pbtree(n=20)
 #' # Generate a tre with 20 tips
 #'
