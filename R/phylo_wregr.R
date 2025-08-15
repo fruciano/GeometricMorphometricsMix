@@ -60,6 +60,8 @@
 #' Y_single = rnorm(20)
 #' result_single = phylo_w_regr_fit(tree, Y_single, X)
 #' plot(result_single, what = "coefficients")
+#'
+#' @export
 phylo_w_regr_fit = function(tree, Y, X) {
   # Compute the phylogenetic correlation matrix (weights) using Brownian motion model
   wgt = nlme::corMatrix(nlme::Initialize(ape::corBrownian(phy=tree, form= ~tree$tip.label), as.data.frame(Y)))

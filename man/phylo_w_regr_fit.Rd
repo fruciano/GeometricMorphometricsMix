@@ -64,6 +64,7 @@ plot(result, what = "coefficients", plot_phylogeny = FALSE)
 Y_single = rnorm(20)
 result_single = phylo_w_regr_fit(tree, Y_single, X)
 plot(result_single, what = "coefficients")
+
 }
 \seealso{
 \code{\link{plot.phylo_wregr_fit}} for plotting the results
