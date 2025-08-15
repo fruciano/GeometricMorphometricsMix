@@ -66,6 +66,7 @@ phylo_w_regr_fit = function(tree, Y, X) {
   # Compute the phylogenetic correlation matrix (weights) using Brownian motion model
   wgt = nlme::corMatrix(nlme::Initialize(ape::corBrownian(phy=tree, form= ~tree$tip.label), as.data.frame(Y)))
 
+
   # For each tip in the tree, fit a weighted linear model of Y ~ X
   PWR = lapply(tree$tip.label, function(x) {
     # Fit weighted linear regression for tip x
