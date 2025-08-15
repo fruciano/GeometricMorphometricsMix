@@ -49,6 +49,25 @@ The function uses different visualization approaches depending on the data type 
 The phytools package is required when \code{plot_phylogeny = TRUE}. The function will
 throw an error if phytools is not installed and phylogenetic plots are requested.
 }
+\examples{
+library(viridisLite)
+
+color_inferno=inferno(n=100, direction = -1)
+# Create a color palette for the R-squared values using 100 values
+# with lighter colours representing smaller values
+# see also ?inferno
+color_result_rsquared=sapply(result$rsquared,
+                            function(x) color_inferno[round(x*100)])
+# Map the values of rsquared to the color palette
+plot(result, what = "rsquared", plot_phylogeny = TRUE,
+     type = "phylogram", col = color_result_rsquared)
+# Plot the phylogeny with the bars and the colours representing the R-squared values
+# Now add a legend of colours and rsquared value covering all range in color_turbo
+
+
+
+
+}
 \seealso{
 \code{\link{phylo_w_regr_fit}} for the main function that generates objects of this class
 }
