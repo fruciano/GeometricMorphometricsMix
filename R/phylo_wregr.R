@@ -30,6 +30,11 @@
 #' @importFrom stats lm var prcomp
 #' @importFrom mclust Mclust
 #'
+#' @note This function may give problems (NA in the output)
+#' in the case of a single species sister to all the rest of the taxa
+#' (this is due to the fact that all the phylogenetic correlations with
+#' other taxa, on which the weighting is base, would be 0)
+#'
 #' @seealso \code{\link{plot.phylo_wregr_fit}} for plotting the results
 #'
 #' @examples
