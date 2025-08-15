@@ -202,6 +202,8 @@ plot.phylo_wregr_fit = function(x, what = c("rsquared", "coefficients"), plot_ph
       # Vector case
       vals = as.vector(coefs)
       if (plot_phylogeny) {
+        vals = setNames(as.vector(vals), x$tree$tip.label)
+        stopifnot(all(names(vals) == x$tree$tip.label))
         phytools::plotTree.wBars(x$tree, vals, ...)
       } else {
         plot(density(vals), main = "Density of Coefficients", xlab = "Coefficient", ...)
@@ -210,6 +212,8 @@ plot.phylo_wregr_fit = function(x, what = c("rsquared", "coefficients"), plot_ph
   } else if (what == "rsquared") {
     vals = as.vector(x$rsquared)
     if (plot_phylogeny) {
+      vals = setNames(as.vector(vals), x$tree$tip.label)
+      stopifnot(all(names(vals) == x$tree$tip.label))
       phytools::plotTree.wBars(x$tree, vals, ...)
     } else {
       plot(density(vals), main = "Density of R-squared", xlab = "R-squared", ...)

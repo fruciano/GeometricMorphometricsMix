@@ -36,9 +36,18 @@ and trait evolution are modeled under Brownian motion.
 The returned object has class `phylo_wregr_fit` and has an associated S3 plot method
 for visualizing results (see \code{\link{plot.phylo_wregr_fit}}).
 }
+\note{
+This function may give problems (NA in the output)
+in the case of a single species sister to all the rest of the taxa
+(this is due to the fact that all the phylogenetic correlations with
+other taxa, on which the weighting is base, would be 0)
+}
 \examples{
 # Simulate a tree and traits
 library(phytools)
+
+set.seed(123)
+
 tree = pbtree(n=20)
 # Generate a tre with 20 tips
 
