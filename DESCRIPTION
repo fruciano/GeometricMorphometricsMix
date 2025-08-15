@@ -20,7 +20,8 @@ Suggests: parallelsugar,
   MASS,
   clusterGeneration,
   ggplot2,
-  Rmpfr
+  Rmpfr,
+  phytools
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
