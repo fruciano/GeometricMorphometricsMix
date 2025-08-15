@@ -7,7 +7,8 @@ Depends: R (>= 3.4.0),
   ape,
   parallel,
   stats,
-  corpcor
+  corpcor,
+  nlme
 Imports:
   methods,
   mclust

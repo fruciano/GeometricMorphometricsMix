@@ -102,7 +102,14 @@ phylo_w_regr_fit = function(tree, Y, X) {
     rsquared = sapply(PWR, function(x) x$rsquared)
     intercepts = t(sapply(PWR, function(x) x$intercept))
     coeff = t(sapply(PWR, function(x) x$coefficients))
-
+    # The part below handles the univariate case
+    # where intercepts and coefficients are vectors
+    if(nrow(intercepts)==1){
+      intercepts=as.vector(intercepts)
+      coeff=as.vector(coeff)
+      names(intercepts)=names(rsquared)
+      names(coeff)=names(rsquared)
+    }
 
   # Return a list containing all results and the weights matrix
   results=list(
@@ -112,7 +119,7 @@ phylo_w_regr_fit = function(tree, Y, X) {
     coefficients = coeff,
     weights = wgt
   )
-  class(results)=c("list","phylo_wregr_fit")
+  class(results)=c("phylo_wregr_fit","list")
  return(results)
 }
 
