@@ -178,7 +178,19 @@ phylo_w_regr_fit = function(tree, Y, X) {
 #' @importFrom stats prcomp density
 #'
 #' @examples
+#' # Same example as the main function but with more complex plotting
+#' # using the attributes passed to functions in phytools
+#' library(phytools)
 #' library(viridisLite)
+#'
+#' set.seed(123)
+#'
+#' tree = pbtree(n=20)
+#' # Generate a tre with 20 tips
+#'
+#' Y = matrix(rnorm(100), nrow=20)
+#' X = rnorm(20)
+#' result = phylo_w_regr_fit(tree, Y, X)
 #'
 #' color_inferno=inferno(n=100, direction = -1)
 #' # Create a color palette for the R-squared values using 100 values
