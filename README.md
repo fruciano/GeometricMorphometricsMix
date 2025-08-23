@@ -2,10 +2,9 @@
 
 Miscellaneous geometric morphometric functions
 
-This repository contains some useful and fairly diverse geometric morphometric functions which may be useful to others.
-All the functions are reasonably well commented with information on usage and similar.
-It started as a simple set of function that I distributed as help to the students of my course in [Geometric Morphometrics](https://www.physalia-courses.org/courses-workshops/course22/) (organized by Physalia Courses).
-They are incorporated into an R package to facilitate distribution and use.
+This package provides a diverse set of functions for geometric morphometric analyses, including shape integration, disparity, association, and more. It is designed for researchers, students, and practitioners in geometric morphometrics.
+
+Originally developed as a resource for students in the [Geometric Morphometrics](https://www.physalia-courses.org/courses-workshops/course22/) course (Physalia Courses), these functions have been complemented over the years with many new functions, and are now distributed as an R package for broader accessibility and ease of use.
 
 ## Currently available functions
 - **adjRand_test** : Permutation test of the adjusted Rand index, which quantifies the agreement between two partitions (e.g., classification of specimens obtained using different methods)
@@ -43,6 +42,12 @@ install_github("fruciano/GeometricMorphometricsMix")
 ## Citation
 Currently, and for the foreseeable future, there are no plans to publish a proper paper describing the package.
 Each function, however, provides reasonable comments and references to the methods, which can (and should) be used when using the functions in the package (in addition to the usual citation to the package itself)
+
+
+## Documentation and Help
+
+Each function in the package is documented with usage examples and references. To access help and documentation for a specific function, use the following command in R:
+
 
 ## Badges
 <!-- badges: start -->
