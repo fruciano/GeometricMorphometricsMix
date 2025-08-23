@@ -585,7 +585,7 @@ pls_major_axis=function(pls_object, new_data_x=NULL, new_data_y=NULL, axes_to_us
       ZEt[,i]=ZEt[,i]*X$pls_scale[i]
     }
     rows = nrow(Scores)
-    ZEt + rep.row(X$mean_pls_scores, rows)
+  ZEt + rep_row(X$mean_pls_scores, rows)
     })
   } else {
 

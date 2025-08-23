@@ -4,12 +4,12 @@
 
 # Functions to repeat rows or columns
 #' @noRd
-rep.row=function(x,n){
-   matrix(rep(x,each=n),nrow=n)
+rep_row=function(x,n){
+  matrix(rep(x,each=n),nrow=n)
 }
 #' @noRd
-rep.col=function(x,n){
-   matrix(rep(x,each=n), ncol=n, byrow=TRUE)
+rep_col=function(x,n){
+  matrix(rep(x,each=n), ncol=n, byrow=TRUE)
 }
 
 
