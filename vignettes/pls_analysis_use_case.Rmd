@@ -1,0 +1,154 @@
+---
+title: "Partial Least Squares (PLS) Analysis"
+author: "Carmelo Fruciano"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+ %\VignetteIndexEntry{Partial Least Squares (PLS) Analysis}
+ %\VignetteEngine{knitr::rmarkdown}
+ %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+library(GeometricMorphometricsMix)
+```
+
+## Introduction
+
+This vignette demonstrates how to use the `pls` function to explore associations between two blocks of variables using Partial Least Squares analysis.
+
+## Simulate Data
+
+```{r}
+set.seed(42)
+X = matrix(rnorm(60), ncol=6) # Block 1: shape variables
+Y = matrix(rnorm(60), ncol=6) # Block 2: ecological variables
+```
+
+## Run PLS Analysis
+
+```{r}
+pls_result = pls(X, Y, perm=999, global_RV_test=TRUE)
+# Perform PLS analysis with permutation test
+# pls_result contains scores, singular axes, and significance tests
+pls_result$global_significance_RV
+# Show global RV test result
+pls_result$singular_axis_significance
+# Show significance for each axis
+```
+
+## Interpretation
+
+The output includes scores for each block, singular axes, and permutation-based significance tests for the association between blocks.
+Significant results indicate association between the two sets of variables.
+Obviously, in this case, we expect no significant association as the data were simulated independently.
+
+
+## Simulating Data with Expected Significant Covariation
+
+In this section, we simulate data with a known association between two blocks by constructing a covariance matrix with non-zero covariances between blocks, then splitting the data into two blocks for PLS analysis.
+
+```{r}
+set.seed(1234)
+n = 50 # number of observations
+p = 6  # variables per block
+
+# Simulate a latent variable that drives covariation
+latent = rnorm(n)
+# latent variable
+
+latent_mat = matrix(latent, nrow=n, ncol=p)
+# latent variable replicated across columns for element-wise addition
+
+X_assoc = matrix(rnorm(n*p), ncol=p) + 0.5 * latent_mat
+# Block 1: shape variables influenced by latent + noise
+
+Y_assoc = matrix(rnorm(n*p), ncol=p) + 0.4 * latent_mat
+# Block 2: ecological variables influenced by latent + noise
+
+# Now X_assoc and Y_assoc have shared structure and will show significant covariation
+```
+
+## Run PLS Analysis on Associated Data
+
+```{r}
+pls_assoc_result = pls(X_assoc, Y_assoc, perm=999, global_RV_test=TRUE)
+# Perform PLS analysis with permutation test
+pls_assoc_result$global_significance_RV # Show global RV test result
+pls_assoc_result$singular_axis_significance # Show significance for each axis
+```
+
+## Interpretation of Associated Data
+
+In this case, the simulated data have a known association between blocks.
+The PLS analysis should detect significant covariation, as reflected in the permutation test results and the singular axis significance output.
+
+
+## Using `pls_major_axis` for Major Axis Projection and Predictions
+
+Sometimes, after fitting a PLS model it is useful to project the scores onto the major axis (first principal component of the paired PLS scores) to obtain simplified representations and predictions in the original variable space.
+In a sense, these projections are the real "predictions" of a PLS model (if all variation is perfectly captured by the model).
+For more details, please see [Fig. 2 in Fruciano et al. 2020-Current Zoology](https://watermark02.silverchair.com/zoaa035.pdf?token=AQECAHi208BE49Ooan9kkhW_Ercy7Dm3ZL_9Cf3qfKAc485ysgAAA0gwggNEBgkqhkiG9w0BBwagggM1MIIDMQIBADCCAyoGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMsvq2ZZ8IVDRhOLkhAgEQgIIC-zEGD-_0MD1f9R90wS5hiQL1PrUHjhdzMRhk1RBjVksi99uhDwPfAzx8DUvFFFX4EPmsvNGd-4y61qFRI005GdOdZ-WWlSoRQNI4itdQ7aKXvDRgcHSmP-qGjpS0ai7LfvM3_8blnwkclY7wCQutm8grFk40SBT_B10FvuP4A1AifInrlN5kBt3iWqJSzfOfHsfCuYfSb-gQAjf5F-6oS3VXYjFJCQV7zXev3H5R5fYqWfEue0G_S-MU1kWASjJ5DEewf6zg_mjGYuhvnzdsWz1NFqFsK8q-cZ4YlPAX_eNMQvz1JQ2ppxzheP8mXvNKT3-532z-elTTxK6Mu2FwQvOVOKILxA2atICBar-EKNs2m4gkAT_A6bDb3fRkaGrQeF7HNXtGtaRFowx6tJXBV1R92lFSVx5ZP_mNHJe25j3UX6e0IUEsRiN640cxfDwlwIpYfAqR2vYksHtbEf-tW2Lqtx7TbS58-MFBuuFbe-lKIQDvXesxKGMaM-7qRxegCWBmLJeGD-DPCXXKKv-CGURS8XABTrD7GH7spSaCa4TUsjFjXwTHQpe6YT79oQncYxwoqY5lVxd7y3TTPvNSgl_cx7VMJ3O1DxiIaSJ83rb36nMqn2Au1HOFhfqjfWpHkvCFcHFFS4-z6DOYTu5B4xHAvHcm_vbC_9_B3Lv5oorefDhjM_P32Vf2gEBHHbJ__X0b87Uo56A3a4hQhDZQqPxAo97PdrwyiKN9Da2K4Mlcpp3R_ZzT-3gAwx-mKpMUvGKZ-qXValrnLt7UA5M-JJGytaWkMzuL4eB21_V8RiUd1OKGBFzguetwHGDrorlVuGp67e3ESQ7HUSb9ItBvuKgmVIv62qQTcmLhxBN3uB4OvIyhZHZmjc77N8gC11rticxm66TnXax1vf0q2Psh5fxdakeZwvGfqIEbUBUaAHt5TwyL-RUXLhvBuHCi3Kx3n0juOK-opph3iS2RNsLnuGS6EdgZvvcHDgMfU_1r61x20JM7KBQHJ9aKfko) and associated text.
+The function `pls_major_axis` performs these operations.
+
+### Major Axis Projection for Original Data
+
+```{r}
+Pred_major_axis = pls_major_axis(pls_assoc_result, axes_to_use=1)
+# Compute projections and predictions based on the first pair of PLS axes
+
+names(Pred_major_axis)
+# Main elements returned (lists for projection, predictions, and optionally new data)
+
+Proj_scores = Pred_major_axis$original_major_axis_projection[[1]]$original_data_PLS_projection
+# Scores of original data projected on the major axis
+
+hist(Proj_scores,
+	main="Original data - projections on the major axis",
+	xlab="Major axis score")
+# Distribution of major axis scores (first axis pair)
+
+Pred_block1 = Pred_major_axis$original_major_axis_predictions_reversed$Block1
+# Predictions for block 1 back-transformed to original space
+
+Pred_block2 = Pred_major_axis$original_major_axis_predictions_reversed$Block2
+# Predictions for block 2 back-transformed to original space
+```
+
+### Providing New Data for Prediction
+
+We now create new data (here, a perturbed version of the original associated data) and obtain projections and predictions for it using the existing PLS model.
+
+```{r}
+set.seed(999)
+X_new = X_assoc + matrix(rnorm(n * ncol(X_assoc), sd=0.2), ncol=ncol(X_assoc))
+# New data for block 1 (perturbed version of original data)
+
+Y_new = Y_assoc + matrix(rnorm(n * ncol(Y_assoc), sd=0.2), ncol=ncol(Y_assoc))
+# New data for block 2 (perturbed version of original data)
+
+Pred_major_axis_new = pls_major_axis(pls_assoc_result,
+							  new_data_x = X_new,
+							  new_data_y = Y_new,
+							  axes_to_use = 1)
+# Obtain major axis projections and predictions for new data
+
+colnames(Pred_major_axis_new$new_data_results$new_data_major_axis_proj)
+# Names (axes) for the major axis projections of new data
+
+head(Pred_major_axis_new$new_data_results$new_data_major_axis_proj)
+# Scores of new data on the major axis
+
+head(Pred_major_axis_new$new_data_results$new_data_Block1_proj_prediction_revert)
+# Predictions for block 1 new data (back-transformed)
+
+head(Pred_major_axis_new$new_data_results$new_data_Block2_proj_prediction_revert)
+# Predictions for block 2 new data (back-transformed)
+```
+
+### Notes
+
+- If `axes_to_use > 1`, the function computes a major axis for each pair of PLS axes and combines predictions.
+- Setting `scale_PLS = FALSE` disables scaling of block scores prior to major axis computation (default is `TRUE`).
+- Predictions can be used to compare observed vs. model-predicted configurations (e.g., distances in shape space). Please, see again [Fruciano et al. 2020-Current Zoology](https://watermark02.silverchair.com/zoaa035.pdf?token=AQECAHi208BE49Ooan9kkhW_Ercy7Dm3ZL_9Cf3qfKAc485ysgAAA0gwggNEBgkqhkiG9w0BBwagggM1MIIDMQIBADCCAyoGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMsvq2ZZ8IVDRhOLkhAgEQgIIC-zEGD-_0MD1f9R90wS5hiQL1PrUHjhdzMRhk1RBjVksi99uhDwPfAzx8DUvFFFX4EPmsvNGd-4y61qFRI005GdOdZ-WWlSoRQNI4itdQ7aKXvDRgcHSmP-qGjpS0ai7LfvM3_8blnwkclY7wCQutm8grFk40SBT_B10FvuP4A1AifInrlN5kBt3iWqJSzfOfHsfCuYfSb-gQAjf5F-6oS3VXYjFJCQV7zXev3H5R5fYqWfEue0G_S-MU1kWASjJ5DEewf6zg_mjGYuhvnzdsWz1NFqFsK8q-cZ4YlPAX_eNMQvz1JQ2ppxzheP8mXvNKT3-532z-elTTxK6Mu2FwQvOVOKILxA2atICBar-EKNs2m4gkAT_A6bDb3fRkaGrQeF7HNXtGtaRFowx6tJXBV1R92lFSVx5ZP_mNHJe25j3UX6e0IUEsRiN640cxfDwlwIpYfAqR2vYksHtbEf-tW2Lqtx7TbS58-MFBuuFbe-lKIQDvXesxKGMaM-7qRxegCWBmLJeGD-DPCXXKKv-CGURS8XABTrD7GH7spSaCa4TUsjFjXwTHQpe6YT79oQncYxwoqY5lVxd7y3TTPvNSgl_cx7VMJ3O1DxiIaSJ83rb36nMqn2Au1HOFhfqjfWpHkvCFcHFFS4-z6DOYTu5B4xHAvHcm_vbC_9_B3Lv5oorefDhjM_P32Vf2gEBHHbJ__X0b87Uo56A3a4hQhDZQqPxAo97PdrwyiKN9Da2K4Mlcpp3R_ZzT-3gAwx-mKpMUvGKZ-qXValrnLt7UA5M-JJGytaWkMzuL4eB21_V8RiUd1OKGBFzguetwHGDrorlVuGp67e3ESQ7HUSb9ItBvuKgmVIv62qQTcmLhxBN3uB4OvIyhZHZmjc77N8gC11rticxm66TnXax1vf0q2Psh5fxdakeZwvGfqIEbUBUaAHt5TwyL-RUXLhvBuHCi3Kx3n0juOK-opph3iS2RNsLnuGS6EdgZvvcHDgMfU_1r61x20JM7KBQHJ9aKfko) for an example of using this technique in a biological context (effect of chromosomal rearrangements on shape)
+

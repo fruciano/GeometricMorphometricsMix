@@ -7,11 +7,11 @@
 #' Given two blocks of variables (shape or other variables) scored on the same observations (specimens),
 #' this analysis finds a series of pairs of axis accounting for maximal covariance between the two blocks.
 #' If tests of significance with permutations are selected, three different significance tests are performed:
-#'  \itemize{
-#'   \item{Global significance:}{ tested using Escoufier RV}
-#'   \item{Axis-specific significance based on singular value:}{ this is the same test described in Rohlf & Corti 2000}
-#'   \item{Axis-specific significance based on correlation of PLS scores:}{ this is a commonly used test which uses as statistic, for each pair of PLS (singular) axes, the correlation of the scores of the first block with the scores of the second block}
-#' }
+#'  \describe{
+#'   \item{Global significance}{Tested using Escoufier RV}
+#'   \item{Axis-specific significance (singular value)}{Same test described in Rohlf & Corti 2000}
+#'   \item{Axis-specific significance (correlation of PLS scores)}{For each pair of PLS (singular) axes, tests the correlation between scores of the first and second block}
+#'  }
 #' The object of class pls_fit returned by the function has print() and summary() methods associated to it.
 #' This means that using these generic functions on an object created by this function (see examples), it is possible to obtain information on the results.
 #' In particular, print() returns a more basic set of results on the global association, whereas summary() returns (only if permutation tests are used) results for each pair of singular axes.
@@ -19,12 +19,11 @@
 #'
 #' @section Notice:
 #' \itemize{
-#' \item{The function does NOT perform GPA when applied to separate configurations of points.}
-#' \item{When using the Escoufier RV, notice that the value reported is the observed value without rarefaction.
-#' For a description of the problem, please see Fruciano et al 2013. To obtain rarefied estimates of Escoufier RV and their confidence interval, use the function RVrarefied.}
-#' \item{In the permutation test, rows of Y are permuted, so using the block with fewer variables as Y may speed up computations and substantially reduce memory usage}
-#' \item{When using the print() and summary() on the pls_fit objects obtained with this function, some of the values are rounded for ease of interpretation. The non-rounded values can be obtained accessing individual elements of the object (see examples).}
-#'}
+#'   \item The function does NOT perform GPA when applied to separate configurations of points.
+#'   \item When using the Escoufier RV, notice that the value reported is the observed value without rarefaction. For a description of the problem, please see Fruciano et al 2013. To obtain rarefied estimates of Escoufier RV and their confidence interval, use the function RVrarefied.
+#'   \item In the permutation test, rows of Y are permuted, so using the block with fewer variables as Y may speed up computations and substantially reduce memory usage.
+#'   \item When using the print() and summary() on the pls_fit objects obtained with this function, some of the values are rounded for ease of interpretation. The non-rounded values can be obtained accessing individual elements of the object (see examples).
+#' }
 #'
 #' @section Citation:
 #' If you use this function to perform the PLS analysis and test for significance,
@@ -360,10 +359,10 @@ pls_perm = function (x, y, perm=999, global_RV_test=TRUE) {
 #' This function acts on a pls_fit object obtained from the function pls.
 #' More in detail, the function:
 #'  \itemize{
-#'   \item{Projects the original data onto the major axis for each pair of PLS axes (obtaining for each observation of the original data a score along this axis)}
-#'   \item{For each observation (specimen) of the original data, obtains the shape predicted by its score along the major axis}
-#'   \item{(optionally) If new data is provided, these data is first projected in the original PLS space and then the two operations above are performed on the new data}
-#' }
+#'   \item Projects the original data onto the major axis for each pair of PLS axes (obtaining for each observation of the original data a score along this axis).
+#'   \item For each observation (specimen) of the original data, obtains the shape predicted by its score along the major axis.
+#'   \item (Optionally) if new data is provided, these data are first projected in the original PLS space and then the two operations above are performed on the new data.
+#'  }
 #' A more in-depth explanation with a figure which allows for a more intuitive understanding
 #' is provided in Fruciano et al 2020
 #' The idea is to obtain individual-level estimates of the shape predicted by a PLS model.
@@ -379,35 +378,30 @@ pls_perm = function (x, y, perm=999, global_RV_test=TRUE) {
 #' \emph{original_major_axis_projection} is a list containing as many elements as specified in axes_to_use (default 1).
 #' Each of this elements contains the details of the computation of the major axis
 #' (as a PCA of PLS scores for a pair of axes), and in particular:
-#' \itemize{
-#'   \item{major_axis_rotation: }{eigenvector}
-#'   \item{mean_pls_scores: }{the mean scores for that axis pair used in the computation}
-#'   \item{pls_scale: }{the scaling factor used}
-#'   \item{\strong{original_data_PLS_projection}: }{scores of the original data on the major axis}
+#' \describe{
+#'   \item{major_axis_rotation}{Eigenvector}
+#'   \item{mean_pls_scores}{Mean scores for that axis pair used in the computation}
+#'   \item{pls_scale}{Scaling factor used}
+#'   \item{\strong{original_data_PLS_projection}}{Scores of the original data on the major axis}
 #' }
 #'
 #' \emph{original_major_axis_predictions_reversed} contains the predictions of the PLS model for the original data,
 #' back-transformed to the original space (i.e., if the original data was shape, this will be shape).
 #' If axes_to_use > 1, these predictions will be based on the major axis computed for all pairs of axes considered.
 #' This element has two sub-elements:
-#' \itemize{
-#' \item{\strong{Block1}: }{prediction for block 1}
-#' \item{\strong{Block2}: }{prediction for block 2}
+#' \describe{
+#'   \item{\strong{Block1}}{Prediction for block 1}
+#'   \item{\strong{Block2}}{Prediction for block 2}
 #' }
 #'
 #' \emph{new_data_results} is only returned when new data is provided and contains the results of the
 #' analyses obtained using a previous PLS model on new data and, in particular:
-#' \itemize{
-#' \item{\strong{new_data_Xscores}: }{PLS scores of the new data using the old model for the first block}
-#' \item{\strong{new_data_Yscores}: }{PLS scores of the new data using the old model for the second block}
-#' \item{\strong{new_data_major_axis_proj}: }{Scores of the new data on the major axis computed
-#'  using the PLS model provided in pls_object. If axes_to_use > 1, each column correspond to a separate major axis}
-#'  \item{\strong{new_data_Block1_proj_prediction_revert}: }{Predictions for the Block1 of the new data
-#'  obtained by first computing the major axis projections for the new data (as found in element new_data_major_axis_proj)
-#'   and then back-transforming these projection to the original space (e.g., shape)}
-#'  \item{\strong{new_data_Block2_proj_prediction_revert}: }{Predictions for the Block2 of the new data
-#'  obtained by first computing the major axis projections for the new data (as found in element new_data_major_axis_proj)
-#'   and then back-transforming these projection to the original space (e.g., shape)}
+#' \describe{
+#'   \item{\strong{new_data_Xscores}}{PLS scores of the new data using the old model for the first block}
+#'   \item{\strong{new_data_Yscores}}{PLS scores of the new data using the old model for the second block}
+#'   \item{\strong{new_data_major_axis_proj}}{Scores of the new data on the major axis computed using the PLS model provided in pls_object. If axes_to_use > 1, each column corresponds to a separate major axis}
+#'   \item{\strong{new_data_Block1_proj_prediction_revert}}{Predictions for Block 1 of the new data obtained by first computing the major axis projections (element new_data_major_axis_proj) and then back-transforming these projections to the original space (e.g., shape)}
+#'   \item{\strong{new_data_Block2_proj_prediction_revert}}{Predictions for Block 2 of the new data obtained by first computing the major axis projections (element new_data_major_axis_proj) and then back-transforming these projections to the original space (e.g., shape)}
 #' }
 #'
 #'
@@ -439,8 +433,8 @@ pls_perm = function (x, y, perm=999, global_RV_test=TRUE) {
 #'
 #' @section Notice:
 #' \itemize{
-#' \item{If new data is provided, this is first centered to the same average as in the original analysis, then it is translated back to the original scale}
-#'}
+#'   \item If new data is provided, this is first centered to the same average as in the original analysis, then it is translated back to the original scale.
+#' }
 #'
 #' @examples
 #'
