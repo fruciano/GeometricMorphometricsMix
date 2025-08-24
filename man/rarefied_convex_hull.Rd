@@ -23,11 +23,14 @@ The function outputs a list with the following elements:
 }
 }
 \description{
+\lifecycle{deprecated}
+
+`rarefied_convex_hull()` is deprecated and will be removed in a future version.
+
 Computes rarefied estimates of convex hull volume
 (i.e., the n-dimensional volume of the convex hull containing
 a set of observations).
-}
-\details{
+
 The advantage of computing rarefied estimates of a parameter
 is to account for differences in sample sizes.
 This can be useful to compare estimates among groups.

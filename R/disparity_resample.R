@@ -1,7 +1,7 @@
 #' Resampling-based estimates (bootstrap or rarefaction) of disparity / morphospace occupation
 #'
 #' Provides a unified interface to obtain resampled (bootstrap or rarefied)
-#' estimates of several commonly used disparity / morphospace occupation statistics.
+#' estimates of several disparity / morphospace occupation statistics.
 #'
 #' The function allows choosing among the following multivariate statistics:
 #' \itemize{

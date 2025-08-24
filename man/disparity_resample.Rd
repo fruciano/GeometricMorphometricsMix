@@ -51,7 +51,7 @@ A list containing:
 }
 \description{
 Provides a unified interface to obtain resampled (bootstrap or rarefied)
-estimates of several commonly used disparity / morphospace occupation statistics.
+estimates of several disparity / morphospace occupation statistics.
 }
 \details{
 The function allows choosing among the following multivariate statistics:
@@ -72,6 +72,13 @@ If `bootstrap_rarefaction=="rarefaction"`, the function performs resampling with
 at the sample size indicated in `sample_size` (numeric) or, if `sample_size=="smallest"`,
 at the size of the smallest group (all groups are resampled to that size).
 Rarefaction requires specifying a valute to the attribute `sample_size`; an error is returned otherwise.
+}
+\note{
+Because of how the computation works, convex hull volume computation requires the number of observations (specimens) to be (substantially) greater than the number of variables (dimensions).
+In case of shape or similar, consider using the scores along the first (few/several) principal components.
+
+"Multivariate variance" is also called "total variance", "Procrustes variance" (in geometric morphometrics) and "sum of univariate variances".
+Note how the computation here does not divide variance by sample size (other than the normal division performed in the computation of variances).
 }
 \section{Observed estimate}{
 
@@ -120,5 +127,5 @@ Claramunt S. 2010. Discovering exceptional diversifications at continental scale
 Fruciano C, Pappalardo AM, Tigano C, Ferrito V. 2014. Phylogeographical relationships of Sicilian brown trout and the effects of genetic introgression on morphospace occupation. Biological Journal of the Linnean Society 112:387-398.
 }
 \seealso{
-\code{\link{rarefied_disparity}}, \code{\link{rarefied_convex_hull}}, \code{\link{disparity_test}}
+\code{\link{disparity_test}}
 }
