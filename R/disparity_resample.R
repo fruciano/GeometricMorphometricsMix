@@ -36,6 +36,9 @@
 #'
 #' @note Because of how the computation works, convex hull volume computation requires the number of observations (specimens) to be (substantially) greater than the number of variables (dimensions).
 #' In case of shape or similar, consider using the scores along the first (few/several) principal components.
+#' Sometimes errors are thrown due to near-zero components, in this case try reducing the number of principal components used.
+#' Examples of use of this statistic with geometric morphometric data include Drake & Klingenberg 2010 (American Naturalist), Fruciano et al. 2012 (Environmental Biology of Fishes) and Fruciano et al. 2014 (Biological Journal of the Linnean Society).
+#' Because of the sensitivity of this statistic to outliers, usually rarefaction is preferred to bootstrapping.
 #'
 #' @note "Multivariate variance" is also called "total variance", "Procrustes variance" (in geometric morphometrics) and "sum of univariate variances".
 #' Note how the computation here does not divide variance by sample size (other than the normal division performed in the computation of variances).
@@ -66,12 +69,20 @@
 #'    \item{resampled_values}{If a single group: numeric vector of length `n_resamples` with the resampled values.
 #'      If multiple groups: a named list with one numeric vector (length `n_resamples`) per group.}
 #' }
+#' 
+#' The returned object has class "disparity_resample" and comes with associated S3 methods for 
+#' convenient display and visualization:
+#' \itemize{
+#'   \item \code{\link{print.disparity_resample}}: Prints a formatted summary of results including confidence interval overlap assessment for multiple groups
+#'   \item \code{\link{plot.disparity_resample}}: Creates a confidence interval plot using ggplot2
+#' }
 #'
 #' @references Drake AG, Klingenberg CP. 2010. Large-scale diversification of skull shape in domestic dogs: disparity and modularity. American Naturalist 175:289-301.
 #' @references Claramunt S. 2010. Discovering exceptional diversifications at continental scales: the case of the endemic families of Neotropical Suboscine passerines. Evolution 64:2004-2019.
+#' @references Fruciano C, Tigano C, Ferrito V. 2012. Body shape variation and colour change during growth in a protogynous fish. Environmental Biology of Fishes 94:615-622.
 #' @references Fruciano C, Pappalardo AM, Tigano C, Ferrito V. 2014. Phylogeographical relationships of Sicilian brown trout and the effects of genetic introgression on morphospace occupation. Biological Journal of the Linnean Society 112:387-398.
 #' @references Fruciano C, Franchini P, Raffini F, Fan S, Meyer A. 2016. Are sympatrically speciating Midas cichlid fish special? Patterns of morphological and genetic variation in the closely related species Archocentrus centrarchus. Ecology and Evolution 6:4102-4114.
-#' @seealso \code{\link{disparity_test}}
+#' @seealso \code{\link{disparity_test}}, \code{\link{print.disparity_resample}}, \code{\link{plot.disparity_resample}}
 #'
 #' @examples
 #' set.seed(123)
@@ -86,13 +97,28 @@
 #'   boot_res = disparity_resample(Data, group=grp, n_resamples=200,
 #'                                 statistic="multivariate_variance",
 #'                                 bootstrap_rarefaction="bootstrap")
+#'   # Direct access to results table
 #'   boot_res$results
+#'   
+#'   # Using the print method for formatted output
+#'   print(boot_res)
+#'   
+#'   # Using the plot method to visualize results
+#'   # plot(boot_res)  # Uncomment to create confidence interval plot
 #'
 #'   # Rarefaction (to the smallest group size) of mean pairwise Euclidean distance
 #'   rar_res = disparity_resample(Data, group=grp, n_resamples=200,
 #'                                statistic="mean_pairwise_euclidean_distance",
 #'                                bootstrap_rarefaction="rarefaction", sample_size="smallest")
-#'   rar_res$results
+#'# Now simulate a third group with larger variance
+#'  X3 = MASS::mvrnorm(15, mu=rep(0, 10), Sigma=diag(10)*1.5)
+#'  grp2 = factor(c(rep("A", nrow(X1)), rep("B", nrow(X2)), rep("C", nrow(X3))))
+#'  boot_res2 = disparity_resample(Data=rbind(X1, X2, X3), group=grp2, n_resamples=1000,
+#'                                 statistic="multivariate_variance",
+#'                                 bootstrap_rarefaction="bootstrap")
+#'  print(boot_res2)
+#'  # plot(boot_res2)
+#'  # Plot of the obtained (95%) confidence intervals (uncomment to plot)
 #' }
 #'
 #' @import stats

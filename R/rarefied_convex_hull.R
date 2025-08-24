@@ -1,7 +1,6 @@
 #' Rarefied estimates of n-dimensional convex hull volume
 #'
 #' @description
-#' \lifecycle{deprecated}
 #' 
 #' `rarefied_convex_hull()` is deprecated and will be removed in a future version.
 #'

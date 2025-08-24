@@ -1,0 +1,254 @@
+---
+title: "Analysis of Disparity: Estimating and Comparing How Variable Phenotype Is"
+author: "Carmelo Fruciano"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+ %\VignetteIndexEntry{Analysis of Disparity: Estimating and Comparing How Variable Phenotype Is}
+ %\VignetteEngine{knitr::rmarkdown}
+ %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+library(GeometricMorphometricsMix)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+This vignette demonstrates how to use the `disparity_resample()` and `disparity_test()` functions to estimate and compare morphospace occupation (disparity) between groups. These functions provide complementary approaches for disparity analysis:
+
+- `disparity_resample()`: Provides resampling-based estimates (bootstrap or rarefaction) with confidence intervals
+- `disparity_test()`: Performs permutation tests to assess statistical differences between two groups
+
+Disparity analysis is fundamental in geometric morphometrics and evolutionary biology to **quantify how much morphological variation exists within groups**.
+Imagine two populations of the same species and we don't want to know whether the average shape of one population is different from the average shape of the other population.
+Rather, we want to know whether the amount of variability in shape is different between the two populations.
+
+## Basic Concepts
+
+Disparity (also called "morphospace occupation") can be quantified using several statistics.
+The ones implemented in *GeometricMorphometricsMix* are:
+- **Multivariate variance**: Sum of variances across all variables (trace of covariance matrix)
+- **Mean pairwise Euclidean distance**: Average distance between all pairs of observations
+- **Convex hull volume**: Volume of the smallest convex hull containing all observations
+- **Claramunt proper variance**: Variance based on linear shrinkage covariance estimates
+
+## Statistical approaches
+*GeometricMorphometricsMix* provides three main statistical approaches, all based on resampling, for comparing disparity across groups:
+- **Bootstrapping** (resampling with replacement) of the statistic of choice to derive confidence intervals (this is the most sensible choice in most cases, particularly with more than two groups)
+- **Rarefaction** (resampling without replacement to a common sample size) to account for differences in sample sizes between groups (this is useful when groups have very different sample sizes and we use statistics sensitive to sample size)
+- **Permutation tests** between two groups to assess whether they differ significantly in disparity (or, more formally, to test the null hypothesis that they have the same amount of variation)
+
+Bootstrapping and rarefaction are implemented in the `disparity_resample()` function, permutation tests in the `disparity_test()` function.
+
+
+## Simulate Example Data
+
+```{r}
+set.seed(123)
+
+if (requireNamespace("MASS", quietly = TRUE)) {
+  # Group A: smaller, more compact group
+  grpA = MASS::mvrnorm(25, mu = rep(0, 8), Sigma = diag(8) * 0.5)
+  # Group A: 25 observations, centered at origin, low variance
+  
+  # Group B: larger, more dispersed group  
+  grpB = MASS::mvrnorm(40, mu = rep(2, 8), Sigma = diag(8) * 1.5)
+  # Group B: 40 observations, shifted mean, higher variance
+  
+  # Group C: intermediate size and dispersion
+  grpC = MASS::mvrnorm(30, mu = rep(-1, 8), Sigma = diag(8) * 1.0)
+  # Group C: 30 observations, negative mean, intermediate variance
+  
+  # Combine data
+  Data = rbind(grpA, grpB, grpC)
+  groups = factor(c(rep("A", nrow(grpA)), rep("B", nrow(grpB)), rep("C", nrow(grpC))))
+  # Combined dataset with group labels
+  
+  cat("Sample sizes:\n")
+  table(groups)
+  # Display sample sizes for each group
+}
+```
+
+## Bootstrap Analysis
+
+Bootstrap resampling provides confidence intervals for disparity estimates by resampling with replacement from the original data.
+
+```{r}
+if (requireNamespace("MASS", quietly = TRUE)) {
+  # Bootstrap multivariate variance
+  boot_mv = disparity_resample(Data, 
+                               group = groups, 
+                               n_resamples = 500,
+                               statistic = "multivariate_variance",
+                               bootstrap_rarefaction = "bootstrap",
+                               CI = 0.95)
+  # Bootstrap analysis of multivariate variance with 95% CI
+  
+  print(boot_mv)
+  # Display formatted results with CI overlap assessment
+  
+  # Bootstrap mean pairwise Euclidean distance
+  boot_ed = disparity_resample(Data,
+                               group = groups,
+                               n_resamples = 500, 
+                               statistic = "mean_pairwise_euclidean_distance",
+                               bootstrap_rarefaction = "bootstrap")
+  # Bootstrap analysis of mean pairwise Euclidean distances
+  
+  cat("\nMean pairwise Euclidean distance results:\n")
+  boot_ed$results
+  # Direct access to results table
+}
+```
+
+## Rarefaction Analysis
+
+Rarefaction resampling accounts for differences in sample sizes by resampling without replacement to a common sample size.
+
+
+```{r}
+if (requireNamespace("MASS", quietly = TRUE) && requireNamespace("geometry", quietly = TRUE)) {
+  # Bootstrap convex hull volume
+  rare_hull = disparity_resample(Data,
+                                 group = groups,
+                                 n_resamples = 200,
+                                 statistic = "convex_hull_volume",
+                                 bootstrap_rarefaction = "rarefaction")
+  # Bootstrap analysis of convex hull volume
+  # Note: fewer resamples due to computational intensity
+
+  print(rare_hull)
+  # Convex hull results - Group B should have largest volume
+}
+```
+
+## Visualization
+
+The plot method creates confidence interval plots for visual comparison of disparity estimates.
+
+```{r, fig.width=7, fig.height=5}
+if (requireNamespace("MASS", quietly = TRUE)) {
+  # Plot bootstrap multivariate variance results
+   plot(boot_mv)
+  
+  plot(rare_hull) 
+  
+  
+  cat("Plotting methods create ggplot2 confidence interval plots\n")
+  cat("showing observed values and confidence intervals for each group.\n")
+}
+```
+
+## Permutation Tests Between Two Groups
+
+The `disparity_test()` function performs permutation tests to assess whether two groups differ significantly in disparity.
+
+```{r}
+if (requireNamespace("MASS", quietly = TRUE)) {
+  # Test Groups A vs B (different variances expected)
+  test_AB = disparity_test(grpA, grpB, perm = 999)
+  # Permutation test between groups A and B
+  
+  cat("Groups A vs B comparison:\n")
+  print(test_AB)
+  # Results show observed values, differences, and p-values
+  
+  # Test Groups A vs C (more similar variances expected)  
+  test_AC = disparity_test(grpA, grpC, perm = 999)
+  # Permutation test between groups A and C
+  
+  cat("\nGroups A vs C comparison:\n")
+  print(test_AC)
+  # Compare groups with more similar dispersions
+}
+```
+
+## Univariate Data Analysis
+
+`disparity_resample()` also works with univariate data (vectors), defaulting to variance as test statistic.
+
+```{r}
+# Simulate univariate data
+set.seed(456)
+uni_A = rnorm(30, mean = 0, sd = 1)
+# Group A: normal distribution, sd=1
+
+uni_B = rnorm(35, mean = 0, sd = 2) 
+# Group B: normal distribution, sd=2 (higher variance)
+
+uni_data = c(uni_A, uni_B)
+uni_groups = factor(c(rep("A", length(uni_A)), rep("B", length(uni_B))))
+# Combined univariate dataset
+
+# Bootstrap analysis of univariate variance
+uni_boot = disparity_resample(uni_data,
+                              group = uni_groups,
+                              n_resamples = 1000,
+                              bootstrap_rarefaction = "bootstrap")
+# Bootstrap for univariate data (statistic argument ignored)
+
+cat("Univariate variance analysis:\n")
+print(uni_boot)
+# Group B should show higher variance
+
+
+plot(uni_boot)
+# Plotting univariate bootstrap results
+
+```
+
+## Advanced: Single Group Analysis
+
+`disparity_resample()` can analyze single groups without group comparisons.
+This might be useful to obtain confidence intervals or estimates in a single group to compare it to a known value or interval.
+
+```{r}
+if (requireNamespace("MASS", quietly = TRUE)) {
+  # Single group bootstrap analysis
+  single_boot = disparity_resample(grpB,
+                                   n_resamples = 500,
+                                   statistic = "multivariate_variance",
+                                   bootstrap_rarefaction = "bootstrap")
+  # Analysis of Group B alone
+  
+  cat("Single group analysis (Group B):\n")
+  print(single_boot)
+  # Confidence interval for single group disparity
+}
+```
+
+## Practical Considerations
+
+### Sample Size Effects
+- **Bootstrap**: Appropriate when groups have sufficient sample sizes
+- **Rarefaction**: Useful when comparing groups with different sample sizes and statistics sensitive to outliers/sample size
+- **Convex hull**: Requires substantially more observations than variables. One often needs to restrict the analysis to scores along a subset of principal components.
+
+### Statistic Selection
+- **Multivariate variance**: Most commonly used, less sensitive to outliers. Also called "sum of univariate variances" and, in geometric morphometrics, "Procrustes variance"
+- **Mean pairwise distance**: Alternative measure, can be more robust
+- **Convex hull volume**: Sensitive to outliers but captures occupied space
+- **Claramunt proper variance**: Accounts for covariance structure and how "spread out" across orthogonal dimensions (principal components) variation is
+
+### Interpretation Guidelines
+- Non-overlapping confidence intervals suggest different disparity levels
+- Permutation test p-values < 0.05 indicate significant differences
+- Consider biological relevance alongside statistical significance
+
+
+## Summary
+
+The `disparity_resample()` and `disparity_test()` functions provide comprehensive tools for morphospace disparity analysis:
+
+1. **`disparity_resample()`** offers flexible resampling approaches with confidence intervals
+2. **`disparity_test()`** provides formal statistical tests between two groups  
+3. Both functions support multiple disparity statistics and handle various data types
+4. S3 methods enable convenient printing and plotting of results
+
+These tools support robust comparative analysis of morphological variation across groups, time periods, or experimental conditions in evolutionary and morphometric studies.

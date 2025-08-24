@@ -24,8 +24,6 @@ The function outputs a list with the following elements:
 }
 }
 \description{
-\lifecycle{deprecated}
-
 `rarefied_disparity()` is deprecated and will be removed in a future version.
 
 Computes rarefied estimates of multivariate variance

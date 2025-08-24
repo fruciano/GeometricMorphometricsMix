@@ -1,7 +1,6 @@
 #' Rarefied estimates of disparity/morphospace occupation
 #'
 #' @description
-#' \lifecycle{deprecated}
 #' 
 #' `rarefied_disparity()` is deprecated and will be removed in a future version.
 #'
