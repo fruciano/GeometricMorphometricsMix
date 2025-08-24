@@ -37,6 +37,9 @@
 #' @note Because of how the computation works, convex hull volume computation requires the number of observations (specimens) to be (substantially) greater than the number of variables (dimensions).
 #' In case of shape or similar, consider using the scores along the first (few/several) principal components.
 #'
+#' @note "Multivariate variance" is also called "total variance", "Procrustes variance" (in geometric morphometrics) and "sum of univariate variances".
+#' Note how the computation here does not divide variance by sample size (other than the normal division performed in the computation of variances).
+#'
 #' @param Data A data frame, matrix, vector, or 3D array. Observations (specimens) must be in rows
 #'  (if a 3D array is supplied, the third dimension is assumed to index specimens).
 #' @param group A factor or a vector indicating group membership (will be coerced to factor). If
