@@ -84,7 +84,7 @@ if (requireNamespace("MASS", quietly = TRUE)) {
   # Bootstrap multivariate variance
   boot_mv = disparity_resample(Data, 
                                group = groups, 
-                               n_resamples = 500,
+                               n_resamples = 1000,
                                statistic = "multivariate_variance",
                                bootstrap_rarefaction = "bootstrap",
                                CI = 0.95)
@@ -96,7 +96,7 @@ if (requireNamespace("MASS", quietly = TRUE)) {
   # Bootstrap mean pairwise Euclidean distance
   boot_ed = disparity_resample(Data,
                                group = groups,
-                               n_resamples = 500, 
+                               n_resamples = 1000, 
                                statistic = "mean_pairwise_euclidean_distance",
                                bootstrap_rarefaction = "bootstrap")
   # Bootstrap analysis of mean pairwise Euclidean distances
@@ -115,13 +115,15 @@ Rarefaction resampling accounts for differences in sample sizes by resampling wi
 ```{r}
 if (requireNamespace("MASS", quietly = TRUE) && requireNamespace("geometry", quietly = TRUE)) {
   # Bootstrap convex hull volume
-  rare_hull = disparity_resample(Data,
+  rare_hull = disparity_resample(prcomp(Data)$x[,seq(3)],
                                  group = groups,
                                  n_resamples = 200,
                                  statistic = "convex_hull_volume",
-                                 bootstrap_rarefaction = "rarefaction")
-  # Bootstrap analysis of convex hull volume
-  # Note: fewer resamples due to computational intensity
+                                 bootstrap_rarefaction = "rarefaction",
+                                 sample_size = "smallest")
+  # Rarefaction analysis of convex hull volume
+  # Note: fewer resamples due to computational intensity, using the scores along
+  # the first few principal components due to the potential issues with the convex hull and high dimensional data
 
   print(rare_hull)
   # Convex hull results - Group B should have largest volume
