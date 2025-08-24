@@ -11,7 +11,7 @@ From Github, using devtools
 
 ```
 library(devtools)
-install_github("fruciano/GeometricMorphometricsMix")
+install_github("fruciano/GeometricMorphometricsMix", build_vignettes=TRUE)
 ```
 
 ## Citation
