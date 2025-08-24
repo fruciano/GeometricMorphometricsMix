@@ -135,16 +135,15 @@ if (requireNamespace("MASS", quietly = TRUE) && requireNamespace("geometry", qui
 The plot method creates confidence interval plots for visual comparison of disparity estimates.
 
 ```{r, fig.width=7, fig.height=5}
-if (requireNamespace("MASS", quietly = TRUE)) {
   # Plot bootstrap multivariate variance results
    plot(boot_mv)
-  
+  # Plot rarefaction for convex hull volume
   plot(rare_hull) 
   
   
   cat("Plotting methods create ggplot2 confidence interval plots\n")
   cat("showing observed values and confidence intervals for each group.\n")
-}
+
 ```
 
 ## Permutation Tests Between Two Groups
