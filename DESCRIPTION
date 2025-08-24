@@ -1,8 +1,8 @@
 Package: GeometricMorphometricsMix
-Title: Miscellaneous functions useful for geometric morphometrics
-Version: 0.1.1.0
+Title: A heterogeneous set of methods for shape and other multidimensional data
+Version: 0.2.0.0
 Authors@R: person("Carmelo", "Fruciano", email = "carmelo.fruciano@unict.it", role = c("aut", "cre"))
-Description: This is a collection of functions, which I have developed for my own use as, at the time I developed them, they were not available in other packages. They serve a quite diverse set of purposes.
+Description: Several methods for the analysis of shape and other multidimensional data. Originally developed to assist participants in my workshops, evolved into a heterogeneous set of functions to perform analyses usually not found in other packages.
 Depends: R (>= 3.4.0),
   ape,
   parallel,
