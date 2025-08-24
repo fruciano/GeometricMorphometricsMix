@@ -25,7 +25,8 @@ Suggests:
   knitr,
   rmarkdown,
   phytools,
-  mvMORPH
+  mvMORPH,
+  progress
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

@@ -40,6 +40,7 @@
 #' (this should normally be left at the default value of 0 as permutations slow down
 #' computation and are of doubtful utility when analyzing tree distributions)
 #' @param verbose logical, whether to print progress information (default TRUE)
+#' @param progress logical, whether to show a progress bar (default TRUE). Requires the 'progress' package.
 #'
 #' @return The function outputs a data.frame with classes "parallel_Kmult" and "data.frame" containing columns:
 #'  \describe{
@@ -109,7 +110,11 @@
 #' 
 #' # Example 1: Single dataset and single treeset analysis
 #' result_single = Kmultparallel(dataset_bm, treeset1)
-#' # Analyze BM dataset with first treeset
+#' # Analyze BM dataset with first treeset - progress bar will show automatically
+#' 
+#' # Example with progress disabled for quiet operation
+#' result_single_quiet = Kmultparallel(dataset_bm, treeset1, verbose = FALSE, progress = FALSE)
+#' # Run analysis without progress indication
 #' 
 #' # Use S3 methods to examine results
 #' print(result_single)
@@ -135,7 +140,7 @@
 #' 
 #' # Run comprehensive analysis on all combinations
 #' result_multiple = Kmultparallel(all_datasets, all_treesets)
-#' # Analyze all dataset-treeset combinations
+#' # Analyze all dataset-treeset combinations - progress bar will track through all 4 combinations
 #' 
 #' # Examine results using S3 methods
 #' print(result_multiple)
@@ -158,8 +163,9 @@
 #' @import stats
 #' @importFrom ape drop.tip vcv.phylo
 #' @importFrom future.apply future_lapply
+#' @importFrom future plan
 #' @export
-Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRUE) {
+Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRUE, progress = TRUE) {
     
     # Standardize input formats
     # Convert single datasets/tree sets to lists for uniform processing
@@ -214,6 +220,33 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
         cat("\n")
     }
     
+    # Initialize progress bar
+    pb = NULL
+    use_parallel_progress = FALSE
+    
+    if (progress && requireNamespace("progress", quietly = TRUE)) {
+        if (verbose) cat("Progress tracking enabled.\n")
+        
+        # Check if we can use parallel progress (requires future to be set up)
+        current_plan = future::plan()
+        if (inherits(current_plan, "sequential")) {
+            # Sequential processing - use regular progress bar
+            if (verbose) cat("Sequential processing detected - using standard progress bar.\n\n")
+            pb = progress::progress_bar$new(
+                format = "Processing [:bar] :percent in :elapsed | eta: :eta | :current/:total combinations",
+                total = total_combinations,
+                clear = FALSE,
+                width = 80
+            )
+        } else {
+            # Parallel processing - use different approach
+            if (verbose) cat("Parallel processing detected - progress updates will be less frequent.\n\n")
+            use_parallel_progress = TRUE
+        }
+    } else if (progress && !requireNamespace("progress", quietly = TRUE)) {
+        if (verbose) cat("Progress bar requested but 'progress' package not available. Install with: install.packages('progress')\n\n")
+    }
+    
     # Function to process a single combination
     process_combination = function(combo_idx) {
         combo = combinations[combo_idx, ]
@@ -221,6 +254,12 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
         current_trees = trees_processed[[combo$treeset_idx]]
         dataset_name = data_names[combo$dataset_idx]
         treeset_name = tree_names[combo$treeset_idx]
+        
+        # Progress message for current combination
+        if (verbose && is.null(pb)) {
+            cat(sprintf("Processing combination %d/%d: Dataset '%s' x Treeset '%s' (%d trees)\n", 
+                       combo_idx, nrow(combinations), dataset_name, treeset_name, length(current_trees)))
+        }
         
         # Safety checks
         if (!is.matrix(current_data) && !is.data.frame(current_data)) {
@@ -346,8 +385,35 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
         return(kmult_results)
     }
     
-    # Process all combinations
-    all_results = future.apply::future_lapply(seq_len(nrow(combinations)), process_combination, future.seed = TRUE)
+    # Process all combinations with appropriate progress tracking
+    if (!is.null(pb) || use_parallel_progress) {
+        # Sequential processing with progress bar OR parallel with periodic updates
+        all_results = vector("list", nrow(combinations))
+        
+        if (use_parallel_progress) {
+            # Parallel processing with periodic progress messages
+            if (verbose) cat("Starting parallel processing of combinations...\n")
+        }
+        
+        for (combo_idx in seq_len(nrow(combinations))) {
+            # Update progress bar if available
+            if (!is.null(pb)) {
+                pb$tick()
+            }
+            
+            # Periodic progress messages for parallel processing
+            if (use_parallel_progress && verbose && (combo_idx %% max(1, round(total_combinations/10)) == 0 || combo_idx == total_combinations)) {
+                cat(sprintf("Completed %d/%d combinations (%.1f%%)\n", 
+                           combo_idx, total_combinations, 100 * combo_idx / total_combinations))
+            }
+            
+            # Process this combination
+            all_results[[combo_idx]] = process_combination(combo_idx)
+        }
+    } else {
+        # Standard parallel processing without progress bar
+        all_results = future.apply::future_lapply(seq_len(nrow(combinations)), process_combination, future.seed = TRUE)
+    }
     
     # Flatten results and convert to data.frame
     flattened_results = do.call(c, all_results)
@@ -370,6 +436,9 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
     
     # Validate results and provide summary
     if (verbose) {
+        if (!is.null(pb) || use_parallel_progress) {
+            cat("\n")  # Add spacing after progress bar
+        }
         cat("Analysis completed successfully.\n")
         cat(sprintf("Results summary:\n"))
         cat(sprintf("- Total Kmult values computed: %d\n", nrow(result_df)))
