@@ -62,7 +62,7 @@ The number of workers should typically not exceed the number of CPU cores availa
 \section{Citation}{
 
 If you use this function please kindly cite both
-Fruciano et al. 2017 (because you're using this parallelized function)
+Fruciano et al. 2017 (because you're using this parallelized function) and
 Adams 2014 (because the function computes Adams' Kmult)
 }
 
@@ -88,18 +88,15 @@ library(MASS)
 library(mvMORPH)
 
 # Generate 20 random phylogenetic trees with 100 tips each
-set.seed(123)
 all_trees = replicate(20, pbtree(n = 100), simplify = FALSE)
 class(all_trees) = "multiPhylo"
 # Create a collection of 20 random trees
 
-# Split trees into 4 tree sets of 5 trees each
+# Split trees into 2 tree sets
 treeset1 = all_trees[1:5]
-treeset2 = all_trees[6:10]
-treeset3 = all_trees[11:15]
-treeset4 = all_trees[16:20]
-class(treeset1) = class(treeset2) = class(treeset3) = class(treeset4) = "multiPhylo"
-# Split the 20 trees into 4 separate tree sets
+treeset2 = all_trees[6:20]
+class(treeset1) = class(treeset2) = "multiPhylo"
+# Split the 20 trees into 2 separate tree sets
 
 # Get tip names from the first tree for consistent naming
 tip_names = all_trees[[1]]$tip.label[1:40]
@@ -110,6 +107,7 @@ dataset1 = mvrnorm(n = 40, mu = rep(0, 5), Sigma = diag(5))
 dataset2 = mvrnorm(n = 40, mu = rep(1, 5), Sigma = diag(5) * 2)
 rownames(dataset1) = rownames(dataset2) = tip_names
 # Create two datasets with different means and variances
+# Notice how these datasets are random and should not display any phylogenetic signal
 
 # Generate 5 datasets using Brownian motion evolution on the first treeset
 bm_datasets = lapply(1:5, function(i) {
@@ -125,6 +123,8 @@ bm_datasets = lapply(1:5, function(i) {
 })
 names(bm_datasets) = paste0("BM_dataset_", 1:5)
 # Generate 5 datasets evolving under Brownian motion
+# Notice that these datasets should display strong phylogenetic signal
+# when each of them is combined with the individual tree used in the simulation of trait evolution
 
 # Example 1: Single dataset and single treeset analysis
 result_single = Kmultparallel(bm_datasets[[1]], treeset1)
@@ -133,9 +133,15 @@ result_single = Kmultparallel(bm_datasets[[1]], treeset1)
 # Use S3 methods to examine results
 print(result_single)
 # Display summary of Kmult values
+# Notice how the range is very broad because we have high phylogenetic signal for those cases
+# in which a given dataset has been simulated under Brownian motion with a given tree, but low phylogenetic signal
+# when we use a different tree.
 
 plot(result_single)
 # Create density plot of Kmult distribution
+# Notice the bimodal distribution with low phylogenetic signal corresponding to a
+# mismatch between the tree used and the true evolutionary history of the traits,
+# and the high phylogenetic signal when the correct tree is used.
 
 # Example 2: Multiple datasets and multiple treesets analysis
 # Combine all datasets into a list
