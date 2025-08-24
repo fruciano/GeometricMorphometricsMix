@@ -42,10 +42,10 @@ obtain associated predictions
 This function acts on a pls_fit object obtained from the function pls.
 More in detail, the function:
  \itemize{
-  \item{Projects the original data onto the major axis for each pair of PLS axes (obtaining for each observation of the original data a score along this axis)}
-  \item{For each observation (specimen) of the original data, obtains the shape predicted by its score along the major axis}
-  \item{(optionally) If new data is provided, these data is first projected in the original PLS space and then the two operations above are performed on the new data}
-}
+  \item Projects the original data onto the major axis for each pair of PLS axes (obtaining for each observation of the original data a score along this axis).
+  \item For each observation (specimen) of the original data, obtains the shape predicted by its score along the major axis.
+  \item (Optionally) if new data is provided, these data are first projected in the original PLS space and then the two operations above are performed on the new data.
+ }
 A more in-depth explanation with a figure which allows for a more intuitive understanding
 is provided in Fruciano et al 2020
 The idea is to obtain individual-level estimates of the shape predicted by a PLS model.
@@ -61,35 +61,30 @@ The most useful elements for the final user are highlighted in boldface.
 \emph{original_major_axis_projection} is a list containing as many elements as specified in axes_to_use (default 1).
 Each of this elements contains the details of the computation of the major axis
 (as a PCA of PLS scores for a pair of axes), and in particular:
-\itemize{
-  \item{major_axis_rotation: }{eigenvector}
-  \item{mean_pls_scores: }{the mean scores for that axis pair used in the computation}
-  \item{pls_scale: }{the scaling factor used}
-  \item{\strong{original_data_PLS_projection}: }{scores of the original data on the major axis}
+\describe{
+  \item{major_axis_rotation}{Eigenvector}
+  \item{mean_pls_scores}{Mean scores for that axis pair used in the computation}
+  \item{pls_scale}{Scaling factor used}
+  \item{\strong{original_data_PLS_projection}}{Scores of the original data on the major axis}
 }
 
 \emph{original_major_axis_predictions_reversed} contains the predictions of the PLS model for the original data,
 back-transformed to the original space (i.e., if the original data was shape, this will be shape).
 If axes_to_use > 1, these predictions will be based on the major axis computed for all pairs of axes considered.
 This element has two sub-elements:
-\itemize{
-\item{\strong{Block1}: }{prediction for block 1}
-\item{\strong{Block2}: }{prediction for block 2}
+\describe{
+  \item{\strong{Block1}}{Prediction for block 1}
+  \item{\strong{Block2}}{Prediction for block 2}
 }
 
 \emph{new_data_results} is only returned when new data is provided and contains the results of the
 analyses obtained using a previous PLS model on new data and, in particular:
-\itemize{
-\item{\strong{new_data_Xscores}: }{PLS scores of the new data using the old model for the first block}
-\item{\strong{new_data_Yscores}: }{PLS scores of the new data using the old model for the second block}
-\item{\strong{new_data_major_axis_proj}: }{Scores of the new data on the major axis computed
- using the PLS model provided in pls_object. If axes_to_use > 1, each column correspond to a separate major axis}
- \item{\strong{new_data_Block1_proj_prediction_revert}: }{Predictions for the Block1 of the new data
- obtained by first computing the major axis projections for the new data (as found in element new_data_major_axis_proj)
-  and then back-transforming these projection to the original space (e.g., shape)}
- \item{\strong{new_data_Block2_proj_prediction_revert}: }{Predictions for the Block2 of the new data
- obtained by first computing the major axis projections for the new data (as found in element new_data_major_axis_proj)
-  and then back-transforming these projection to the original space (e.g., shape)}
+\describe{
+  \item{\strong{new_data_Xscores}}{PLS scores of the new data using the old model for the first block}
+  \item{\strong{new_data_Yscores}}{PLS scores of the new data using the old model for the second block}
+  \item{\strong{new_data_major_axis_proj}}{Scores of the new data on the major axis computed using the PLS model provided in pls_object. If axes_to_use > 1, each column corresponds to a separate major axis}
+  \item{\strong{new_data_Block1_proj_prediction_revert}}{Predictions for Block 1 of the new data obtained by first computing the major axis projections (element new_data_major_axis_proj) and then back-transforming these projections to the original space (e.g., shape)}
+  \item{\strong{new_data_Block2_proj_prediction_revert}}{Predictions for Block 2 of the new data obtained by first computing the major axis projections (element new_data_major_axis_proj) and then back-transforming these projections to the original space (e.g., shape)}
 }
 }
 \section{Citation}{
@@ -100,7 +95,7 @@ If you use this function, please cite Fruciano et al. 2020.
 \section{Notice}{
 
 \itemize{
-\item{If new data is provided, this is first centered to the same average as in the original analysis, then it is translated back to the original scale}
+  \item If new data is provided, this is first centered to the same average as in the original analysis, then it is translated back to the original scale.
 }
 }
 

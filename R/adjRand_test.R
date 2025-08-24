@@ -65,6 +65,12 @@
 #'
 #' @export
 adjRand_test=function(A, B, perm=999) {
+
+  if (!requireNamespace("mclust", quietly = TRUE)) {
+    stop("Package 'mclust' is required but is not installed.")
+  }
+  # Ensure that the required package is available
+
   if (length(A)!=length(B)) { stop("A and B should have the same length") }
   # Make sure that the two groups of partitions have the same length
 
