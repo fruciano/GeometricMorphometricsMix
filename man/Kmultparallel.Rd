@@ -4,7 +4,7 @@
 \alias{Kmultparallel}
 \title{Parallel implementation of Adams' Kmult with additional support for multiple datasets and tree sets}
 \usage{
-Kmultparallel(data, trees, burninpercent = 0, iter = 0)
+Kmultparallel(data, trees, burninpercent = 0, iter = 0, verbose = TRUE)
 }
 \arguments{
 \item{data}{Either a data.frame/matrix with continuous (multivariate) phenotypes,
@@ -20,6 +20,8 @@ or a list where each element is a multiPhylo object representing a separate tree
 \item{iter}{number of permutations to be used in the permutation test
 (this should normally be left at the default value of 0 as permutations slow down
 computation and are of doubtful utility when analyzing tree distributions)}
+
+\item{verbose}{logical, whether to print progress information (default TRUE)}
 }
 \value{
 The function outputs a data.frame with classes "parallel_Kmult" and "data.frame" containing columns:
@@ -72,6 +74,7 @@ The returned object has specialized S3 methods:
 \itemize{
   \item \code{\link{print.parallel_Kmult}}: Provides a summary of Kmult ranges for each dataset-treeset combination
   \item \code{\link{plot.parallel_Kmult}}: Creates density plots of Kmult values grouped by dataset-treeset combinations
+  \item \code{\link{summary.parallel_Kmult}}: Provides detailed summary statistics for the analysis results
 }
 }
 

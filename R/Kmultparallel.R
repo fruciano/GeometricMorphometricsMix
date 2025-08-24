@@ -39,6 +39,7 @@
 #' @param iter number of permutations to be used in the permutation test
 #' (this should normally be left at the default value of 0 as permutations slow down
 #' computation and are of doubtful utility when analyzing tree distributions)
+#' @param verbose logical, whether to print progress information (default TRUE)
 #'
 #' @return The function outputs a data.frame with classes "parallel_Kmult" and "data.frame" containing columns:
 #'  \describe{
@@ -54,6 +55,7 @@
 #' \itemize{
 #'   \item \code{\link{print.parallel_Kmult}}: Provides a summary of Kmult ranges for each dataset-treeset combination
 #'   \item \code{\link{plot.parallel_Kmult}}: Creates density plots of Kmult values grouped by dataset-treeset combinations
+#'   \item \code{\link{summary.parallel_Kmult}}: Provides detailed summary statistics for the analysis results
 #' }
 #'
 #' @examples
@@ -157,7 +159,7 @@
 #' @importFrom ape drop.tip vcv.phylo
 #' @importFrom future.apply future_lapply
 #' @export
-Kmultparallel = function(data, trees, burninpercent = 0, iter = 0) {
+Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRUE) {
     
     # Standardize input formats
     # Convert single datasets/tree sets to lists for uniform processing
@@ -197,6 +199,21 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0) {
         stringsAsFactors = FALSE
     )
     
+    # Report progress information
+    total_trees = sum(sapply(trees_processed, length))
+    total_combinations = nrow(combinations)
+    if (verbose) {
+        cat(sprintf("Starting Kmultparallel analysis:\n"))
+        cat(sprintf("- %d dataset(s) x %d treeset(s) = %d combination(s)\n", 
+                    length(data), length(trees_processed), total_combinations))
+        cat(sprintf("- Total trees to process: %d\n", total_trees))
+        cat(sprintf("- Iterations per tree: %d\n", ifelse(iter > 0, iter, 0)))
+        if (iter > 0) {
+            cat(sprintf("- Warning: %d iterations requested. This may take considerable time.\n", iter))
+        }
+        cat("\n")
+    }
+    
     # Function to process a single combination
     process_combination = function(combo_idx) {
         combo = combinations[combo_idx, ]
@@ -211,6 +228,28 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0) {
         }
         if (is.null(row.names(current_data))) {
             stop("Data must have row names matching tree tip labels")
+        }
+        if (nrow(current_data) < 3) {
+            stop(sprintf("Dataset '%s' has fewer than 3 rows (%d). Kmult requires at least 3 observations.",
+                        dataset_name, nrow(current_data)))
+        }
+        if (ncol(current_data) < 1) {
+            stop(sprintf("Dataset '%s' has no columns. Kmult requires at least 1 variable.",
+                        dataset_name))
+        }
+        if (any(is.na(current_data))) {
+            stop(sprintf("Dataset '%s' contains missing values (NA). Kmult requires complete data.",
+                        dataset_name))
+        }
+        
+        # Check for tree-data compatibility first
+        available_data_tips = row.names(current_data)
+        first_tree_tips = current_trees[[1]]$tip.label
+        common_tips = intersect(first_tree_tips, available_data_tips)
+        
+        if (length(common_tips) < 3) {
+            stop(sprintf("Dataset '%s' and treeset '%s' have fewer than 3 matching tips (%d common tips found). Kmult requires at least 3 matching tips.",
+                        dataset_name, treeset_name, length(common_tips)))
         }
         
         # Check if all trees in the treeset have the same tips
@@ -328,6 +367,23 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0) {
     
     # Add classes to the result
     class(result_df) = c("parallel_Kmult", "data.frame")
+    
+    # Validate results and provide summary
+    if (verbose) {
+        cat("Analysis completed successfully.\n")
+        cat(sprintf("Results summary:\n"))
+        cat(sprintf("- Total Kmult values computed: %d\n", nrow(result_df)))
+        cat(sprintf("- Overall Kmult range: %.4f - %.4f\n", min(result_df$Kmult), max(result_df$Kmult)))
+        
+        # Check for potential issues
+        if (any(result_df$Kmult < 0)) {
+            cat("- Warning: Some negative Kmult values detected. This may indicate computational issues.\n")
+        }
+        if (any(result_df$Kmult > 10)) {
+            cat("- Note: Some very high Kmult values detected (>10). Verify results are reasonable.\n")
+        }
+        cat("\n")
+    }
     
     return(result_df)
 }
@@ -487,4 +543,69 @@ plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL, x_lab = "Kmult", .
     }
     
     return(p)
+}
+
+
+#' Summary method for parallel_Kmult objects
+#'
+#' Provides detailed summary statistics for Kmult analysis results.
+#'
+#' @param object An object of class 'parallel_Kmult' produced by \code{\link{Kmultparallel}}
+#' @param ... Additional arguments (currently not used)
+#'
+#' @return Invisibly returns the input object
+#'
+#' @examples
+#' \dontrun{
+#' # Assuming you have data and trees
+#' result = Kmultparallel(data, trees)
+#' summary(result)
+#' }
+#'
+#' @export
+summary.parallel_Kmult = function(object, ...) {
+    cat("Parallel Kmult Analysis - Detailed Summary\n")
+    cat("=========================================\n\n")
+    
+    # Overall statistics
+    cat("Overall Statistics:\n")
+    cat(sprintf("  Total observations: %d\n", nrow(object)))
+    cat(sprintf("  Kmult range: %.4f - %.4f\n", min(object$Kmult), max(object$Kmult)))
+    cat(sprintf("  Kmult mean: %.4f\n", mean(object$Kmult)))
+    cat(sprintf("  Kmult median: %.4f\n", median(object$Kmult)))
+    cat(sprintf("  Kmult standard deviation: %.4f\n", sd(object$Kmult)))
+    
+    # Check for p-values
+    has_pvalues = "p value" %in% colnames(object)
+    if (has_pvalues) {
+        cat(sprintf("  Significant results (p < 0.05): %d (%.1f%%)\n", 
+                   sum(object$"p value" < 0.05), 
+                   100 * mean(object$"p value" < 0.05)))
+    }
+    cat("\n")
+    
+    # By dataset
+    cat("By Dataset:\n")
+    dataset_summary = aggregate(Kmult ~ dataset, object, function(x) {
+        c(n = length(x), mean = mean(x), sd = sd(x), min = min(x), max = max(x))
+    })
+    for (i in 1:nrow(dataset_summary)) {
+        stats = dataset_summary$Kmult[i, ]
+        cat(sprintf("  Dataset %s: n=%d, mean=%.4f (SD=%.4f), range=%.4f-%.4f\n",
+                   dataset_summary$dataset[i], stats[1], stats[2], stats[3], stats[4], stats[5]))
+    }
+    cat("\n")
+    
+    # By treeset
+    cat("By Treeset:\n")
+    treeset_summary = aggregate(Kmult ~ treeset, object, function(x) {
+        c(n = length(x), mean = mean(x), sd = sd(x), min = min(x), max = max(x))
+    })
+    for (i in 1:nrow(treeset_summary)) {
+        stats = treeset_summary$Kmult[i, ]
+        cat(sprintf("  Treeset %s: n=%d, mean=%.4f (SD=%.4f), range=%.4f-%.4f\n",
+                   treeset_summary$treeset[i], stats[1], stats[2], stats[3], stats[4], stats[5]))
+    }
+    
+    invisible(object)
 }
