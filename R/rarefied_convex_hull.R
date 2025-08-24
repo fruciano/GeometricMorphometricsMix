@@ -1,5 +1,10 @@
 #' Rarefied estimates of n-dimensional convex hull volume
 #'
+#' @description
+#' \lifecycle{deprecated}
+#' 
+#' `rarefied_convex_hull()` is deprecated and will be removed in a future version.
+#'
 #' Computes rarefied estimates of convex hull volume
 #' (i.e., the n-dimensional volume of the convex hull containing
 #' a set of observations).
@@ -54,7 +59,8 @@
 #' @import stats
 #' @export
 rarefied_convex_hull=function(Data,rep=100,samplesize) {
-
+    .Deprecated(msg = "rarefied_convex_hull() is deprecated and will be removed in a future version. Please, use the more general disparity_resample() instead.")
+    
     RarefiedSamples=lapply(seq(rep),function(x) Data[sample(1:nrow(Data),samplesize,replace=TRUE),])
 
     DisparityEst=lapply(RarefiedSamples, function(x) geometry::convhulln(x,options="FA")$vol)

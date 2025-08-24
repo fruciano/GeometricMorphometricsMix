@@ -1,5 +1,10 @@
 #' Rarefied estimates of disparity/morphospace occupation
 #'
+#' @description
+#' \lifecycle{deprecated}
+#' 
+#' `rarefied_disparity()` is deprecated and will be removed in a future version.
+#'
 #' Computes rarefied estimates of multivariate variance
 #' (i.e., the trace of the covariance matrix) and
 #' the mean pairwise Euclidean distance
@@ -51,7 +56,8 @@
 #' @import stats
 #' @export
 rarefied_disparity=function(Data,rep=1000,samplesize, claramunt_pv=FALSE) {
-
+    .Deprecated(msg = "rarefied_disparity() is deprecated and will be removed in a future version.  Please, use the more general disparity_resample() instead.")
+    
     RarefiedSamples=lapply(seq(rep),function(x) Data[sample(1:nrow(Data),samplesize,replace=TRUE),])
 
     if (claramunt_pv==TRUE) {

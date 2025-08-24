@@ -28,6 +28,7 @@ Each function in the package is documented with usage examples and references.
 - **adjRand_test** : Permutation test of the adjusted Rand index, which quantifies the agreement between two partitions (e.g., classification of specimens obtained using different methods)
 - **BTailTest** : Comparison of disparity between two groups
 - **critical_angle** : Critical angle for the test of difference between two vectors
+- **disparity_resample** : Obtain resampling estimates (bootstrap or rarefaction) of disparity statistics
 - **disparity_test** : Comparison of disparity between two groups
 - **dist_mean_boot** : Bootstrap estimates of the distance between group means
 - **EscoufierRV** : Computation of Escoufier RV, which quantifies levels of association between blocks of variables (Escoufier 1973 - Biometrics)
@@ -40,8 +41,8 @@ Each function in the package is documented with usage examples and references.
 - **rescale_by_landmark_distance** : Convenience function to rescale configurations of landmarks based on a vector of inter-landmark distances
 - **reversePCA** : Simple function to obtain the original variables (e.g., shape) from PC scores (and mean)
 - **rotate_landmarks**: Apply a user-defined rotation of a landmark configuration about the origin
-- **rarefied_convex_hull** : Computation of rarefied estimates of n-dimensional convex hull volume (a measure of disparity/morphospace occupation)
-- **rarefied_disparity** : Rarefied estimates of some measures of disparity/morphospace occupation
+- **rarefied_convex_hull** : Computation of rarefied estimates of n-dimensional convex hull volume (a measure of disparity/morphospace occupation) - deprecated
+- **rarefied_disparity** : Rarefied estimates of some measures of disparity/morphospace occupation - deprecated
 - **repeated_measures_test** : Test of difference between two repeated measures
 - **RVrarefied** : Computation of rarefied estimates of Escoufier RV (see Fruciano et al. 2013 - Plos One)
 - **RVcomparison** : Permutation test for the difference in Escoufier RV (see Fruciano et al. 2013 - Plos One)
@@ -52,10 +53,11 @@ Each function in the package is documented with usage examples and references.
 
 | Analysis Type | Functions | Description |
 |--------------|-----------|-------------|
-| **Analysis of Disparity** | `BTailTest` | Comparison of disparity between two groups |
-| | `disparity_test` | Comparison of disparity between two groups (alternative implementation) |
-| | `rarefied_convex_hull` | Computation of rarefied estimates of n-dimensional convex hull volume (measure of disparity/morphospace occupation) |
-| | `rarefied_disparity` | Rarefied estimates of various measures of disparity/morphospace occupation |
+| **Analysis of Disparity** | `BTailTest` | Traditional comparison of disparity between two groups |
+| | `disparity_resample` | Resampling estimates of disparity |
+| | `disparity_test` | Comparison of disparity between two groups |
+| | `rarefied_convex_hull` | Computation of rarefied estimates of n-dimensional convex hull volume (measure of disparity/morphospace occupation) - deprecated |
+| | `rarefied_disparity` | Rarefied estimates of various measures of disparity/morphospace occupation - deprecated |
 | **Integration/Association/Modularity** | `EscoufierRV` | Computation of Escoufier RV coefficient, quantifying association between blocks of variables |
 | | `RVrarefied` | Computation of rarefied estimates of Escoufier RV to account for sample size |
 | | `RVcomparison` | Permutation test for the difference in Escoufier RV between datasets |

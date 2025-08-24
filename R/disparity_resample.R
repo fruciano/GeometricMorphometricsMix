@@ -34,6 +34,9 @@
 #' (e.g., p landmarks x k dimensions x n specimens). In the latter case, the array is converted
 #' internally to a 2D matrix with specimens in rows and (landmark * dimension) variables in columns.
 #'
+#' @note Because of how the computation works, convex hull volume computation requires the number of observations (specimens) to be (substantially) greater than the number of variables (dimensions).
+#' In case of shape or similar, consider using the scores along the first (few/several) principal components.
+#'
 #' @param Data A data frame, matrix, vector, or 3D array. Observations (specimens) must be in rows
 #'  (if a 3D array is supplied, the third dimension is assumed to index specimens).
 #' @param group A factor or a vector indicating group membership (will be coerced to factor). If
@@ -65,7 +68,7 @@
 #' @references Claramunt S. 2010. Discovering exceptional diversifications at continental scales: the case of the endemic families of Neotropical Suboscine passerines. Evolution 64:2004-2019.
 #' @references Fruciano C, Pappalardo AM, Tigano C, Ferrito V. 2014. Phylogeographical relationships of Sicilian brown trout and the effects of genetic introgression on morphospace occupation. Biological Journal of the Linnean Society 112:387-398.
 #'
-#' @seealso \code{\link{rarefied_disparity}}, \code{\link{rarefied_convex_hull}}, \code{\link{disparity_test}}
+#' @seealso \code{\link{disparity_test}}
 #'
 #' @examples
 #' set.seed(123)
