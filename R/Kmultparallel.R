@@ -141,6 +141,8 @@
 #' 
 #' plot(result_multiple)
 #' # Create grouped density plots by combination
+#' # Notice how the distribution of Kmult when we use the random dataset
+#' # has a strong peak at small values (no phylogenetic signal, as expected)
 #' 
 #' # Custom plotting with different transparency
 #' plot(result_multiple, alpha = 0.5, title = "Kmult Distribution Across All Combinations")
