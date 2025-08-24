@@ -15,8 +15,8 @@ install_github("fruciano/GeometricMorphometricsMix")
 ```
 
 ## Citation
-Currently, and for the foreseeable future, there are no plans to publish a proper paper describing the package.
-Each function, however, provides reasonable comments and references to the methods, which can (and should) be used when using the functions in the package (in addition to the usual citation to the package itself)
+Currently, there is no formal publication describing the package (but this may be available in the future). Please, use citation() to identify the most appropriate current citation of *GeometricMorphometricsMix*.
+Importantly, each function provides reasonable comments and references to the methods, which can (and should) be used when using the functions in the package (in addition to the usual citation to the package itself).
 
 
 ## Documentation and Help
