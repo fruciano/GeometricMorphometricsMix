@@ -4,14 +4,7 @@
 \alias{Kmultparallel}
 \title{Parallel implementation of Adams' Kmult with additional support for multiple datasets and tree sets}
 \usage{
-Kmultparallel(
-  data,
-  trees,
-  burninpercent = 0,
-  iter = 0,
-  verbose = TRUE,
-  progress = TRUE
-)
+Kmultparallel(data, trees, burninpercent = 0, iter = 0, verbose = TRUE)
 }
 \arguments{
 \item{data}{Either a data.frame/matrix with continuous (multivariate) phenotypes,
@@ -29,8 +22,6 @@ or a list where each element is a multiPhylo object representing a separate tree
 computation and are of doubtful utility when analyzing tree distributions)}
 
 \item{verbose}{logical, whether to print progress information (default TRUE)}
-
-\item{progress}{logical, whether to show a progress bar (default TRUE). Requires the 'progress' package.}
 }
 \value{
 The function outputs a data.frame with classes "parallel_Kmult" and "data.frame" containing columns:
@@ -138,11 +129,7 @@ rownames(dataset_bm) = tree_pruned$tip.label
 
 # Example 1: Single dataset and single treeset analysis
 result_single = Kmultparallel(dataset_bm, treeset1)
-# Analyze BM dataset with first treeset - progress bar will show automatically
-
-# Example with progress disabled for quiet operation
-result_single_quiet = Kmultparallel(dataset_bm, treeset1, verbose = FALSE, progress = FALSE)
-# Run analysis without progress indication
+# Analyze BM dataset with first treeset
 
 # Use S3 methods to examine results
 print(result_single)
@@ -168,7 +155,7 @@ all_treesets = list(treeset1 = treeset1, treeset2 = treeset2)
 
 # Run comprehensive analysis on all combinations
 result_multiple = Kmultparallel(all_datasets, all_treesets)
-# Analyze all dataset-treeset combinations - progress bar will track through all 4 combinations
+# Analyze all dataset-treeset combinations
 
 # Examine results using S3 methods
 print(result_multiple)
