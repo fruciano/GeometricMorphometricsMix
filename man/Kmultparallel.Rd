@@ -86,6 +86,7 @@ plan(multisession, workers = 6)
 library(phytools)
 library(MASS)
 library(mvMORPH)
+library(ape)  # for drop.tip function
 
 # Generate 20 random phylogenetic trees with 100 tips each
 all_trees = replicate(20, pbtree(n = 100), simplify = FALSE)
@@ -102,40 +103,37 @@ class(treeset1) = class(treeset2) = "multiPhylo"
 tip_names = all_trees[[1]]$tip.label[1:40]
 # Use first 40 tip names for consistent data generation
 
-# Generate 2 datasets using multivariate normal distribution
-dataset1 = mvrnorm(n = 40, mu = rep(0, 5), Sigma = diag(5))
-dataset2 = mvrnorm(n = 40, mu = rep(1, 5), Sigma = diag(5) * 2)
-rownames(dataset1) = rownames(dataset2) = tip_names
-# Create two datasets with different means and variances
-# Notice how these datasets are random and should not display any phylogenetic signal
+# Generate 1 random dataset using multivariate normal distribution
+dataset_random = mvrnorm(n = 40, mu = rep(0, 5), Sigma = diag(5))
+rownames(dataset_random) = tip_names
+# Create one random dataset which should not display phylogenetic signal
 
-# Generate 5 datasets using Brownian motion evolution on the first treeset
-bm_datasets = lapply(1:5, function(i) {
-  tree_temp = treeset1[[i]]
-  # Get only the first 40 tips to match our data size
-  tips_to_keep = tree_temp$tip.label[1:40]
-  tree_pruned = drop.tip(tree_temp, setdiff(tree_temp$tip.label, tips_to_keep))
-  
-  # Simulate data under Brownian motion
-  sim_data = mvSIM(tree = tree_pruned, nsim = 1, model = "BM1", 
-                   param = list(sigma = diag(5), theta = rep(0, 5)))
-  return(sim_data)
-})
-names(bm_datasets) = paste0("BM_dataset_", 1:5)
-# Generate 5 datasets evolving under Brownian motion
-# Notice that these datasets should display strong phylogenetic signal
-# when each of them is combined with the individual tree used in the simulation of trait evolution
+# Generate 1 dataset using Brownian motion evolution on the first tree
+tree_temp = treeset1[[1]]
+# Get only the first 40 tips to match our data size
+tips_to_keep = tree_temp$tip.label[1:40]
+tree_pruned = ape::drop.tip(tree_temp, setdiff(tree_temp$tip.label, tips_to_keep))
+
+# Simulate data under Brownian motion
+sim_data = mvSIM(tree = tree_pruned, nsim = 1, model = "BM1", 
+                 param = list(sigma = diag(5), theta = rep(0, 5)))
+# Convert to matrix and ensure proper row names
+if (is.list(sim_data)) sim_data = sim_data[[1]]
+dataset_bm = as.matrix(sim_data)
+rownames(dataset_bm) = tree_pruned$tip.label
+# Generate 1 dataset evolving under Brownian motion
+# This dataset should display strong phylogenetic signal when combined with treeset1
 
 # Example 1: Single dataset and single treeset analysis
-result_single = Kmultparallel(bm_datasets[[1]], treeset1)
-# Analyze first BM dataset with first treeset
+result_single = Kmultparallel(dataset_bm, treeset1)
+# Analyze BM dataset with first treeset
 
 # Use S3 methods to examine results
 print(result_single)
 # Display summary of Kmult values
-# Notice how the range is very broad because we have high phylogenetic signal for those cases
-# in which a given dataset has been simulated under Brownian motion with a given tree, but low phylogenetic signal
-# when we use a different tree.
+# Notice how the range is very broad because we have high phylogenetic signal for the case
+# in which the dataset has been simulated under Brownian motion with the first tree, but low phylogenetic signal
+# when we use the other trees in the treeset.
 
 plot(result_single)
 # Create density plot of Kmult distribution
@@ -144,14 +142,13 @@ plot(result_single)
 # and the high phylogenetic signal when the correct tree is used.
 
 # Example 2: Multiple datasets and multiple treesets analysis
-# Combine all datasets into a list
-all_datasets = c(list(mvrnorm1 = dataset1, mvrnorm2 = dataset2), bm_datasets)
+# Combine datasets into a list
+all_datasets = list(random = dataset_random, brownian = dataset_bm)
 # Combine random and BM datasets
 
-# Combine all treesets into a list
-all_treesets = list(treeset1 = treeset1, treeset2 = treeset2, 
-                    treeset3 = treeset3, treeset4 = treeset4)
-# Create list of all tree sets
+# Combine treesets into a list
+all_treesets = list(treeset1 = treeset1, treeset2 = treeset2)
+# Create list of both tree sets
 
 # Run comprehensive analysis on all combinations
 result_multiple = Kmultparallel(all_datasets, all_treesets)
