@@ -2,55 +2,61 @@
 % Please edit documentation in R/Kmultparallel.R
 \name{Kmultparallel}
 \alias{Kmultparallel}
-\title{Parallel implementation of Adams' Kmult}
+\title{Parallel implementation of Adams' Kmult with additional support for multiple datasets and tree sets}
 \usage{
-Kmultparallel(data, trees, ncores = 1, burninpercent = 0, iter = 0)
+Kmultparallel(data, trees, burninpercent = 0, iter = 0)
 }
 \arguments{
-\item{data}{data frame with continuous (multivariate) phenotypes,
-including geometric morphometric data}
+\item{data}{Either a data.frame/matrix with continuous (multivariate) phenotypes,
+or a list where each element is a data.frame/matrix representing a separate dataset.
+Row names should match species names in the phylogenetic trees.}
 
-\item{trees}{a multi-phylo object containing a collection of trees}
+\item{trees}{Either a multiPhylo object containing a collection of trees (single tree set),
+or a list where each element is a multiPhylo object representing a separate tree set.}
 
-\item{ncores}{number of cores to use (default 1; i.e., no parallelization)}
-
-\item{burninpercent}{percentage of trees in trees to discard as burn-in
+\item{burninpercent}{percentage of trees in each tree set to discard as burn-in
 (by default no tree is discarded)}
 
 \item{iter}{number of permutations to be used in the permutation test
-(this should normally be left at the default value of 0)}
+(this should normally be left at the default value of 0 as permutations slow down
+computation and are of doubtful utility when analyzing tree distributions)}
 }
 \value{
-The function outputs a matrix with as many rows as input trees and columns:
+The function outputs a data.frame with classes "parallel_Kmult" and "data.frame" containing columns:
  \describe{
-  \item{Phylogenetic signal (K mult)}{Value of Kmult for each tree}
-  \item{p value}{p value for the significance of the test (normally not used)}
+  \item{Kmult}{Value of Kmult for each tree-dataset combination}
+  \item{p value}{p value for the significance of the test (only if iter > 0)}
+  \item{treeset}{Identifier for the tree set (name from list or number)}
+  \item{dataset}{Identifier for the dataset (name from list or number)}
+  \item{tree_index}{Index of the tree within its tree set}
 }
 }
 \description{
 Parallel implementation of Kmult, a measure of phylogenetic signal which
-is a multivariate equivalent of Blomberg's K
+is a multivariate equivalent of Blomberg's K. This version supports multiple
+datasets and tree sets, computing Kmult for all combinations.
 }
 \details{
 This is an updated and improved version of the function included in Fruciano et al. 2017.
- It performs the computation of Adams' Kmult (Adams 2014) in parallel
- with the aim of facilitating computation on a distribution of trees rather than a single tree
- This is a very simple parallelization of the code ('embarassingly parallel') which
- uses internally Adams' published code (to maintain consistency over time).
- If one wanted to perform a computation of Kmult on a single tree, he/she would be
- advised to use the version implemented in the package geomorph.
+It performs the computation of Adams' Kmult (Adams 2014) in parallel
+with the aim of facilitating computation on a distribution of trees rather than a single tree.
+This version uses the future framework for parallelization, making it more flexible
+and compatible across different operating systems.
+If one wanted to perform a computation of Kmult on a single tree, he/she would be
+advised to use the version implemented in the package geomorph, which receives regular updates.
 }
-\section{Notice}{
+\section{Parallelization}{
 
-Under Windows, this implementation needs the package 'parallelsugar'
-if one wants to run it with multiple cores in parallel.
-The package 'parallelsugar' can be installed from Github with the command
-devtools::install_github("nathanvan/parallelsugar")
-This, in turn, requires the package devtools to be installed.
-Notice also that the reason why the value of iter is set to 0 by default is that
-using permutations slows down sensibly the computation and it is of doubtful utility
-in most cases (as one would get a distribution of p-values not independent from each other).
-Unless one has a specific use in mind, the suggestion is, then, to keep iter at the default value
+This function uses the future framework for parallelization. To enable parallel processing,
+you need to set up a future plan before calling this function. For example:
+\itemize{
+  \item For sequential processing: \code{future::plan(future::sequential)}
+  \item For multicore processing (Unix/Mac): \code{future::plan(future::multicore, workers = 4)}
+  \item For multisession processing (Windows/Unix/Mac): \code{future::plan(future::multisession, workers = 4)}
+  \item For cluster processing: \code{future::plan(future::cluster, workers = c("host1", "host2"))}
+}
+On Windows machines, use \code{future::plan(future::multisession, workers = 4)} for parallel processing.
+The number of workers should typically not exceed the number of CPU cores available.
 }
 
 \section{Citation}{
@@ -60,6 +66,104 @@ Fruciano et al. 2017 (because you're using this parallelized function)
 Adams 2014 (because the function computes Adams' Kmult)
 }
 
+\section{S3 Methods}{
+
+The returned object has specialized S3 methods:
+\itemize{
+  \item \code{\link{print.parallel_Kmult}}: Provides a summary of Kmult ranges for each dataset-treeset combination
+  \item \code{\link{plot.parallel_Kmult}}: Creates density plots of Kmult values grouped by dataset-treeset combinations
+}
+}
+
+\examples{
+\dontrun{
+# Set up future for parallel processing on multiple cores (including Windows)
+library(future)
+plan(multisession, workers = 6)
+# Use multisession backend which works on all platforms including Windows
+
+# Load required packages for data simulation
+library(phytools)
+library(MASS)
+library(mvMORPH)
+
+# Generate 20 random phylogenetic trees with 100 tips each
+set.seed(123)
+all_trees = replicate(20, pbtree(n = 100), simplify = FALSE)
+class(all_trees) = "multiPhylo"
+# Create a collection of 20 random trees
+
+# Split trees into 4 tree sets of 5 trees each
+treeset1 = all_trees[1:5]
+treeset2 = all_trees[6:10]
+treeset3 = all_trees[11:15]
+treeset4 = all_trees[16:20]
+class(treeset1) = class(treeset2) = class(treeset3) = class(treeset4) = "multiPhylo"
+# Split the 20 trees into 4 separate tree sets
+
+# Get tip names from the first tree for consistent naming
+tip_names = all_trees[[1]]$tip.label[1:40]
+# Use first 40 tip names for consistent data generation
+
+# Generate 2 datasets using multivariate normal distribution
+dataset1 = mvrnorm(n = 40, mu = rep(0, 5), Sigma = diag(5))
+dataset2 = mvrnorm(n = 40, mu = rep(1, 5), Sigma = diag(5) * 2)
+rownames(dataset1) = rownames(dataset2) = tip_names
+# Create two datasets with different means and variances
+
+# Generate 5 datasets using Brownian motion evolution on the first treeset
+bm_datasets = lapply(1:5, function(i) {
+  tree_temp = treeset1[[i]]
+  # Get only the first 40 tips to match our data size
+  tips_to_keep = tree_temp$tip.label[1:40]
+  tree_pruned = drop.tip(tree_temp, setdiff(tree_temp$tip.label, tips_to_keep))
+  
+  # Simulate data under Brownian motion
+  sim_data = mvSIM(tree = tree_pruned, nsim = 1, model = "BM1", 
+                   param = list(sigma = diag(5), theta = rep(0, 5)))
+  return(sim_data)
+})
+names(bm_datasets) = paste0("BM_dataset_", 1:5)
+# Generate 5 datasets evolving under Brownian motion
+
+# Example 1: Single dataset and single treeset analysis
+result_single = Kmultparallel(bm_datasets[[1]], treeset1)
+# Analyze first BM dataset with first treeset
+
+# Use S3 methods to examine results
+print(result_single)
+# Display summary of Kmult values
+
+plot(result_single)
+# Create density plot of Kmult distribution
+
+# Example 2: Multiple datasets and multiple treesets analysis
+# Combine all datasets into a list
+all_datasets = c(list(mvrnorm1 = dataset1, mvrnorm2 = dataset2), bm_datasets)
+# Combine random and BM datasets
+
+# Combine all treesets into a list
+all_treesets = list(treeset1 = treeset1, treeset2 = treeset2, 
+                    treeset3 = treeset3, treeset4 = treeset4)
+# Create list of all tree sets
+
+# Run comprehensive analysis on all combinations
+result_multiple = Kmultparallel(all_datasets, all_treesets)
+# Analyze all dataset-treeset combinations
+
+# Examine results using S3 methods
+print(result_multiple)
+# Display summary showing ranges for each combination
+
+plot(result_multiple)
+# Create grouped density plots by combination
+
+# Custom plotting with different transparency
+plot(result_multiple, alpha = 0.5, title = "Kmult Distribution Across All Combinations")
+# Customize the plot appearance
+}
+
+}
 \references{
 Adams DC. 2014. A Generalized K Statistic for Estimating Phylogenetic Signal from Shape and Other High-Dimensional Multivariate Data. Systematic Biology 63:685-697.
 
