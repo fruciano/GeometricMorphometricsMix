@@ -32,6 +32,7 @@ Rather, we want to know whether the amount of variability in shape is different 
 
 Disparity (also called "morphospace occupation") can be quantified using several statistics.
 The ones implemented in *GeometricMorphometricsMix* are:
+
 - **Multivariate variance**: Sum of variances across all variables (trace of covariance matrix)
 - **Mean pairwise Euclidean distance**: Average distance between all pairs of observations
 - **Convex hull volume**: Volume of the smallest convex hull containing all observations
@@ -39,6 +40,7 @@ The ones implemented in *GeometricMorphometricsMix* are:
 
 ## Statistical approaches
 *GeometricMorphometricsMix* provides three main statistical approaches, all based on resampling, for comparing disparity across groups:
+
 - **Bootstrapping** (resampling with replacement) of the statistic of choice to derive confidence intervals (this is the most sensible choice in most cases, particularly with more than two groups)
 - **Rarefaction** (resampling without replacement to a common sample size) to account for differences in sample sizes between groups (this is useful when groups have very different sample sizes and we use statistics sensitive to sample size)
 - **Permutation tests** between two groups to assess whether they differ significantly in disparity (or, more formally, to test the null hypothesis that they have the same amount of variation)
