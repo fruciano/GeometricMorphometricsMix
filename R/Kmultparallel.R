@@ -23,6 +23,21 @@
 #' }
 #' On Windows machines, use \code{future::plan(future::multisession, workers = 4)} for parallel processing.
 #' The number of workers should typically not exceed the number of CPU cores available.
+#' @section Parallelization:
+#' This function uses the future framework for parallelization but only at the level of
+#' individual trees within each treeset. The outer loop over dataset × treeset combinations
+#' is executed sequentially.
+#' This is because the main utility of this function is to parallelise across distributions of many trees.
+#' To enable parallel processing, you still need to set up a future plan before calling
+#' this function. Example plans:
+#' \itemize{
+#'   \item For sequential processing: \code{future::plan(future::sequential)}
+#'   \item For multicore processing (Unix/Mac): \code{future::plan(future::multicore, workers = 4)}
+#'   \item For multisession processing (Windows/Unix/Mac): \code{future::plan(future::multisession, workers = 4)}
+#'   \item For cluster processing: \code{future::plan(future::cluster, workers = c("host1", "host2"))}
+#' }
+#' On Windows machines, use \code{future::plan(future::multisession, workers = 4)} for parallel processing.
+#' The number of workers should typically not exceed the number of CPU cores available.
 #'
 #' @section Citation:
 #' If you use this function please kindly cite both
@@ -346,8 +361,9 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
         return(kmult_results)
     }
     
-    # Process all combinations
-    all_results = future.apply::future_lapply(seq_len(nrow(combinations)), process_combination, future.seed = TRUE)
+    # Process all combinations sequentially. Only per-tree work inside each combination
+    # is parallelized using future.apply::future_lapply (to avoid nested futures).
+    all_results = lapply(seq_len(nrow(combinations)), process_combination)
     
     # Flatten results and convert to data.frame
     flattened_results = do.call(c, all_results)
@@ -526,6 +542,10 @@ plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL, x_lab = "Kmult", .
         stop("Package 'ggplot2' is required for plotting parallel_Kmult objects")
     }
     
+    # Create local bindings to avoid R CMD check 'no visible binding' notes
+    Kmult <- x$Kmult
+    combination <- x$combination
+
     if (n_combinations == 1) {
         # Single combination - simple density plot
         p = ggplot2::ggplot(x, ggplot2::aes(x = Kmult)) +
@@ -589,7 +609,7 @@ summary.parallel_Kmult = function(object, ...) {
     dataset_summary = aggregate(Kmult ~ dataset, object, function(x) {
         c(n = length(x), mean = mean(x), sd = sd(x), min = min(x), max = max(x))
     })
-    for (i in 1:nrow(dataset_summary)) {
+    for (i in seq_len(nrow(dataset_summary))) {
         stats = dataset_summary$Kmult[i, ]
         cat(sprintf("  Dataset %s: n=%d, mean=%.4f (SD=%.4f), range=%.4f-%.4f\n",
                    dataset_summary$dataset[i], stats[1], stats[2], stats[3], stats[4], stats[5]))
@@ -601,7 +621,7 @@ summary.parallel_Kmult = function(object, ...) {
     treeset_summary = aggregate(Kmult ~ treeset, object, function(x) {
         c(n = length(x), mean = mean(x), sd = sd(x), min = min(x), max = max(x))
     })
-    for (i in 1:nrow(treeset_summary)) {
+    for (i in seq_len(nrow(treeset_summary))) {
         stats = treeset_summary$Kmult[i, ]
         cat(sprintf("  Treeset %s: n=%d, mean=%.4f (SD=%.4f), range=%.4f-%.4f\n",
                    treeset_summary$treeset[i], stats[1], stats[2], stats[3], stats[4], stats[5]))
