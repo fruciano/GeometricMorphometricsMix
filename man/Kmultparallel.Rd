@@ -10,7 +10,7 @@ Kmultparallel(
   burninpercent = 0,
   iter = 0,
   verbose = TRUE,
-  ncores = parallel::detectCores(logical = FALSE)
+  ncores = (parallel::detectCores(logical = FALSE) - 1)
 )
 }
 \arguments{
@@ -70,20 +70,8 @@ On Windows machines, use \code{future::plan(future::multisession, workers = 4)} 
 The number of workers should typically not exceed the number of CPU cores available.
 
 
-This function uses the future framework for parallelization but only at the level of
-individual trees within each treeset. The outer loop over dataset × treeset combinations
-is executed sequentially.
+This function performs parallelization at the level of individual trees within each treeset.
 This is because the main utility of this function is to parallelise across distributions of many trees.
-To enable parallel processing, you still need to set up a future plan before calling
-this function. Example plans:
-\itemize{
-  \item For sequential processing: \code{future::plan(future::sequential)}
-  \item For multicore processing (Unix/Mac): \code{future::plan(future::multicore, workers = 4)}
-  \item For multisession processing (Windows/Unix/Mac): \code{future::plan(future::multisession, workers = 4)}
-  \item For cluster processing: \code{future::plan(future::cluster, workers = c("host1", "host2"))}
-}
-On Windows machines, use \code{future::plan(future::multisession, workers = 4)} for parallel processing.
-The number of workers should typically not exceed the number of CPU cores available.
 }
 
 \section{Citation}{
