@@ -50,37 +50,89 @@ pdistance=function(X1, X2) {
 
 #' Cross-platform safe parallel lapply
 #'
-#' A small helper that selects an appropriate parallel backend depending on the
-#' platform. On Windows it uses a PSOCK cluster (parLapply), on Unix-like
-#' systems it tries to use forking via parallel::mclapply and falls back to a
-#' PSOCK cluster if forking is not available or fails. If \code{workers==1}
-#' this simply calls \code{lapply}. The function supports exporting objects and
-#' loading packages on worker processes and has basic RNG handling via
-#' \code{seed}.
+#' Select an appropriate parallel backend depending on the platform and run a
+#' parallelized lapply safely. On Windows a PSOCK cluster is used
+#' (parallel::parLapply). On Unix-like systems the function will try
+#' to use forking via parallel::mclapply and will fall back to a PSOCK
+#' cluster if forking is not available or fails. If \code{ncores == 1}
+#' this simply calls \code{lapply}. 
 #'
-#' This helper is intended for internal package use (not exported).
+#' This function is used internally by a few functions in this package but is exported
+#' so that users can reuse it for lightweight cross-platform parallel
+#' work (for example on Windows where forking is not available).
 #'
-#' @noRd
-safe_parallel_lapply <- function(X, FUN, ncores = parallel::detectCores(logical = FALSE),
-                                 packages = NULL, export = NULL, seed = NULL,
-                                 type = c("auto", "mclapply", "psock")) {
-  type <- match.arg(type)
-  ncores <- as.integer(max(1, min(length(X), ncores)))
+#' @param X A list or vector to iterate over.
+#' @param FUN A function to apply to each element of \code{X}.
+#' @param ncores Integer number of worker processes to use. Defaults to
+#'   \code{(parallel::detectCores(logical = FALSE)-1)} and is limited to
+#'   \code{length(X)}.
+#' @param packages Character vector of package names to be required on the
+#'   worker processes (each worker will try to \code{require()} them).
+#' @param export Character vector of names of objects in the current
+#'   environment to export to worker environments via \code{clusterExport}.
+#' @param seed Optional integer seed for RNG on workers. When using PSOCK
+#'   clusters this is passed to \code{clusterSetRNGStream}; with forking
+#'   (mclapply) the seed is set via \code{set.seed()} on the master prior to
+#'   forking.
+#' @param type One of \code{"auto"}, \code{"mclapply"} or \code{"psock"}
+#'   to force the backend selection. Default is \code{"auto"}.
+#' @return A \code{list} with the results of applying \code{FUN} to each
+#'   element of \code{X} (same shape as \code{lapply}).
+#' @examples
+#' \dontrun{
+#' # simple usage
+#' safe_parallel_lapply(1:4, function(i) i^2, ncores = 2)
+#'
+#' # more complex example: simulate work with a pause to compare serial vs parallel timing
+#' slow_task = function(i) {
+#'   # simulate a time-consuming operation (0.5 seconds)
+#'   Sys.sleep(0.5)
+#'   return(i^2)
+#' }
+#'
+#' # run serially (ncores = 1)
+#' t_serial = system.time({
+#'   res_serial = safe_parallel_lapply(1:8, slow_task, ncores = 1)
+#' })
+#'
+#' # run in parallel (ncores = 4)
+#' t_parallel = system.time({
+#'   res_parallel = safe_parallel_lapply(1:8, slow_task, ncores = 4)
+#' })
+#'
+#' # show timings
+#' print(t_serial)    # expected ~ 4 seconds (8 * 0.5)
+#' print(t_parallel)  # expected substantially less on a 4-core machine
+#'
+#' # verify results are identical
+#' identical(unlist(res_serial), unlist(res_parallel))
+#' }
+#' @export
+safe_parallel_lapply = function(X, FUN, ncores = (parallel::detectCores(logical = FALSE)-1),
+                                packages = NULL, export = NULL, seed = NULL,
+                                type = c("auto", "mclapply", "psock")) {
+  type = match.arg(type)
+  ncores = as.integer(max(1, min(length(X), ncores)))
+
+  # basic input validation
+  if (!is.function(FUN)) stop("'FUN' must be a function")
+  if (!is.null(export)) export = as.character(export)
+  if (!is.null(packages)) packages = as.character(packages)
 
   if (ncores <= 1) return(lapply(X, FUN))
 
-  os_type <- .Platform$OS.type  # "windows" or "unix"
+  os_type = .Platform$OS.type  # "windows" or "unix"
 
   # Helper to run on PSOCK cluster
-  run_psock <- function() {
-  cl <- parallel::makeCluster(ncores, type = "PSOCK")
+  run_psock = function() {
+    cl = parallel::makeCluster(ncores, type = "PSOCK")
     # ensure cluster is stopped on exit of this function
     on.exit(parallel::stopCluster(cl), add = TRUE)
 
     if (!is.null(export)) parallel::clusterExport(cl, export, envir = parent.frame())
     if (!is.null(packages)) {
       # export the packages vector so workers can access it
-      parallel::clusterExport(cl, varlist = "packages", envir = environment())
+      parallel::clusterExport(cl, varlist = "packages", envir = parent.frame())
       parallel::clusterEvalQ(cl, {
         for (pk in packages) {
           try(require(pk, character.only = TRUE), silent = TRUE)
@@ -90,7 +142,12 @@ safe_parallel_lapply <- function(X, FUN, ncores = parallel::detectCores(logical 
     }
     if (!is.null(seed)) parallel::clusterSetRNGStream(cl, seed)
 
-    res <- parallel::parLapply(cl, X, FUN)
+    # run in a tryCatch to ensure cluster is stopped and errors are informative
+    res = tryCatch({
+      parallel::parLapply(cl, X, FUN)
+    }, error = function(e) {
+      stop("Error while running parLapply on PSOCK cluster: ", conditionMessage(e))
+    })
     return(res)
   }
 
@@ -101,7 +158,8 @@ safe_parallel_lapply <- function(X, FUN, ncores = parallel::detectCores(logical 
       return(run_psock())
     }
     if (!is.null(seed)) set.seed(seed)
-    return(parallel::mclapply(X, FUN, mc.cores = ncores, mc.preschedule = TRUE, mc.set.seed = TRUE))
+    res = parallel::mclapply(X, FUN, mc.cores = ncores, mc.preschedule = TRUE, mc.set.seed = TRUE)
+    return(res)
   }
 
   if (type == "psock") return(run_psock())
@@ -111,7 +169,7 @@ safe_parallel_lapply <- function(X, FUN, ncores = parallel::detectCores(logical 
     return(run_psock())
   } else {
     # try mclapply but fallback to PSOCK on error
-    try_res <- try({
+    try_res = try({
       if (!is.null(seed)) set.seed(seed)
       parallel::mclapply(X, FUN, mc.cores = ncores, mc.preschedule = TRUE, mc.set.seed = TRUE)
     }, silent = TRUE)
