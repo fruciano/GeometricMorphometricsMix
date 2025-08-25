@@ -79,8 +79,13 @@ safe_parallel_lapply <- function(X, FUN, ncores = parallel::detectCores(logical 
 
     if (!is.null(export)) parallel::clusterExport(cl, export, envir = parent.frame())
     if (!is.null(packages)) {
+      # export the packages vector so workers can access it
+      parallel::clusterExport(cl, varlist = "packages", envir = environment())
       parallel::clusterEvalQ(cl, {
-        invisible(lapply(packages, function(pk) require(pk, character.only = TRUE)))
+        for (pk in packages) {
+          try(require(pk, character.only = TRUE), silent = TRUE)
+        }
+        NULL
       })
     }
     if (!is.null(seed)) parallel::clusterSetRNGStream(cl, seed)
