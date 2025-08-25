@@ -24,20 +24,8 @@
 #' On Windows machines, use \code{future::plan(future::multisession, workers = 4)} for parallel processing.
 #' The number of workers should typically not exceed the number of CPU cores available.
 #' @section Parallelization:
-#' This function uses the future framework for parallelization but only at the level of
-#' individual trees within each treeset. The outer loop over dataset × treeset combinations
-#' is executed sequentially.
+#' This function performs parallelization at the level of individual trees within each treeset.
 #' This is because the main utility of this function is to parallelise across distributions of many trees.
-#' To enable parallel processing, you still need to set up a future plan before calling
-#' this function. Example plans:
-#' \itemize{
-#'   \item For sequential processing: \code{future::plan(future::sequential)}
-#'   \item For multicore processing (Unix/Mac): \code{future::plan(future::multicore, workers = 4)}
-#'   \item For multisession processing (Windows/Unix/Mac): \code{future::plan(future::multisession, workers = 4)}
-#'   \item For cluster processing: \code{future::plan(future::cluster, workers = c("host1", "host2"))}
-#' }
-#' On Windows machines, use \code{future::plan(future::multisession, workers = 4)} for parallel processing.
-#' The number of workers should typically not exceed the number of CPU cores available.
 #'
 #' @section Citation:
 #' If you use this function please kindly cite both
@@ -174,8 +162,8 @@
 #' @importFrom ape drop.tip vcv.phylo
 #' @export
 ##' @param ncores number of cores to use for per-tree parallelization (default: detectCores(logical = FALSE))
-Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRUE, ncores = parallel::detectCores(logical = FALSE)) {
-    
+Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRUE, ncores = (parallel::detectCores(logical = FALSE)-1)) {
+
     # Standardize input formats
     # Convert single datasets/tree sets to lists for uniform processing
     if (is.data.frame(data) || is.matrix(data)) {
@@ -276,73 +264,47 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
             length(tips) == length(first_tips) && all(sort(tips) == sort(first_tips))
         }))
         
-        if (all_same_tips) {
-            # All trees have the same tips - efficient processing
-            # Find tips to drop based on the first tree (same for all)
-            available_data_tips = row.names(current_data)
-            if (is.null(available_data_tips)) {
-                stop("Data must have row names matching tree tip labels")
-            }
-            droplist = setdiff(current_trees[[1]]$tip.label, available_data_tips)
-            
-            # Function to prune a single tree (same droplist for all)
-            prune_tree = function(tree) {
-                if (length(droplist) > 0) {
-                    ape::drop.tip(tree, droplist)
-                } else {
-                    tree
-                }
-            }
-            
-            # Prune all trees in the set (parallel across trees)
-            pruned_trees = safe_parallel_lapply(current_trees, prune_tree, ncores = ncores, packages = c("ape"))
-            class(pruned_trees) = "multiPhylo"
-            
-            # Check that we have trees with enough tips after pruning
-            tree_sizes = sapply(pruned_trees, function(tree) length(tree$tip.label))
-            if (any(tree_sizes < 3)) {
-                stop("After pruning, some trees have fewer than 3 tips, which is insufficient for Kmult calculation")
-            }
-            
-            # Reorder data to match tree tip order for each tree
-            data_reordered = lapply(pruned_trees, function(tree) {
-                current_data[tree$tip.label, , drop = FALSE]
-            })
-        } else {
-            # Trees have different tips - individual processing
-            # Process each tree individually with its own droplist
-            tree_processing_results = safe_parallel_lapply(current_trees, function(tree) {
-                # Find tips to drop for this specific tree
-                available_data_tips = row.names(current_data)
-                if (is.null(available_data_tips)) {
-                    stop("Data must have row names matching tree tip labels")
-                }
-                droplist_tree = setdiff(tree$tip.label, available_data_tips)
-                
-                # Prune this tree
-                if (length(droplist_tree) > 0) {
-                    pruned_tree = ape::drop.tip(tree, droplist_tree)
-                } else {
-                    pruned_tree = tree
-                }
-                
-                # Reorder data for this tree
-                data_reordered_tree = current_data[pruned_tree$tip.label, , drop = FALSE]
-                
-                list(pruned_tree = pruned_tree, data_reordered = data_reordered_tree)
-                })
-            
-            # Extract pruned trees and reordered data
-            pruned_trees = lapply(tree_processing_results, function(x) x$pruned_tree)
-            class(pruned_trees) = "multiPhylo"
-            data_reordered = lapply(tree_processing_results, function(x) x$data_reordered)
-            
-            # Check that we have trees with enough tips after pruning
-            tree_sizes = sapply(pruned_trees, function(tree) length(tree$tip.label))
-            if (any(tree_sizes < 3)) {
-                stop("After pruning, some trees have fewer than 3 tips, which is insufficient for Kmult calculation")
-            }
+        # Robust pruning: for each tree compute the intersection of tree tip labels and data rownames
+        # and prune only the tips not present in the data. This avoids assumptions about identical tip
+        # sets and reports trees that would be left with fewer than 3 tips.
+        available_data_tips = row.names(current_data)
+        if (is.null(available_data_tips)) {
+            stop("Data must have row names matching tree tip labels")
         }
+
+        tree_processing_results = safe_parallel_lapply(current_trees, function(tree) {
+            # Determine which tips to keep (present both in tree and data)
+            keep = intersect(tree$tip.label, available_data_tips)
+            if (length(keep) < 3) {
+                stop(sprintf("Dataset '%s' and treeset '%s': tree has only %d matching tips after pruning (need >= 3)",
+                             dataset_name, treeset_name, length(keep)))
+            }
+
+            # If some tips must be dropped, prune them; otherwise keep original tree
+            if (length(keep) == length(tree$tip.label)) {
+                pruned_tree = tree
+            } else {
+                droplist_tree = setdiff(tree$tip.label, keep)
+                pruned_tree = ape::drop.tip(tree, droplist_tree)
+            }
+
+            # Reorder data for this pruned tree according to pruned tip labels
+            data_reordered_tree = current_data[pruned_tree$tip.label, , drop = FALSE]
+
+            list(pruned_tree = pruned_tree, data_reordered = data_reordered_tree)
+        }, ncores = ncores, packages = c("ape"))
+
+        # Extract pruned trees and reordered data
+        pruned_trees = lapply(tree_processing_results, function(x) x$pruned_tree)
+        class(pruned_trees) = "multiPhylo"
+        data_reordered = lapply(tree_processing_results, function(x) x$data_reordered)
+
+        # Check that we have trees with enough tips after pruning (redundant but defensive)
+        tree_sizes = sapply(pruned_trees, function(tree) length(tree$tip.label))
+        if (any(tree_sizes < 3)) {
+            stop("After pruning, some trees have fewer than 3 tips, which is insufficient for Kmult calculation")
+        }
+        
         
         # Compute Kmult for each tree
         tree_indices = seq_along(pruned_trees)
