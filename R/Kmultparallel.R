@@ -222,7 +222,6 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
         cat(sprintf("- %d dataset(s) x %d treeset(s) = %d combination(s)\n", 
                     length(data), length(trees_processed), total_combinations))
         cat(sprintf("- Total trees to process: %d\n", total_trees))
-        cat(sprintf("- Iterations per tree: %d\n", ifelse(iter > 0, iter, 0)))
         if (iter > 0) {
             cat(sprintf("- Warning: %d iterations requested. This may take considerable time.\n", iter))
         }
