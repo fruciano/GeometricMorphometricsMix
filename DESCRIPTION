@@ -9,10 +9,9 @@ Depends: R (>= 3.4.0),
   corpcor
 Imports:
   methods,
-  mclust,
-  future.apply
+  mclust
 Suggests: 
-  future,
+  parallel,
   Morpho,
   utils,
   geometry,
@@ -25,8 +24,7 @@ Suggests:
   knitr,
   rmarkdown,
   phytools,
-  mvMORPH,
-  progress
+  mvMORPH
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

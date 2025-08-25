@@ -172,9 +172,9 @@
 #'
 #' @import stats
 #' @importFrom ape drop.tip vcv.phylo
-#' @importFrom future.apply future_lapply
 #' @export
-Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRUE) {
+##' @param ncores number of cores to use for per-tree parallelization (default: detectCores(logical = FALSE))
+Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRUE, ncores = parallel::detectCores(logical = FALSE)) {
     
     # Standardize input formats
     # Convert single datasets/tree sets to lists for uniform processing
@@ -294,8 +294,8 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
                 }
             }
             
-            # Prune all trees in the set
-            pruned_trees = future.apply::future_lapply(current_trees, prune_tree, future.seed = TRUE)
+            # Prune all trees in the set (parallel across trees)
+            pruned_trees = safe_parallel_lapply(current_trees, prune_tree, ncores = ncores, packages = c("ape"))
             class(pruned_trees) = "multiPhylo"
             
             # Check that we have trees with enough tips after pruning
@@ -311,7 +311,7 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
         } else {
             # Trees have different tips - individual processing
             # Process each tree individually with its own droplist
-            tree_processing_results = future.apply::future_lapply(current_trees, function(tree) {
+            tree_processing_results = safe_parallel_lapply(current_trees, function(tree) {
                 # Find tips to drop for this specific tree
                 available_data_tips = row.names(current_data)
                 if (is.null(available_data_tips)) {
@@ -330,7 +330,7 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
                 data_reordered_tree = current_data[pruned_tree$tip.label, , drop = FALSE]
                 
                 list(pruned_tree = pruned_tree, data_reordered = data_reordered_tree)
-            }, future.seed = TRUE)
+                })
             
             # Extract pruned trees and reordered data
             pruned_trees = lapply(tree_processing_results, function(x) x$pruned_tree)
@@ -346,7 +346,7 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
         
         # Compute Kmult for each tree
         tree_indices = seq_along(pruned_trees)
-        kmult_results = future.apply::future_lapply(tree_indices, function(i) {
+    kmult_results = safe_parallel_lapply(tree_indices, function(i) {
             result = Test_Kmult(data_reordered[[i]], pruned_trees[[i]], iter = iter)
             list(
                 kmult = result$phy.signal,
@@ -355,13 +355,13 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
                 dataset = dataset_name,
                 tree_index = i
             )
-        }, future.seed = TRUE)
+        })
         
         return(kmult_results)
     }
     
     # Process all combinations sequentially. Only per-tree work inside each combination
-    # is parallelized using future.apply::future_lapply (to avoid nested futures).
+    # is parallelized using internal safe_parallel_lapply (to avoid nested parallel backends).
     all_results = lapply(seq_len(nrow(combinations)), process_combination)
     
     # Flatten results and convert to data.frame

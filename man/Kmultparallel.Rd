@@ -48,33 +48,13 @@ If one wanted to perform a computation of Kmult on a single tree, he/she would b
 advised to use the version implemented in the package geomorph, which receives regular updates.
 }
 \section{Parallelization}{
-
-This function uses the future framework for parallelization. To enable parallel processing,
-you need to set up a future plan before calling this function. For example:
-\itemize{
-  \item For sequential processing: \code{future::plan(future::sequential)}
-  \item For multicore processing (Unix/Mac): \code{future::plan(future::multicore, workers = 4)}
-  \item For multisession processing (Windows/Unix/Mac): \code{future::plan(future::multisession, workers = 4)}
-  \item For cluster processing: \code{future::plan(future::cluster, workers = c("host1", "host2"))}
-}
-On Windows machines, use \code{future::plan(future::multisession, workers = 4)} for parallel processing.
-The number of workers should typically not exceed the number of CPU cores available.
-
-
-This function uses the future framework for parallelization but only at the level of
-individual trees within each treeset. The outer loop over dataset × treeset combinations
-is executed sequentially.
-This is because the main utility of this function is to parallelise across distributions of many trees.
-To enable parallel processing, you still need to set up a future plan before calling
-this function. Example plans:
-\itemize{
-  \item For sequential processing: \code{future::plan(future::sequential)}
-  \item For multicore processing (Unix/Mac): \code{future::plan(future::multicore, workers = 4)}
-  \item For multisession processing (Windows/Unix/Mac): \code{future::plan(future::multisession, workers = 4)}
-  \item For cluster processing: \code{future::plan(future::cluster, workers = c("host1", "host2"))}
-}
-On Windows machines, use \code{future::plan(future::multisession, workers = 4)} for parallel processing.
-The number of workers should typically not exceed the number of CPU cores available.
+This function performs parallel work at the level of individual trees within each treeset.
+Control parallelism via the \code{ncores} argument of \code{Kmultparallel} (default:
+\code{parallel::detectCores(logical = FALSE)}). On Windows a PSOCK cluster is used
+internally (via \code{parallel::parLapply}). On Unix-like systems the function will
+attempt to use \code{parallel::mclapply} (forking) and fall back to PSOCK if forking
+is unavailable. See \code{?parallel} for details on OS-specific behaviour and on
+integration with job schedulers.
 }
 
 \section{Citation}{
