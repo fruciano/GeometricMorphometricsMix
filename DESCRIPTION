@@ -9,9 +9,9 @@ Depends: R (>= 3.4.0),
   corpcor
 Imports:
   methods,
-  mclust
+  mclust,
+  parallel
 Suggests: 
-  parallel,
   Morpho,
   utils,
   geometry,
