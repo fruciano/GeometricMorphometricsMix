@@ -24,7 +24,8 @@ Suggests:
   knitr,
   rmarkdown,
   phytools,
-  mvMORPH
+  mvMORPH,
+  phylolm
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
