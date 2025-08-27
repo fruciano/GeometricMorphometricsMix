@@ -30,20 +30,17 @@ If `nsim == 0`, returns the object produced by
   elements `tree`, `rsquared`, `intercepts`, `coefficients`, and
   `weights`.
 
-  If `nsim > 0`, returns a list containing components used for inference:
-  	abular{ll}{
-    PGLS_model_fit: 	ab the fitted PGLS model used to generate simulations.
-    
-    	ab 
-    Simulated_coefficients: 	ab a list (or matrix for univariate Y) of
-    simulated phylogenetic-weighted regression coefficients for each
-    simulation. 
-    	ab 
-    angle_comparisons_with_simulations: 	ab a data.frame with observed
-    angles and summaries (min/max/95% quantile) from simulations,
-    plus logical columns indicating exceedance of simulation-based
-    thresholds/critical angles.
-  }
+If `nsim > 0`, returns a named list used for inference. Typical components
+include:
+\describe{
+  \item{PGLS_model_fit}{The fitted PGLS model used to generate simulations.}
+  \item{Simulated_coefficients}{A list (or matrix for univariate Y) of simulated
+    phylogenetic-weighted regression coefficients, one element per simulation.}
+  \item{angle_comparisons_with_simulations}{A data.frame with observed angles
+    and summaries (min, max, 95% quantile) from simulations, plus logical
+    columns indicating exceedance of simulation-based thresholds or a
+    critical angle.}
+}
 }
 \description{
 Fit a phylogenetic-weighted regression for each tip of a phylogeny
