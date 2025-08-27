@@ -19,7 +19,7 @@
 #' @return A fitted model object (class 'phylolm' or 'mvgls').
 #' @keywords internal
 #' @noRd
-fit_pgls = function(Y, X, tree, model = "BM"){
+fit_pgls = function(tree, Y, X, model = "BM"){
 
   # Decide whether Y is univariate or multivariate and call the
   # appropriate fitting function using namespace-qualified calls.
@@ -46,8 +46,6 @@ fit_pgls = function(Y, X, tree, model = "BM"){
     # multivariate: ensure matrix and rownames
     Ymat = if(is.data.frame(Y)) as.matrix(Y) else Y
     if(is.null(rownames(Ymat))) rownames(Ymat) = tree$tip.label
-
-    if (model == "BM") model = "BM1"
 
     # call mvgls for multivariate response
     PGLS_model = mvMORPH::mvgls(formula = Ymat ~ X, tree = tree, model = model)

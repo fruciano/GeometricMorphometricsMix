@@ -1,5 +1,5 @@
 ### Ancillary functions
-### (not exported)
+### (mostly not exported)
 
 
 # Functions to repeat rows or columns
@@ -17,6 +17,33 @@ rep_col=function(x,n){
 # and degrees to radians
 rad2deg = function(rad) {(rad * 180) / (pi)}
 deg2rad = function(deg) {(deg * pi) / (180)}
+
+
+# Function to calculate the angle between two multivariate vectors
+# Outputs the angle in radians
+vector_angle = function(v1, v2) {
+  # Check that vectors have the same length
+  if (length(v1) != length(v2)) {
+    stop("Vectors must have the same length")
+  }
+  
+  # Normalize vectors to unit length
+  v1_unit = v1 / sqrt(sum(v1^2))
+  v2_unit = v2 / sqrt(sum(v2^2))
+  
+  # Calculate dot product of unit vectors (gives cosine directly)
+  cos_angle = sum(v1_unit * v2_unit)
+  
+  # Handle numerical precision issues (clamp to [-1, 1])
+  cos_angle = pmax(-1, pmin(1, cos_angle))
+  
+  # Calculate angle in radians
+  angle = acos(cos_angle)
+  
+  return(angle)
+}
+
+
 
 
 # Function to compute "multivariate variance"

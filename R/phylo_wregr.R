@@ -134,6 +134,160 @@ phylo_w_regr_fit = function(tree, Y, X) {
  return(results)
 }
 
+
+
+
+
+#' Phylogenetically weighted regression with optional simulations
+#'
+#' Fit a phylogenetic-weighted regression for each tip of a phylogeny
+#' (for both univariate and multivariate dependent variables)and,
+#' optionally, perform parametric simulations under a PGLS model to evaluate
+#' whether observed tip-level coefficients differ from expectations under
+#' the PGLS model fitted across the whole tree.
+#'
+#' This is the primary user-facing function in this source file. It returns
+#' either the observed phylogenetic weighted regression fit (an internal
+#' `phylo_wregr_fit` object) or, when `nsim > 0`, a list that contains the
+#' fitted PGLS model, simulated phylogenetic-weighted regression coefficients and
+#' summaries comparing observed and simulated coefficients
+#'
+#' @param tree An object of class `phylo` (from the `ape` package).
+#' @param Y A numeric vector, matrix, or data.frame of response variables
+#'   (rows correspond to tips in `tree`).
+#' @param X A numeric vector or factor of predictor values (length must match
+#'   number of tips).
+#' @param nsim Integer; number of parametric simulations to perform. If 0,
+#'   only the observed phylogenetic-weighted regression is returned. Default
+#'   is 1000.
+#' @param model Character; evolutionary model used for simulation. Passed to
+#'   the PGLS simulation routine (e.g. "BM").
+#' @param ncores Integer; number of cores to use for simulations. Default is 1.
+#'
+#' @return If `nsim == 0`, returns the object produced by
+#'   `phylo_w_regr_fit()` (class `phylo_wregr_fit`) containing at least
+#'   elements `tree`, `rsquared`, `intercepts`, `coefficients`, and
+#'   `weights`.
+#'
+#'   If `nsim > 0`, returns a list containing components used for inference:
+#'   	abular{ll}{
+#'     PGLS_model_fit: 	ab the fitted PGLS model used to generate simulations.
+#'     
+#'     	ab 
+#'     Simulated_coefficients: 	ab a list (or matrix for univariate Y) of
+#'     simulated phylogenetic-weighted regression coefficients for each
+#'     simulation. 
+#'     	ab 
+#'     angle_comparisons_with_simulations: 	ab a data.frame with observed
+#'     angles and summaries (min/max/95% quantile) from simulations,
+#'     plus logical columns indicating exceedance of simulation-based
+#'     thresholds/critical angles.
+#'   }
+#'
+#' @details
+#' The function for the case where nsim>0 relies on `mvMORPH` and, in case of univariate data,
+#'  `phylolm` (which should, therefore, be installed)
+#'
+#' @examples
+#' # Assuming 'tree', 'Y' and 'X' are available in the session:
+#' # result = phylo_wregression(tree, Y, X, nsim = 100)
+#' # print(result)
+#'
+#' @export
+phylo_wregression=function(tree, Y, X, nsim=1000, model="BM", ncores=1){
+
+  # Fit the phylogenetic weighted regression model
+  wmodel_fit = phylo_w_regr_fit(tree, Y, X)
+
+  if (nsim>0) {
+    # Routine for simulating data under a PGLS model for the whole tree
+    # To test for the effect of tree shape
+
+    # Fit PGLS model
+    PGLS_model_fit = fit_pgls(tree, Y, X, model = "BM")
+
+    # Use the class of the object produced by this function to determine if data
+    # is multivariate or univariate (essentially using the checks already implemented
+    # in the fit_pgls() function)
+    is_univariate = inherits(PGLS_model_fit, "phylolm")
+
+    # Simulate data under the fitted PGLS model
+    PGLS_simulations = PGLS_sim_gen(PGLS_model_fit, nsim = nsim, model = model)
+
+
+    # Fit the phylogenetic weighted regression model on each simulated dataset
+    PGLS_simulations_wregr_fits = safe_parallel_lapply(
+      PGLS_simulations, function(sim_data) {
+      fit = phylo_w_regr_fit(tree, Y=sim_data, X=X)
+      return(fit$coefficients)
+    }, ncores = ncores,
+        packages = c("mvMORPH", "stats"),
+        type = "auto")
+
+    if (is_univariate){
+      # If data is univariate, all coefficients for each simulation
+      # are combined into a matrix with one column per simulation and one row
+      # per tree tip
+      Simulated_coefficients = do.call(cbind, PGLS_simulations_wregr_fits)
+    } else {
+
+      # Compute of angles between observed phylogenetically weighted regression coefficients
+      # and PGLS coefficients
+      Observed_angle_with_PGLS=apply(wmodel_fit$coefficients, 1, function(x){
+        rad2deg(vector_angle(PGLS_model_fit$coefficients[2,], x))
+      })
+
+      # For each simulated dataset, find the angle between each tip and PGLS coefficients
+      Angles_sim_with_PGLS=do.call("rbind", lapply(seq(nrow(PGLS_simulations_wregr_fits[[1]])), function(tip_n){
+        unlist(lapply(seq(length(PGLS_simulations_wregr_fits)), function(sim_i){
+          rad2deg(vector_angle(PGLS_model_fit$coefficients[2,],
+      PGLS_simulations_wregr_fits[[sim_i]][tip_n,]))
+        }))
+      }))
+      rownames(Angles_sim_with_PGLS)=rownames(wmodel_fit$coefficients)
+
+      range_angles_sim_with_PGLS=t(apply(Angles_sim_with_PGLS, 1, range))
+      critical_angle_PGLS=critical_angle(dimensions=ncol(PGLS_model_fit$coefficients))
+      # First set of results (observed, range and one-sided 95% CI)
+      results_angle_comparison=data.frame(observed=Observed_angle_with_PGLS,
+                                         min_simulated=range_angles_sim_with_PGLS[,1],
+                                         max_simulated=range_angles_sim_with_PGLS[,2],
+                                         CI_95=apply(Angles_sim_with_PGLS, 1, quantile, probs=0.95))
+      results_angle_comparison$exceeds_95CI=apply(results_angle_comparison, 1, function(x) x[1]>x[4])                                   
+      results_angle_comparison$exceeds_simulated_range=apply(results_angle_comparison, 1, function(x) x[1]>x[3])
+      results_angle_comparison$exceeds_critical_angle=apply(results_angle_comparison, 1, function(x) x[1]>critical_angle_PGLS)
+      results=PGLS_simulations_wregr_fits
+      results$PGLS_model_fit= PGLS_model_fit
+      results$Simulated_coefficients=PGLS_simulations_wregr_fits
+      results$angle_comparisons_with_simulations=results_angle_comparison
+    }
+
+  } else {
+    results=wmodel_fit
+  }
+return(results)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #' Plot method for phylo_wregr_fit objects
 #'
 #' Visualizes the results of phylogenetic weighted regression analysis. The function can plot
