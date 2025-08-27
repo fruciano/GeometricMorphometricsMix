@@ -226,6 +226,22 @@ phylo_wregression=function(tree, Y, X, nsim=1000, model="BM", ncores=1){
       # are combined into a matrix with one column per simulation and one row
       # per tree tip
       Simulated_coefficients = do.call(cbind, PGLS_simulations_wregr_fits)
+      
+      results_sim_comparison=data.frame(observed=wmodel_fit$coefficients,
+                                         min_simulated=apply(Simulated_coefficients, 1, min),
+                                         max_simulated=apply(Simulated_coefficients, 1, max),
+                                         CI_95_min=apply(Angles_sim_with_PGLS, 1, quantile, probs=0.025),
+                                         CI_95_max=apply(Angles_sim_with_PGLS, 1, quantile, probs=0.975))
+      results_sim_comparison$exceeds_95CI=apply(results_sim_comparison, 1, function(x) x[1]>x[4] | x[1]<x[5])
+      results_sim_comparison$exceeds_simulated_range=apply(results_sim_comparison, 1, function(x) x[1]>x[3] | x[1]<x[2])
+
+
+    results=wmodel_fit
+      results$PGLS_model_fit= PGLS_model_fit
+      results$Simulated_coefficients=Simulated_coefficients
+      results$coeff_comparisons_with_simulations= results_sim_comparison
+
+
     } else {
 
       # Compute of angles between observed phylogenetically weighted regression coefficients
@@ -253,7 +269,7 @@ phylo_wregression=function(tree, Y, X, nsim=1000, model="BM", ncores=1){
       results_angle_comparison$exceeds_95CI=apply(results_angle_comparison, 1, function(x) x[1]>x[4])                                   
       results_angle_comparison$exceeds_simulated_range=apply(results_angle_comparison, 1, function(x) x[1]>x[3])
       results_angle_comparison$exceeds_critical_angle=apply(results_angle_comparison, 1, function(x) x[1]>critical_angle_PGLS)
-      results=PGLS_simulations_wregr_fits
+      results=wmodel_fit
       results$PGLS_model_fit= PGLS_model_fit
       results$Simulated_coefficients=PGLS_simulations_wregr_fits
       results$angle_comparisons_with_simulations=results_angle_comparison
