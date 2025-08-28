@@ -108,7 +108,7 @@ phylo_wregression=function(tree, Y, X, nsim=1000, model="BM", ncores=1){
     # To test for the effect of tree shape
 
     # Fit PGLS model
-    PGLS_model_fit = fit_pgls(tree, Y, X, model = "BM")
+    PGLS_model_fit = fit_pgls(tree, Y, X, model = model)
 
     # Use the class of the object produced by this function to determine if data
     # is multivariate or univariate (essentially using the checks already implemented
