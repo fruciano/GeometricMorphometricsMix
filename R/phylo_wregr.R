@@ -379,14 +379,23 @@ plot.phylo_wregression <- function(x, plot_phylogeny = TRUE, ...) {
       simmap_vector=rep(0, length(x$phylo_wregr_fit$tree$tip.label))
       simmap_vector[significant_tips]=1
       names(simmap_vector)=x$phylo_wregr_fit$tree$tip.label
-      # keep the returned phylo object from make.simmap (don't capture printed output)
-      tree_simmap = phytools::make.simmap(tree = x$phylo_wregr_fit$tree, x = simmap_vector)
-      x$phylo_wregr_fit$tree = tree_simmap
+      if (class(x$PGLS_model_fit)=="mvgls"){
+        tree_simmap = phytools::make.simmap(tree = x$phylo_wregr_fit$tree, x = simmap_vector)
+        x$phylo_wregr_fit$tree = tree_simmap
+      }
       if(plot_phylogeny==TRUE){
-        plot.phylo_wregr_fit(x$phylo_wregr_fit, plot_phylogeny = TRUE) 
+        # Univariate case, with simulations and "significant", and plot_phylogeny==TRUE
+        if (class(x$PGLS_model_fit)=="phylolm"){
+          colors=rep("grey", length(simmap_vector))
+          colors[simmap_vector==1]="red"
+          plot.phylo_wregr_fit(x$phylo_wregr_fit, plot_phylogeny = TRUE, col=colors, ...)
+        } else {
+          # Multivariate case, with simulations and "significant", and plot_phylogeny==TRUE
+        plot.phylo_wregr_fit(x$phylo_wregr_fit, plot_phylogeny = TRUE,...)
+        } 
       } else {
         plot.phylo_wregr_fit(x$phylo_wregr_fit, plot_phylogeny = FALSE,
-        col=factor(simmap_vector))
+        col=factor(simmap_vector),...)
       }
       
     } else {
