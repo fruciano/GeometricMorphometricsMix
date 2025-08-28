@@ -4,7 +4,7 @@
 \alias{phylo_w_regr_fit}
 \title{Phylogenetic Weighted Regression for Comparative Data}
 \usage{
-phylo_w_regr_fit(tree, Y, X)
+phylo_w_regr_fit(tree, Y, X, model = "BM")
 }
 \arguments{
 \item{tree}{An object of class `phylo` (from the `ape` package) representing the phylogenetic tree.}
@@ -78,3 +78,4 @@ plot(result_single, what = "coefficients")
 \seealso{
 \code{\link{plot.phylo_wregr_fit}} for plotting the results
 }
+\keyword{internal}

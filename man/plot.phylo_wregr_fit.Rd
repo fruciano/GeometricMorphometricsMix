@@ -4,18 +4,18 @@
 \alias{plot.phylo_wregr_fit}
 \title{Plot method for phylo_wregr_fit objects}
 \usage{
-\method{plot}{phylo_wregr_fit}(x, what = c("rsquared", "coefficients"), plot_phylogeny = TRUE, ...)
+\method{plot}{phylo_wregr_fit}(x, plot_phylogeny = TRUE, ...)
 }
 \arguments{
 \item{x}{An object of class `phylo_wregr_fit`, typically the result of \code{\link{phylo_w_regr_fit}}}
-
-\item{what}{Character string specifying what to plot. Either "rsquared" for R-squared values
-or "coefficients" for regression coefficients. Default is "rsquared".}
 
 \item{plot_phylogeny}{Logical indicating whether to include phylogenetic information in plots.
 When TRUE, uses phylogenetic plotting functions from the phytools package. Default is TRUE.}
 
 \item{...}{Additional arguments passed to the underlying plotting functions (e.g., graphical parameters)}
+
+\item{what}{Character string specifying what to plot. Either "rsquared" for R-squared values
+or "coefficients" for regression coefficients. Default is "rsquared".}
 }
 \value{
 Invisibly returns the input object x
@@ -83,3 +83,4 @@ plot(result, what = "rsquared", plot_phylogeny = TRUE,
 \seealso{
 \code{\link{phylo_w_regr_fit}} for the main function that generates objects of this class
 }
+\keyword{internal}

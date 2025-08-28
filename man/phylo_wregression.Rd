@@ -2,7 +2,7 @@
 % Please edit documentation in R/phylo_wregr.R
 \name{phylo_wregression}
 \alias{phylo_wregression}
-\title{Phylogenetically weighted regression with optional simulations}
+\title{Phylogenetically weighted regression}
 \usage{
 phylo_wregression(tree, Y, X, nsim = 1000, model = "BM", ncores = 1)
 }
@@ -25,21 +25,22 @@ the PGLS simulation routine (e.g. "BM").}
 \item{ncores}{Integer; number of cores to use for simulations. Default is 1.}
 }
 \value{
-If `nsim == 0`, returns the object produced by
-  `phylo_w_regr_fit()` (class `phylo_wregr_fit`) containing at least
-  elements `tree`, `rsquared`, `intercepts`, `coefficients`, and
+If `nsim == 0`, returns an object of class `phylo_wregr_fit`
+ containing at least elements `tree`, `intercepts`, `coefficients`, and
   `weights`.
 
-If `nsim > 0`, returns a named list used for inference. Typical components
-include:
+If `nsim > 0`, returns a named list comprising the object of class `phylo_wregr_fit` described above
+and additional components including:
 \describe{
+  \item{tree}{The input phylogenetic tree.}
   \item{PGLS_model_fit}{The fitted PGLS model used to generate simulations.}
   \item{Simulated_coefficients}{A list (or matrix for univariate Y) of simulated
     phylogenetic-weighted regression coefficients, one element per simulation.}
-  \item{angle_comparisons_with_simulations}{A data.frame with observed angles
-    and summaries (min, max, 95% quantile) from simulations, plus logical
-    columns indicating exceedance of simulation-based thresholds or a
-    critical angle.}
+  \item{comparisons_with_simulations}{A data.frame with, for multivariate data,
+    observed angles and summaries (min, max, one-sided 95\% confidence interval) from simulations,
+    plus logical columns indicating exceedance of simulation-based thresholds or a
+    critical angle. For univariate data, the structure is similar but it focuses on
+    comparing coefficients to simulations (and the 95\% confidence interval is two-sided).}
 }
 }
 \description{
@@ -60,9 +61,53 @@ summaries comparing observed and simulated coefficients
 The function for the case where nsim>0 relies on `mvMORPH` and, in case of univariate data,
  `phylolm` (which should, therefore, be installed)
 }
+\note{
+This function may give problems (NA in the output)
+in the case of a single species sister to all the rest of the taxa
+(this is due to the fact that all the phylogenetic correlations with
+other taxa, on which the weighting is base, would be 0)
+}
 \examples{
-# Assuming 'tree', 'Y' and 'X' are available in the session:
-# result = phylo_wregression(tree, Y, X, nsim = 100)
-# print(result)
+# Simulate a tree and traits
+library(phytools)
+library(mvMORPH)
 
+set.seed(123)
+
+tree = pbtree(n=30)
+plot(tree)
+# Generate a tre with 30 tips
+
+Sigma=diag(6)
+Sigma[1,2]=Sigma[2,1]=0.5
+Data_sim=mvSIM(tree=tree, nsim=1, model="BM1", param=list(sigma=Sigma))
+# Generate data under Brownian motion
+# with the first two variables exibiting a weak correlation
+Y = Data_sim[,2:6]
+X = Data_sim[,1]
+# Split the data in dependent variables and predictor
+
+# manova.gls(mvgls(Y~X, tree=tree, model="BM"), nperm=100)
+# We could test the significance of a PGLS model
+# uncommenting the line above
+
+result = phylo_wregression(tree, Y, X, nsim=100)
+names(result)
+
+# Plot a PCA of coefficients with superimposed the phylogeny
+# (a so called "phylomorphospace" plot)
+plot(result$phylo_wregr_fit)
+
+# Plot coefficients without phylogeny
+plot(result$phylo_wregr_fit, plot_phylogeny = FALSE)
+
+# Single trait example
+Y_single = rnorm(20)
+result_single = phylo_w_regr_fit(tree, Y_single, X)
+plot(result_single, what = "coefficients")
+
+
+}
+\seealso{
+\code{\link{plot.phylo_wregr_fit}} for plotting the results
 }
