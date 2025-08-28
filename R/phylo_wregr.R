@@ -90,7 +90,7 @@
 #' # Single trait example
 #' Y_single = rnorm(20)
 #' result_single = phylo_w_regr_fit(tree, Y_single, X)
-#' plot(result_single, what = "coefficients")
+#' plot(result_single)
 #'
 #'
 #' @export
