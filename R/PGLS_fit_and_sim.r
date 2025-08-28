@@ -109,7 +109,8 @@ multivariate_PGLS_sim_gen = function(PGLS_model, nsim = 1000, model = "BM1"){
   # covariance for simulation: use residual covariance from the fitted model
   cov_mat = stats::cov(PGLS_model$residuals)
 
-  Sims_error = mvMORPH::mvSIM(tree, nsim = nsim, model = model, param = list(sigma = cov_mat))
+  Sims_error = suppressMessages(suppressWarnings(
+    mvMORPH::mvSIM(tree, nsim = nsim, model = model, param = list(sigma = cov_mat))))
   # Compute simulations using mvMORPH::mvSIM()
 
 
@@ -187,7 +188,8 @@ univariate_PGLS_sim_gen = function(PGLS_model, nsim = 1000, model = "BM"){
 
   if (model == "BM") model = "BM1"
 
-  Sims_error = mvMORPH::mvSIM(tree, nsim = nsim, model = model, param = list(sigma = target_resid_var))
+  Sims_error = suppressMessages(suppressWarnings(
+    mvMORPH::mvSIM(tree, nsim = nsim, model = model, param = list(sigma = target_resid_var))) )
 
   # mvSIM for univariate may return a matrix with columns = simulations
   if(is.matrix(Sims_error)){

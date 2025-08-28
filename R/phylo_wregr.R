@@ -375,7 +375,8 @@ plot.phylo_wregression <- function(x, plot_phylogeny = TRUE, ...) {
       simmap_vector=rep(0, length(x$phylo_wregr_fit$tree$tip.label))
       simmap_vector[significant_tips]=1
       names(simmap_vector)=x$phylo_wregr_fit$tree$tip.label
-      tree_simmap=make.simmap(tree=x$phylo_wregr_fit$tree, x=simmap_vector)
+  tree_simmap=suppressMessages(suppressWarnings(
+    make.simmap(tree=x$phylo_wregr_fit$tree, x=simmap_vector)))
       x$phylo_wregr_fit$tree=tree_simmap
       if(plot_phylogeny==TRUE){
         plot.phylo_wregr_fit(x$phylo_wregr_fit, plot_phylogeny = TRUE) 
