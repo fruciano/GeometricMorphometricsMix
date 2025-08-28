@@ -125,10 +125,11 @@ multivariate_PGLS_sim_gen = function(PGLS_model, nsim = 1000, model = "BM1"){
 
   # now scale simulated errors to this target
   Sims_error = lapply(Sims_error, function(X){
-    sim_var = sum(diag(stats::cov(X)))
-    if(sim_var == 0) return(X)
+    Xmat = as.matrix(X)
+    sim_var = sum(diag(stats::cov(Xmat)))
+    if(sim_var == 0) return(Xmat)
     scaling_factor = sqrt(target_tot_resid_var / sim_var)
-    X * scaling_factor
+    Xmat * scaling_factor
   })
 
   # add fitted values if available, otherwise return scaled errors
