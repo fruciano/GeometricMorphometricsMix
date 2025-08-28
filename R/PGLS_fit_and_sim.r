@@ -40,7 +40,7 @@ fit_pgls = function(tree, Y, X, model = "BM"){
     rownames(dat) = rn
     
     # call phylolm for univariate response
-    PGLS_model = phylolm(formula = Y ~ X, data = dat, phy = tree, model = ifelse(missing(model), "BM", model))
+  PGLS_model = phylolm::phylolm(formula = Y ~ X, data = dat, phy = tree, model = ifelse(missing(model), "BM", model))
     PGLS_model$tree = tree  # store tree in the model for later use
   } else {
     # multivariate: ensure matrix and rownames
@@ -110,7 +110,8 @@ multivariate_PGLS_sim_gen = function(PGLS_model, nsim = 1000, model = "BM1"){
   cov_mat = stats::cov(PGLS_model$residuals)
 
   Sims_error = suppressMessages(suppressWarnings(
-    mvMORPH::mvSIM(tree, nsim = nsim, model = model, param = list(sigma = cov_mat))))
+    suppressWarnings(capture.output(
+      mvMORPH::mvSIM(tree, nsim = nsim, model = model, param = list(sigma = cov_mat)), file = NULL))))
   # Compute simulations using mvMORPH::mvSIM()
 
 
@@ -189,7 +190,8 @@ univariate_PGLS_sim_gen = function(PGLS_model, nsim = 1000, model = "BM"){
   if (model == "BM") model = "BM1"
 
   Sims_error = suppressMessages(suppressWarnings(
-    mvMORPH::mvSIM(tree, nsim = nsim, model = model, param = list(sigma = target_resid_var))) )
+    suppressWarnings(capture.output(
+      mvMORPH::mvSIM(tree, nsim = nsim, model = model, param = list(sigma = target_resid_var)), file = NULL))))
 
   # mvSIM for univariate may return a matrix with columns = simulations
   if(is.matrix(Sims_error)){

@@ -133,8 +133,8 @@ phylo_wregression=function(tree, Y, X, nsim=1000, model="BM", ncores=1){
       results_sim_comparison=data.frame(observed=wmodel_fit$coefficients,
                                          min_simulated=apply(Simulated_coefficients, 1, min),
                                          max_simulated=apply(Simulated_coefficients, 1, max),
-                                         CI_95_min=apply(Angles_sim_with_PGLS, 1, quantile, probs=0.025),
-                                         CI_95_max=apply(Angles_sim_with_PGLS, 1, quantile, probs=0.975))
+                                         CI_95_min=apply(Simulated_coefficients, 1, quantile, probs=0.025),
+                                         CI_95_max=apply(Simulated_coefficients, 1, quantile, probs=0.975))
       results_sim_comparison$exceeds_95CI=apply(results_sim_comparison, 1, function(x) x[1]>x[4] | x[1]<x[5])
       results_sim_comparison$exceeds_simulated_range=apply(results_sim_comparison, 1, function(x) x[1]>x[3] | x[1]<x[2])
 
@@ -259,9 +259,9 @@ return(results)
 #' plot(result, what = "coefficients", plot_phylogeny = FALSE)
 #'
 #' # Single trait example
-#' Y_single = rnorm(20)
+#' Y_single = Y[,1]
 #' result_single = phylo_w_regr_fit(tree, Y_single, X)
-#' plot(result_single, what = "coefficients")
+#' plot(result_single)
 #'
 #' @keywords internal
 phylo_w_regr_fit = function(tree, Y, X, model="BM") {
@@ -376,7 +376,7 @@ plot.phylo_wregression <- function(x, plot_phylogeny = TRUE, ...) {
       simmap_vector[significant_tips]=1
       names(simmap_vector)=x$phylo_wregr_fit$tree$tip.label
   tree_simmap=suppressMessages(suppressWarnings(
-    make.simmap(tree=x$phylo_wregr_fit$tree, x=simmap_vector)))
+    capture.output(make.simmap(tree=x$phylo_wregr_fit$tree, x=simmap_vector), file = NULL)))
       x$phylo_wregr_fit$tree=tree_simmap
       if(plot_phylogeny==TRUE){
         plot.phylo_wregr_fit(x$phylo_wregr_fit, plot_phylogeny = TRUE) 
