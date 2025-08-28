@@ -82,14 +82,14 @@
 #'
 #' # Plot a PCA of coefficients with superimposed the phylogeny
 #' # (a so called "phylomorphospace" plot)
-#' plot(result$phylo_wregr_fit)
+#' plot(result)
 #'
 #' # Plot coefficients without phylogeny
-#' plot(result$phylo_wregr_fit, plot_phylogeny = FALSE)
+#' plot(result, plot_phylogeny = FALSE)
 #'
 #' # Single trait example
 #' Y_single = rnorm(20)
-#' result_single = phylo_w_regr_fit(tree, Y_single, X)
+#' result_single = phylo_wregression(tree, Y_single, X, nsim=100)
 #' plot(result_single)
 #'
 #'
