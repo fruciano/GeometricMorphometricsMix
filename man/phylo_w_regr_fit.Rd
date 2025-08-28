@@ -70,9 +70,9 @@ plot(result, what = "coefficients")
 plot(result, what = "coefficients", plot_phylogeny = FALSE)
 
 # Single trait example
-Y_single = rnorm(20)
+Y_single = Y[,1]
 result_single = phylo_w_regr_fit(tree, Y_single, X)
-plot(result_single, what = "coefficients")
+plot(result_single)
 
 }
 \seealso{
