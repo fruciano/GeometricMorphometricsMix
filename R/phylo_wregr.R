@@ -95,6 +95,10 @@
 #'
 #' @export
 phylo_wregression=function(tree, Y, X, nsim=1000, model="BM", ncores=1){
+  # Input validation
+  if (missing(tree) || is.null(tree) || !inherits(tree, "phylo")) stop("Argument 'tree' must be a valid phylo object.")
+  if (missing(Y) || is.null(Y) || (!is.numeric(Y) && !is.data.frame(Y) && !is.matrix(Y))) stop("Argument 'Y' must be numeric, matrix, or data.frame.")
+  if (missing(X) || is.null(X) || (!is.numeric(X) && !is.factor(X))) stop("Argument 'X' must be numeric or factor.")
 
   # Fit the phylogenetic weighted regression model
   wmodel_fit = phylo_w_regr_fit(tree, Y, X)

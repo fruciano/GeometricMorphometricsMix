@@ -124,13 +124,21 @@ multivariate_PGLS_sim_gen = function(PGLS_model, nsim = 1000, model = "BM1"){
   target_tot_resid_var = traceR + crossTrace
 
   # now scale simulated errors to this target
-  Sims_error = lapply(Sims_error, function(X){
-    Xmat = as.matrix(X)
-    sim_var = sum(diag(stats::cov(Xmat)))
-    if(sim_var == 0) return(Xmat)
-    scaling_factor = sqrt(target_tot_resid_var / sim_var)
-    Xmat * scaling_factor
-  })
+    Sims_error = lapply(Sims_error, function(X){
+      Xmat = as.matrix(X)
+      # Check: must be numeric, matrix, and at least 2 rows/columns
+      if (!is.numeric(Xmat) || !is.matrix(Xmat) || nrow(Xmat) < 2 || ncol(Xmat) < 1) {
+        warning("Simulated error is not a numeric matrix with >=2 rows; skipping scaling for this simulation.")
+        return(Xmat)
+      }
+      sim_var = sum(diag(stats::cov(Xmat)))
+      if (!is.finite(sim_var) || sim_var == 0) {
+        warning("Simulated covariance is not finite or zero; skipping scaling for this simulation.")
+        return(Xmat)
+      }
+      scaling_factor = sqrt(target_tot_resid_var / sim_var)
+      Xmat * scaling_factor
+    })
 
   # add fitted values if available, otherwise return scaled errors
   if(!is.null(PGLS_model$fitted)){
