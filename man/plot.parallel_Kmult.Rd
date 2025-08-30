@@ -4,7 +4,14 @@
 \alias{plot.parallel_Kmult}
 \title{Plot method for parallel_Kmult objects}
 \usage{
-\method{plot}{parallel_Kmult}(x, alpha = 0.25, title = NULL, x_lab = "Kmult", ...)
+\method{plot}{parallel_Kmult}(
+  x,
+  alpha = 0.25,
+  title = NULL,
+  x_lab = "Kmult",
+  fill_color = "steelblue",
+  ...
+)
 }
 \arguments{
 \item{x}{An object of class 'parallel_Kmult' produced by \code{\link{Kmultparallel}}}
@@ -14,6 +21,8 @@
 \item{title}{Character string for plot title (default NULL for automatic title)}
 
 \item{x_lab}{Character string for x-axis label (default "Kmult")}
+
+\item{fill_color}{Character string for the fill color of density plots (default "steelblue")}
 
 \item{...}{Additional arguments passed to the plotting function}
 }
@@ -31,7 +40,7 @@ result = Kmultparallel(data, trees)
 plot(result)
 
 # With custom settings
-plot(result, alpha = 0.5, title = "Kmult Distribution")
+plot(result, alpha = 0.5, title = "Kmult Distribution", fill_color = "red")
 }
 
 }
