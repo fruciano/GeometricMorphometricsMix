@@ -466,6 +466,7 @@ print.parallel_Kmult = function(x, ...) {
 #' @param alpha Transparency level for density plots (default 0.25)
 #' @param title Character string for plot title (default NULL for automatic title)
 #' @param x_lab Character string for x-axis label (default "Kmult")
+#' @param fill_color Character string for the fill color of density plots (default "steelblue")
 #' @param ... Additional arguments passed to the plotting function
 #'
 #' @return A ggplot object
@@ -477,11 +478,11 @@ print.parallel_Kmult = function(x, ...) {
 #' plot(result)
 #' 
 #' # With custom settings
-#' plot(result, alpha = 0.5, title = "Kmult Distribution")
+#' plot(result, alpha = 0.5, title = "Kmult Distribution", fill_color = "red")
 #' }
 #'
 #' @export
-plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL, x_lab = "Kmult", ...) {
+plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL, x_lab = "Kmult", fill_color = "steelblue", ...) {
     
     # Create combination identifier for grouping
     x$combination = paste0("Dataset:", x$dataset, " - Treeset:", x$treeset)
@@ -510,7 +511,7 @@ plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL, x_lab = "Kmult", .
     if (n_combinations == 1) {
         # Single combination - simple density plot
         p = ggplot2::ggplot(x, ggplot2::aes(x = Kmult)) +
-            ggplot2::geom_density(alpha = alpha, fill = "steelblue") +
+            ggplot2::geom_density(alpha = alpha, fill = fill_color) +
             ggplot2::theme_classic() +
             ggplot2::labs(x = x_lab, y = "Density", title = title) +
             ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))

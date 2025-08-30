@@ -13,6 +13,12 @@
 #' @param ymax_var Character string specifying the column name for upper CI limit (default "CI_max")
 #' @param x_lab Character string for x-axis label (default "Group")
 #' @param y_lab Character string for y-axis label (default "Observed")
+#' @param point_color A single color or a vector of colors for point estimates.
+#'   If length 1, the same color is used for all points. If length equals the
+#'   number of unique x-axis levels OR the number of rows in `data`, colors are
+#'   assigned per level (preferred) or per row respectively. (default "darkblue")
+#' @param errorbar_color A single color or a vector of colors for error bars.
+#'   Follows the same recycling / matching rules as `point_color`. (default "darkred")
 #' @param ... Additional arguments passed to ggplot
 #'
 #' @return A ggplot object
@@ -20,20 +26,49 @@
 #' @noRd
 CI_plot=function(data, x_var="group", y_var="observed", 
                  ymin_var="CI_min", ymax_var="CI_max",
-                 x_lab="Group", y_lab="Observed", ...) {
+                 x_lab="Group", y_lab="Observed", 
+                 point_color="darkblue", errorbar_color="darkred", ...) {
   
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Package 'ggplot2' is required for CI_plot")
   }
   
-  # Create the plot
-  p=ggplot2::ggplot(data, ggplot2::aes_string(x=x_var, y=y_var, group=1), ...) +
-    ggplot2::geom_point(alpha=0.8, size=3, colour="darkblue") +
+  # Determine x levels for color assignment logic
+  x_vals = data[[x_var]]
+  x_levels = unique(x_vals)
+  n_levels = length(x_levels)
+  n_rows = nrow(data)
+
+  # Helper to expand / validate a color vector
+  expand_col_vector <- function(col_vec, label) {
+    if (length(col_vec) == 1) {
+      return(rep(col_vec, n_rows))
+    } else if (length(col_vec) == n_levels) {
+      # Map by level
+      named <- setNames(col_vec, x_levels)
+      return(unname(named[match(x_vals, names(named))]))
+    } else if (length(col_vec) == n_rows) {
+      return(col_vec)
+    } else {
+      stop(sprintf("Length of %s (%d) must be 1, number of unique '%s' levels (%d), or number of rows (%d)",
+                   label, length(col_vec), x_var, n_levels, n_rows))
+    }
+  }
+
+  # Prepare per-row colors (even if constant) for unified handling
+  point_cols_row = expand_col_vector(point_color, "point_color")
+  errorbar_cols_row = expand_col_vector(errorbar_color, "errorbar_color")
+
+  data$.__point_col = point_cols_row
+  data$.__err_col = errorbar_cols_row
+
+  # Build plot (no need for group=1)
+  p = ggplot2::ggplot(data, ggplot2::aes_string(x = x_var, y = y_var), ...) +
+    ggplot2::geom_point(ggplot2::aes(color = .__point_col), alpha = 0.8, size = 3, show.legend = FALSE) +
+    ggplot2::geom_errorbar(ggplot2::aes_string(ymin = ymin_var, ymax = ymax_var, color = "__err_col"), width = 0.1, show.legend = FALSE) +
+    ggplot2::scale_color_identity() +
     ggplot2::theme_classic() +
-    ggplot2::geom_errorbar(width=.1, 
-                          ggplot2::aes_string(ymin=ymin_var, ymax=ymax_var), 
-                          colour="darkred") +
-    ggplot2::labs(x=x_lab, y=y_lab) +
+    ggplot2::labs(x = x_lab, y = y_lab) +
     ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
   
   return(p)
