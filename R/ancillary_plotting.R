@@ -1,6 +1,9 @@
 ### Ancillary plotting functions
 ### (not exported)
 
+## Register internal helper column names to avoid R CMD check notes
+utils::globalVariables(c("CI_point_color", "CI_errorbar_color"))
+
 #' Create confidence interval plot
 #'
 #' Creates a simple ggplot showing points with error bars for confidence intervals.
@@ -59,13 +62,13 @@ CI_plot=function(data, x_var="group", y_var="observed",
   point_cols_row = expand_col_vector(point_color, "point_color")
   errorbar_cols_row = expand_col_vector(errorbar_color, "errorbar_color")
 
-  data$.__point_col = point_cols_row
-  data$.__err_col = errorbar_cols_row
+  data$CI_point_color = point_cols_row
+  data$CI_errorbar_color = errorbar_cols_row
 
   # Build plot (no need for group=1)
   p = ggplot2::ggplot(data, ggplot2::aes_string(x = x_var, y = y_var), ...) +
-    ggplot2::geom_point(ggplot2::aes(color = .__point_col), alpha = 0.8, size = 3, show.legend = FALSE) +
-    ggplot2::geom_errorbar(ggplot2::aes_string(ymin = ymin_var, ymax = ymax_var, color = "__err_col"), width = 0.1, show.legend = FALSE) +
+    ggplot2::geom_point(ggplot2::aes(color = CI_point_color), alpha = 0.8, size = 3, show.legend = FALSE) +
+    ggplot2::geom_errorbar(ggplot2::aes_string(ymin = ymin_var, ymax = ymax_var, color = "CI_errorbar_color"), width = 0.1, show.legend = FALSE) +
     ggplot2::scale_color_identity() +
     ggplot2::theme_classic() +
     ggplot2::labs(x = x_lab, y = y_lab) +
