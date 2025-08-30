@@ -255,15 +255,7 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
                         dataset_name, treeset_name, length(common_tips)))
         }
         
-        # Check if all trees in the treeset have the same tips
-        # Extract tip labels from all trees
-        all_tip_labels = lapply(current_trees, function(tree) tree$tip.label)
-        
-        # Check if all tip sets are identical
-        first_tips = all_tip_labels[[1]]
-        all_same_tips = all(sapply(all_tip_labels, function(tips) {
-            length(tips) == length(first_tips) && all(sort(tips) == sort(first_tips))
-        }))
+    # (previously extracted tip labels; not required here)
         
         # Robust pruning: for each tree compute the intersection of tree tip labels and data rownames
         # and prune only the tips not present in the data. This avoids assumptions about identical tip

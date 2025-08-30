@@ -67,7 +67,7 @@ CI_plot=function(data, x_var="group", y_var="observed",
 
   # Build plot (no need for group=1)
   p = ggplot2::ggplot(data, ggplot2::aes_string(x = x_var, y = y_var), ...) +
-    ggplot2::geom_point(ggplot2::aes(color = CI_point_color), alpha = 0.8, size = 3, show.legend = FALSE) +
+    ggplot2::geom_point(ggplot2::aes_string(color = "CI_point_color"), alpha = 0.8, size = 3, show.legend = FALSE) +
     ggplot2::geom_errorbar(ggplot2::aes_string(ymin = ymin_var, ymax = ymax_var, color = "CI_errorbar_color"), width = 0.1, show.legend = FALSE) +
     ggplot2::scale_color_identity() +
     ggplot2::theme_classic() +
