@@ -117,9 +117,8 @@
 #' # Use S3 methods to examine results
 #' print(result_single)
 #' # Display summary of Kmult values
-#' # Notice how the range is very broad because we have high phylogenetic signal
-#' # for the case in which the dataset has been simulated under Brownian motion
-#' # with the first tree, but low phylogenetic signal
+#' # Notice how the range is very broad because we have high phylogenetic signal for the case
+#' # in which the dataset has been simulated under Brownian motion with the first tree, but low phylogenetic signal
 #' # when we use the other trees in the treeset.
 #' 
 #' plot(result_single)
@@ -255,7 +254,15 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
                         dataset_name, treeset_name, length(common_tips)))
         }
         
-    # (previously extracted tip labels; not required here)
+        # Check if all trees in the treeset have the same tips
+        # Extract tip labels from all trees
+        all_tip_labels = lapply(current_trees, function(tree) tree$tip.label)
+        
+        # Check if all tip sets are identical
+        first_tips = all_tip_labels[[1]]
+        all_same_tips = all(sapply(all_tip_labels, function(tips) {
+            length(tips) == length(first_tips) && all(sort(tips) == sort(first_tips))
+        }))
         
         # Robust pruning: for each tree compute the intersection of tree tip labels and data rownames
         # and prune only the tips not present in the data. This avoids assumptions about identical tip
@@ -459,7 +466,6 @@ print.parallel_Kmult = function(x, ...) {
 #' @param alpha Transparency level for density plots (default 0.25)
 #' @param title Character string for plot title (default NULL for automatic title)
 #' @param x_lab Character string for x-axis label (default "Kmult")
-#' @param fill_color Character string for the fill color of density plots (default "steelblue")
 #' @param ... Additional arguments passed to the plotting function
 #'
 #' @return A ggplot object
@@ -471,11 +477,11 @@ print.parallel_Kmult = function(x, ...) {
 #' plot(result)
 #' 
 #' # With custom settings
-#' plot(result, alpha = 0.5, title = "Kmult Distribution", fill_color = "red")
+#' plot(result, alpha = 0.5, title = "Kmult Distribution")
 #' }
 #'
 #' @export
-plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL, x_lab = "Kmult", fill_color = "steelblue", ...) {
+plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL, x_lab = "Kmult", ...) {
     
     # Create combination identifier for grouping
     x$combination = paste0("Dataset:", x$dataset, " - Treeset:", x$treeset)
@@ -504,7 +510,7 @@ plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL, x_lab = "Kmult", f
     if (n_combinations == 1) {
         # Single combination - simple density plot
         p = ggplot2::ggplot(x, ggplot2::aes(x = Kmult)) +
-            ggplot2::geom_density(alpha = alpha, fill = fill_color) +
+            ggplot2::geom_density(alpha = alpha, fill = "steelblue") +
             ggplot2::theme_classic() +
             ggplot2::labs(x = x_lab, y = "Density", title = title) +
             ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
