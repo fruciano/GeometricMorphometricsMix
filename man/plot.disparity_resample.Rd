@@ -4,12 +4,18 @@
 \alias{plot.disparity_resample}
 \title{Plot method for disparity_resample objects}
 \usage{
-\method{plot}{disparity_resample}(x, ...)
+\method{plot}{disparity_resample}(x, point_color = "darkblue", errorbar_color = "darkred", ...)
 }
 \arguments{
 \item{x}{An object of class "disparity_resample"}
 
-\item{...}{Additional arguments}
+\item{point_color}{A single color or vector of colors for point estimates passed to internal CI_plot.
+If a vector, rules follow CI_plot: length 1 (recycled), length equal to number of x levels, or number of rows.
+(default "darkblue").}
+
+\item{errorbar_color}{A single color or vector of colors for error bars (same length rules as point_color; default "darkred").}
+
+\item{...}{Additional arguments passed to CI_plot}
 }
 \value{
 A ggplot object

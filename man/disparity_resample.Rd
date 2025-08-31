@@ -11,7 +11,11 @@ disparity_resample(
   statistic = "multivariate_variance",
   CI = 0.95,
   bootstrap_rarefaction = "bootstrap",
-  sample_size = NULL
+  sample_size = NULL,
+  parallel = FALSE,
+  ncores = NULL,
+  progress = TRUE,
+  ci_method = "percentile"
 )
 }
 \arguments{
@@ -29,16 +33,27 @@ disparity_resample(
 `"multivariate_variance"`. Ignored for univariate data (vector input).}
 
 \item{CI}{Desired two-sided confidence interval level (default 0.95) used for percentile
-confidence intervals.}
+confidence intervals. When `CI = 1`, returns the full range of resampled values.}
 
-\item{bootstrap_rarefaction}{Either `"bootstrap"` (default) for resampling with replacement or
-`"rarefaction"` for resampling without replacement.}
+\item{bootstrap_rarefaction}{Either `"bootstrap"` (default) for resampling with replacement, 
+`"rarefaction"` for resampling without replacement, or `"rarefaction_with_replacement"` 
+for resampling with replacement at a specified sample size.}
 
 \item{sample_size}{Either `NULL` (default), a positive integer indicating the number of rows to
-sample without replacement when `bootstrap_rarefaction=="rarefaction"`, or the character
-`"smallest"` to use the size of the smallest group (all groups rarefied to that size). If
-`"smallest"` is supplied but no groups are defined, an error is returned. Required (not `NULL`)
-when `bootstrap_rarefaction=="rarefaction"`.}
+sample when `bootstrap_rarefaction` is `"rarefaction"` or `"rarefaction_with_replacement"`, 
+or the character `"smallest"` to use the size of the smallest group (all groups rarefied to that size). 
+If `"smallest"` is supplied but no groups are defined, an error is returned. Required (not `NULL`)
+when `bootstrap_rarefaction` is `"rarefaction"` or `"rarefaction_with_replacement"`.}
+
+\item{parallel}{Logical indicating whether to use parallel processing for resampling (default FALSE).}
+
+\item{ncores}{Integer number of cores to use for parallel processing. If NULL, defaults to 
+`parallel::detectCores() - 1`.}
+
+\item{progress}{Logical indicating whether to show progress information (default TRUE).}
+
+\item{ci_method}{Character string specifying confidence interval method. Currently only 
+"percentile" is fully supported (default "percentile").}
 }
 \value{
 A list containing:
@@ -64,7 +79,8 @@ estimates of several disparity / morphospace occupation statistics.
 The function allows choosing among the following multivariate statistics:
 \itemize{
  \item Multivariate variance (trace of the covariance matrix; sum of variances)
- \item Mean pairwise Euclidean distance
+ \item Mean pairwise Euclidea
+Plot method for disparity_resample objectstance
  \item Convex hull volume (n-dimensional)
  \item Claramunt proper variance (Claramunt 2010) based on a linear shrinkage covariance matrix
 }
@@ -78,7 +94,11 @@ If `bootstrap_rarefaction=="bootstrap"`, the function performs resampling with r
 If `bootstrap_rarefaction=="rarefaction"`, the function performs resampling without replacement
 at the sample size indicated in `sample_size` (numeric) or, if `sample_size=="smallest"`,
 at the size of the smallest group (all groups are resampled to that size).
-Rarefaction requires specifying a valute to the attribute `sample_size`; an error is returned otherwise.
+Rarefaction requires specifying a value to the attribute `sample_size`; an error is returned otherwise.
+
+If `bootstrap_rarefaction=="rarefaction_with_replacement"`, the function performs resampling 
+with replacement at the sample size indicated in `sample_size`. This is equivalent to 
+choosing "bootstrap" with a specified `sample_size`.
 }
 \note{
 Because of how the computation works, convex hull volume computation requires the number of observations (specimens) to be (substantially) greater than the number of variables (dimensions).
@@ -93,10 +113,10 @@ Note how the computation here does not divide variance by sample size (other tha
 \section{Observed estimate}{
 
 For bootstrap resampling the observed estimate reported is the statistic computed on the
-original (non-resampled) data for each group. For rarefaction, because the purpose is to make
-groups comparable at a common (smaller) sample size, the observed estimate reported is the
-mean of the rarefied resampled values for that group (i.e., the mean across all rarefaction
-replicates).
+original (non-resampled) data for each group. For rarefaction and rarefaction_with_replacement, 
+because the purpose is to make groups comparable at a common (smaller) sample size, the observed 
+estimate reported is the mean of the rarefied resampled values for that group (i.e., the mean 
+across all rarefaction replicates).
 }
 
 \section{Input data types}{
@@ -104,6 +124,13 @@ replicates).
 `Data` can be a data frame, a matrix, a vector, or a 3D array of landmark coordinates
 (e.g., p landmarks x k dimensions x n specimens). In the latter case, the array is converted
 internally to a 2D matrix with specimens in rows and (landmark * dimension) variables in columns.
+}
+
+\section{Confidence intervals}{
+
+When `CI = 1`, the function returns the full range (minimum and maximum) of the resampled 
+values instead of confidence intervals. This can be useful for exploring the complete 
+variability of the statistic.
 }
 
 \examples{
@@ -115,32 +142,36 @@ if (requireNamespace("MASS", quietly = TRUE)) {
   Data = rbind(X1, X2)
   grp = factor(c(rep("A", nrow(X1)), rep("B", nrow(X2))))
 
-  # Bootstrap multivariate variance
+  # Bootstrap multivariate variance with BCa intervals (if boot package available)
   boot_res = disparity_resample(Data, group=grp, n_resamples=200,
                                 statistic="multivariate_variance",
-                                bootstrap_rarefaction="bootstrap")
-  # Direct access to results table
-  boot_res$results
-  
-  # Using the print method for formatted output
+                                bootstrap_rarefaction="bootstrap",
+                                ci_method="bca")
   print(boot_res)
   
-  # Using the plot method to visualize results
-  # plot(boot_res)  # Uncomment to create confidence interval plot
-
   # Rarefaction (to the smallest group size) of mean pairwise Euclidean distance
   rar_res = disparity_resample(Data, group=grp, n_resamples=200,
                                statistic="mean_pairwise_euclidean_distance",
-                               bootstrap_rarefaction="rarefaction", sample_size="smallest")
-# Now simulate a third group with larger variance
- X3 = MASS::mvrnorm(15, mu=rep(0, 10), Sigma=diag(10)*1.5)
- grp2 = factor(c(rep("A", nrow(X1)), rep("B", nrow(X2)), rep("C", nrow(X3))))
- boot_res2 = disparity_resample(Data=rbind(X1, X2, X3), group=grp2, n_resamples=1000,
-                                statistic="multivariate_variance",
-                                bootstrap_rarefaction="bootstrap")
- print(boot_res2)
- # plot(boot_res2)
- # Plot of the obtained (95\%) confidence intervals (uncomment to plot)
+                               bootstrap_rarefaction="rarefaction", 
+                               sample_size="smallest")
+  
+  # Rarefaction with replacement at fixed sample size
+  raref_repl_res = disparity_resample(Data, group=grp, n_resamples=200,
+                                      statistic="multivariate_variance",
+                                      bootstrap_rarefaction="rarefaction_with_replacement",
+                                      sample_size=15)
+  
+  # Get full range of values (CI = 1)
+  range_res = disparity_resample(Data, group=grp, n_resamples=200,
+                                 statistic="multivariate_variance",
+                                 bootstrap_rarefaction="bootstrap",
+                                 CI=1.0)
+  
+  # Parallel processing with multiple cores
+  # parallel_res = disparity_resample(Data, group=grp, n_resamples=1000,
+  #                                   statistic="multivariate_variance",
+  #                                   bootstrap_rarefaction="bootstrap",
+  #                                   ncores=4)
 }
 
 }
