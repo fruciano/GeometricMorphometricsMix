@@ -30,7 +30,7 @@ computation and are of doubtful utility when analyzing tree distributions)}
 
 \item{verbose}{logical, whether to print progress information (default TRUE)}
 
-\item{ncores}{number of cores to use for per-tree parallelization (default: detectCores(logical = FALSE))}
+\item{ncores}{number of cores to use for parallelization (default: detectCores(logical = FALSE) - 1)}
 }
 \value{
 The function outputs a data.frame with classes "parallel_Kmult" and "data.frame" containing columns:
@@ -51,27 +51,18 @@ datasets and tree sets, computing Kmult for all combinations.
 This is an updated and improved version of the function included in Fruciano et al. 2017.
 It performs the computation of Adams' Kmult (Adams 2014) in parallel
 with the aim of facilitating computation on a distribution of trees rather than a single tree.
-This version uses the future framework for parallelization, making it more flexible
-and compatible across different operating systems.
+This version uses cross-platform parallel processing that works on Windows, Mac, and Linux systems.
 If one wanted to perform a computation of Kmult on a single tree, he/she would be
 advised to use the version implemented in the package geomorph, which receives regular updates.
 }
 \section{Parallelization}{
 
-This function uses the future framework for parallelization. To enable parallel processing,
-you need to set up a future plan before calling this function. For example:
-\itemize{
-  \item For sequential processing: \code{future::plan(future::sequential)}
-  \item For multicore processing (Unix/Mac): \code{future::plan(future::multicore, workers = 4)}
-  \item For multisession processing (Windows/Unix/Mac): \code{future::plan(future::multisession, workers = 4)}
-  \item For cluster processing: \code{future::plan(future::cluster, workers = c("host1", "host2"))}
-}
-On Windows machines, use \code{future::plan(future::multisession, workers = 4)} for parallel processing.
-The number of workers should typically not exceed the number of CPU cores available.
-
-
-This function performs parallelization at the level of individual trees within each treeset.
-This is because the main utility of this function is to parallelise across distributions of many trees.
+This function automatically uses parallel processing when beneficial. The parallelization
+is handled internally and works across different operating systems. On Windows, it uses
+a PSOCK cluster; on Unix-like systems (Mac/Linux), it tries to use forking and falls back
+to PSOCK if needed. The function performs parallelization at the level of individual trees
+within each treeset, which is optimal for analyzing distributions of many trees.
+The number of cores used is controlled by the \code{ncores} parameter.
 }
 
 \section{Citation}{
@@ -93,11 +84,6 @@ The returned object has specialized S3 methods:
 
 \examples{
 \dontrun{
-# Set up future for parallel processing on multiple cores (including Windows)
-library(future)
-plan(multisession, workers = 6)
-# Use multisession backend which works on all platforms including Windows
-
 # Load required packages for data simulation
 library(phytools)
 library(MASS)
@@ -142,7 +128,7 @@ rownames(dataset_bm) = tree_pruned$tip.label
 
 # Example 1: Single dataset and single treeset analysis
 result_single = Kmultparallel(dataset_bm, treeset1)
-# Analyze BM dataset with first treeset
+# Analyze BM dataset with first treeset (uses default number of cores)
 
 # Use S3 methods to examine results
 print(result_single)
@@ -183,6 +169,10 @@ plot(result_multiple)
 # Custom plotting with different transparency
 plot(result_multiple, alpha = 0.5, title = "Kmult Distribution Across All Combinations")
 # Customize the plot appearance
+
+# Example 3: Using custom number of cores
+result_custom = Kmultparallel(dataset_bm, treeset1, ncores = 2)
+# Use only 2 cores for parallel processing
 }
 
 }
