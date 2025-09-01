@@ -147,9 +147,8 @@ result_single = Kmultparallel(dataset_bm, treeset1)
 # Use S3 methods to examine results
 print(result_single)
 # Display summary of Kmult values
-# Notice how the range is very broad because we have high phylogenetic signal
-# for the case in which the dataset has been simulated under Brownian motion
-# with the first tree, but low phylogenetic signal
+# Notice how the range is very broad because we have high phylogenetic signal for the case
+# in which the dataset has been simulated under Brownian motion with the first tree, but low phylogenetic signal
 # when we use the other trees in the treeset.
 
 plot(result_single)

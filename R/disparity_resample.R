@@ -53,7 +53,7 @@
 #'  `"claramunt_proper_variance"`. Default is
 #'  `"multivariate_variance"`. Ignored for univariate data (vector input).
 #' @param CI Desired two-sided confidence interval level (default 0.95) used for percentile
-#'  confidence intervals.
+#'  confidence intervals. Use CI=1 to display the full range (minimum to maximum) of resampled values.
 #' @param bootstrap_rarefaction Either `"bootstrap"` (default) for resampling with replacement or
 #'  `"rarefaction"` for resampling without replacement.
 #' @param sample_size Either `NULL` (default), a positive integer indicating the number of rows to
@@ -65,9 +65,11 @@
 #' @return A list containing:
 #'  \describe{
 #'    \item{chosen_statistic}{Character vector of length 1 with the human-readable name of the statistic used.}
-#'    \item{results}{A data frame with columns `group`, `observed`, `CI_min`, `CI_max`. One row per group.}
+#'    \item{results}{A data frame with columns `group`, `observed`, `CI_min`, `CI_max`. One row per group.
+#'      When CI=1, `CI_min` and `CI_max` represent the minimum and maximum of resampled values rather than confidence intervals.}
 #'    \item{resampled_values}{If a single group: numeric vector of length `n_resamples` with the resampled values.
 #'      If multiple groups: a named list with one numeric vector (length `n_resamples`) per group.}
+#'    \item{CI_level}{The CI level used (between 0 and 1). When CI=1, ranges are computed instead of confidence intervals.}
 #' }
 #' 
 #' The returned object has class "disparity_resample" and comes with associated S3 methods for 
@@ -127,113 +129,29 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
                             statistic="multivariate_variance", CI=0.95,
                             bootstrap_rarefaction="bootstrap", sample_size=NULL) {
 
-  # Input validation ----------------------------------------------------------------
+  # Input validation
+  validate_disparity_resample_inputs(Data, group, n_resamples, statistic, CI, 
+                                     bootstrap_rarefaction, sample_size)
   
-  # Validate CI parameter
-  if (!is.numeric(CI) || length(CI) != 1 || CI <= 0 || CI >= 1) {
-    stop("CI must be a single numeric value between 0 and 1 (exclusive)")
-  }
+  # Data preparation and processing
+  prepared_data = prepare_data_disparity_resample(Data, group)
   
-  # Validate n_resamples
-  if (!is.numeric(n_resamples) || length(n_resamples) != 1 || n_resamples <= 0 || n_resamples != as.integer(n_resamples)) {
-    stop("n_resamples must be a positive integer")
-  }
-  
-  # Validate bootstrap_rarefaction
-  if (!bootstrap_rarefaction %in% c("bootstrap", "rarefaction")) {
-    stop("bootstrap_rarefaction must be either 'bootstrap' or 'rarefaction'")
-  }
+  # Extract variables for compatibility with existing code
+  Data = prepared_data$data
+  group_factor = prepared_data$group_factor
+  group_levels = prepared_data$group_levels
+  group_sizes = prepared_data$group_sizes
+  original_input_is_vector = prepared_data$original_input_is_vector
+  single_group_analysis = prepared_data$single_group_analysis
+  n_obs = prepared_data$n_obs
 
-  # Coerce Data to appropriate matrix / vector form ---------------------------------
-  original_input_is_vector=FALSE
-  if (is.array(Data) && length(dim(Data))==3) {
-    # Assume dimensions: landmarks x dimensions x specimens (p x k x n)
-    if (!requireNamespace("Morpho", quietly = TRUE)) {
-      stop("Package 'Morpho' is required for 3D array conversion")
-    }
-    Data=Morpho::vecx(Data)
-    # Convert to matrix
-  }
-  if (is.vector(Data) && !is.list(Data)) {
-    Data = as.numeric(Data)
-    original_input_is_vector=TRUE
-  }
-  if (is.data.frame(Data)) { Data = as.matrix(Data) }
-  if (!original_input_is_vector && !is.matrix(Data)) {
-    stop("Data should be a matrix, data frame, vector, or a 3D array") }
+  # Group validation
+  validate_groups_disparity_resample(group_sizes)
 
-  # Handle missing data -------------------------------------------------------------
-  if (original_input_is_vector) {
-    missing_indices = which(is.na(Data))
-    if (length(missing_indices) > 0) {
-      warning(sprintf("Removing %d observations with missing data", length(missing_indices)))
-      Data = Data[-missing_indices]
-      if (!is.null(group)) {
-        group = group[-missing_indices]
-      }
-    }
-  } else {
-    missing_rows = which(apply(Data, 1, function(x) any(is.na(x))))
-    if (length(missing_rows) > 0) {
-      warning(sprintf("Removing %d observations with missing data", length(missing_rows)))
-      Data = Data[-missing_rows, , drop=FALSE]
-      if (!is.null(group)) {
-        group = group[-missing_rows]
-      }
-    }
-  }
-  
-  # Check for empty data after missing data removal
-  n_obs = ifelse(original_input_is_vector, length(Data), nrow(Data))
-  if (n_obs == 0) {
-    stop("No observations remain after removing missing data")
-  }
+  # Statistic validation
+  validate_stat_reqs_disparity_resample(statistic, prepared_data, sample_size, bootstrap_rarefaction)
 
-  # Handle grouping -----------------------------------------------------------------
-  n_obs = ifelse(original_input_is_vector, length(Data), nrow(Data))
-  
-  if (is.null(group)) {
-    group_factor = factor(rep("All", n_obs))
-    single_group_analysis = TRUE
-  } else {
-    if (length(group) != n_obs) {
-      stop("Length of group does not match number of observations after removing missing data") 
-    }
-    group_factor = as.factor(group)
-    single_group_analysis = FALSE
-  }
-
-  group_levels = levels(group_factor)
-  
-  # Validate group sizes (minimum 2 observations per group for variance calculation)
-  group_sizes = table(group_factor)
-  min_group_size = min(group_sizes)
-  
-  if (min_group_size < 2) {
-    small_groups = names(group_sizes)[group_sizes < 2]
-    stop(sprintf("All groups must have at least 2 observations for variance calculation. Groups with < 2 observations: %s", 
-                 paste(small_groups, collapse=", ")))
-  }
-
-  # Determine statistic --------------------------------------------------------------
-  statistic_choices=c("multivariate_variance", "mean_pairwise_euclidean_distance",
-                      "convex_hull_volume", "claramunt_proper_variance")
-
-  if (!original_input_is_vector) {
-    if (!(statistic %in% statistic_choices)) {
-      stop(paste("statistic should be one of:", paste(statistic_choices, collapse=", "))) 
-    }
-    
-    # Special validation for convex hull volume
-    if (statistic == "convex_hull_volume") {
-      n_vars = ncol(Data)
-      if (min_group_size <= n_vars) {
-        stop(sprintf("Convex hull volume requires more observations than variables in each group. Minimum group size: %d, Number of variables: %d", 
-                     min_group_size, n_vars))
-      }
-    }
-  }
-
+  # Statistic setup and labeling
   stat_label_map=list(multivariate_variance="Multivariate variance",
                       mean_pairwise_euclidean_distance="Mean pairwise Euclidean distance",
                       convex_hull_volume="Convex hull volume",
@@ -261,41 +179,9 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
     }
   }
 
-  # Rarefaction settings ------------------------------------------------------------
+  # Rarefaction settings using modular function --------------------------
   if (bootstrap_rarefaction=="rarefaction") {
-    if (is.null(sample_size)) { 
-      stop("sample_size must be provided for rarefaction") 
-    }
-    if (identical(sample_size, "smallest")) {
-      if (length(group_levels)==1) { 
-        stop("sample_size='smallest' requires multiple groups") 
-      }
-      sample_size_num=min(group_sizes)
-    } else {
-      sample_size_num=as.numeric(sample_size)
-      if (is.na(sample_size_num) || sample_size_num<=0 || sample_size_num != as.integer(sample_size_num)) { 
-        stop("sample_size must be a positive integer or 'smallest'") 
-      }
-    }
-    
-    # Validate that sample_size is appropriate for all groups
-    if (sample_size_num < 2) {
-      stop("sample_size for rarefaction must be at least 2 for variance calculation")
-    }
-    
-    if (sample_size_num > min_group_size) {
-      stop(sprintf("sample_size (%d) is larger than the smallest group size (%d)", 
-                   sample_size_num, min_group_size))
-    }
-    
-    # Special validation for convex hull with rarefaction
-    if (!original_input_is_vector && statistic == "convex_hull_volume") {
-      n_vars = ncol(Data)
-      if (sample_size_num <= n_vars) {
-        stop(sprintf("Convex hull volume with rarefaction requires sample_size > number of variables. sample_size: %d, Number of variables: %d", 
-                     sample_size_num, n_vars))
-      }
-    }
+    sample_size_num = resolve_rarefaction_sample_size(sample_size, group_sizes)
   }
 
   # Preallocation of "storage"
@@ -324,8 +210,14 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
       observed_stat=compute_stat(Xg)
     } else { stop("bootstrap_rarefaction must be either 'bootstrap' or 'rarefaction'") }
 
-    CI_min=quantile(res_vals, probs=alpha, names=FALSE, type=7)
-    CI_max=quantile(res_vals, probs=1-alpha, names=FALSE, type=7)
+    # Handle CI=1 as a special case for full range
+    if (CI == 1) {
+      CI_min = min(res_vals)
+      CI_max = max(res_vals)
+    } else {
+      CI_min = quantile(res_vals, probs=alpha, names=FALSE, type=7)
+      CI_max = quantile(res_vals, probs=1-alpha, names=FALSE, type=7)
+    }
 
     resampled_values_list[[g]]=res_vals
     results_rows[[g]]=data.frame(group=g, observed=observed_stat,
@@ -348,11 +240,265 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
 
   results_list=list(chosen_statistic=chosen_statistic,
               results=results_df,
-              resampled_values=resampled_values_out)
+              resampled_values=resampled_values_out,
+              CI_level=CI)
   class(results_list)=c("disparity_resample", "list")
   # Set class for S3 methods
 return(results_list)
 }
+
+##########################
+## Validation Functions ##
+##########################
+
+
+#' Validate inputs for disparity_resample function
+#'
+#' @param Data Input data for validation
+#' @param group Group factor for validation  
+#' @param n_resamples Number of resamples for validation
+#' @param statistic Statistic choice for validation
+#' @param CI Confidence interval level for validation (0 < CI <= 1, where CI=1 means full range)
+#' @param bootstrap_rarefaction Resampling method for validation
+#' @param sample_size Sample size for rarefaction validation
+#'
+#' @return NULL (throws errors if validation fails)
+#' @noRd
+validate_disparity_resample_inputs = function(Data, group, n_resamples, statistic, CI, 
+                                               bootstrap_rarefaction, sample_size) {
+  
+  # Validate CI parameter
+  if (!is.numeric(CI) || length(CI) != 1 || CI <= 0 || CI > 1) {
+    stop("CI must be a single numeric value between 0 and 1 (inclusive). Use CI=1 to display the full range of resampled values.")
+  }
+  
+  # Validate n_resamples
+  if (!is.numeric(n_resamples) || length(n_resamples) != 1 || n_resamples <= 0 || n_resamples != as.integer(n_resamples)) {
+    stop("n_resamples must be a positive integer")
+  }
+  
+  # Validate bootstrap_rarefaction
+  if (!bootstrap_rarefaction %in% c("bootstrap", "rarefaction")) {
+    stop("bootstrap_rarefaction must be either 'bootstrap' or 'rarefaction'")
+  }
+  
+  # Validate sample_size for rarefaction
+  if (bootstrap_rarefaction == "rarefaction") {
+    if (is.null(sample_size)) { 
+      stop("sample_size must be provided for rarefaction") 
+    }
+    if (!identical(sample_size, "smallest")) {
+      sample_size_num = as.numeric(sample_size)
+      if (is.na(sample_size_num) || sample_size_num <= 0 || sample_size_num != as.integer(sample_size_num)) { 
+        stop("sample_size must be a positive integer or 'smallest'") 
+      }
+    }
+  }
+  
+  invisible(NULL)
+}
+
+
+#' Prepare and validate data for disparity analysis
+#'
+#' @param Data Input data (matrix, data frame, vector, or 3D array)
+#' @param group Optional group factor
+#'
+#' @return List with processed data and metadata
+#' @noRd
+prepare_data_disparity_resample = function(Data, group) {
+  
+  # Determine if input is originally a vector
+  original_input_is_vector = FALSE
+  if (is.array(Data) && length(dim(Data)) == 3) {
+    # Assume dimensions: landmarks x dimensions x specimens (p x k x n)
+    if (!requireNamespace("Morpho", quietly = TRUE)) {
+      stop("Package 'Morpho' is required for 3D array conversion")
+    }
+    Data = Morpho::vecx(Data)
+  }
+  if (is.vector(Data) && !is.list(Data)) {
+    Data = as.numeric(Data)
+    original_input_is_vector = TRUE
+  }
+  if (is.data.frame(Data)) { 
+    Data = as.matrix(Data) 
+  }
+  if (!original_input_is_vector && !is.matrix(Data)) {
+    stop("Data should be a matrix, data frame, vector, or a 3D array") 
+  }
+
+  # Handle missing data
+  if (original_input_is_vector) {
+    missing_indices = which(is.na(Data))
+    if (length(missing_indices) > 0) {
+      warning(sprintf("Removing %d observations with missing data", length(missing_indices)))
+      Data = Data[-missing_indices]
+      if (!is.null(group)) {
+        group = group[-missing_indices]
+      }
+    }
+  } else {
+    missing_rows = which(apply(Data, 1, function(x) any(is.na(x))))
+    if (length(missing_rows) > 0) {
+      warning(sprintf("Removing %d observations with missing data", length(missing_rows)))
+      Data = Data[-missing_rows, , drop = FALSE]
+      if (!is.null(group)) {
+        group = group[-missing_rows]
+      }
+    }
+  }
+  
+  # Check for empty data after missing data removal
+  n_obs = ifelse(original_input_is_vector, length(Data), nrow(Data))
+  if (n_obs == 0) {
+    stop("No observations remain after removing missing data")
+  }
+
+  # Handle grouping
+  if (is.null(group)) {
+    group_factor = factor(rep("All", n_obs))
+    single_group_analysis = TRUE
+  } else {
+    if (length(group) != n_obs) {
+      stop("Length of group does not match number of observations after removing missing data") 
+    }
+    group_factor = as.factor(group)
+    single_group_analysis = FALSE
+  }
+
+  group_levels = levels(group_factor)
+  group_sizes = table(group_factor)
+  
+  return(list(
+    data = Data,
+    group_factor = group_factor,
+    group_levels = group_levels,
+    group_sizes = group_sizes,
+    original_input_is_vector = original_input_is_vector,
+    single_group_analysis = single_group_analysis,
+    n_obs = n_obs
+  ))
+}
+
+
+#' Validate group requirements for disparity analysis
+#'
+#' @param group_sizes Table of group sizes
+#' @param min_group_size Minimum required group size
+#'
+#' @return NULL (throws errors if validation fails)
+#' @noRd
+validate_groups_disparity_resample = function(group_sizes, min_group_size = 2) {
+  
+  min_size = min(group_sizes)
+  
+  if (min_size < min_group_size) {
+    small_groups = names(group_sizes)[group_sizes < min_group_size]
+    stop(sprintf("All groups must have at least %d observations for variance calculation. Groups with < %d observations: %s", 
+                 min_group_size, min_group_size, paste(small_groups, collapse = ", ")))
+  }
+  
+  invisible(NULL)
+}
+
+
+#' Validate statistic-specific requirements
+#'
+#' @param statistic Name of the statistic to compute
+#' @param prepared_data List returned by prepare_data_disparity_resample
+#' @param sample_size Sample size for rarefaction (if applicable)
+#' @param bootstrap_rarefaction Type of resampling
+#'
+#' @return NULL (throws errors if validation fails)
+#' @noRd
+validate_stat_reqs_disparity_resample = function(statistic, prepared_data, sample_size = NULL, bootstrap_rarefaction = "bootstrap") {
+  
+  # Skip validation for univariate data
+  if (prepared_data$original_input_is_vector) {
+    return(invisible(NULL))
+  }
+  
+  # Validate statistic choice
+  statistic_choices = c("multivariate_variance", "mean_pairwise_euclidean_distance",
+                        "convex_hull_volume", "claramunt_proper_variance")
+  
+  if (!(statistic %in% statistic_choices)) {
+    stop(paste("statistic should be one of:", paste(statistic_choices, collapse = ", "))) 
+  }
+  
+  # Special validation for convex hull volume
+  if (statistic == "convex_hull_volume") {
+    n_vars = ncol(prepared_data$data)
+    min_group_size = min(prepared_data$group_sizes)
+    
+    if (bootstrap_rarefaction == "bootstrap") {
+      if (min_group_size <= n_vars) {
+        stop(sprintf("Convex hull volume requires more observations than variables in each group. Minimum group size: %d, Number of variables: %d", 
+                     min_group_size, n_vars))
+      }
+    } else if (bootstrap_rarefaction == "rarefaction" && !is.null(sample_size)) {
+      # Resolve sample_size if it's "smallest"
+      if (identical(sample_size, "smallest")) {
+        sample_size_num = min(prepared_data$group_sizes)
+      } else {
+        sample_size_num = as.numeric(sample_size)
+      }
+      
+      if (sample_size_num <= n_vars) {
+        stop(sprintf("Convex hull volume with rarefaction requires sample_size > number of variables. sample_size: %d, Number of variables: %d", 
+                     sample_size_num, n_vars))
+      }
+    }
+  }
+  
+  invisible(NULL)
+}
+
+
+#' Resolve rarefaction sample size parameter
+#'
+#' @param sample_size User-provided sample size (numeric or "smallest")
+#' @param group_sizes Table of group sizes
+#'
+#' @return Numeric sample size value
+#' @noRd
+resolve_rarefaction_sample_size = function(sample_size, group_sizes) {
+  
+  if (identical(sample_size, "smallest")) {
+    if (length(levels(as.factor(names(group_sizes)))) == 1) { 
+      stop("sample_size='smallest' requires multiple groups") 
+    }
+    sample_size_num = min(group_sizes)
+  } else {
+    sample_size_num = as.numeric(sample_size)
+    if (is.na(sample_size_num) || sample_size_num <= 0 || sample_size_num != as.integer(sample_size_num)) { 
+      stop("sample_size must be a positive integer or 'smallest'") 
+    }
+  }
+  
+  # Additional validations
+  if (sample_size_num < 2) {
+    stop("sample_size for rarefaction must be at least 2 for variance calculation")
+  }
+  
+  min_group_size = min(group_sizes)
+  if (sample_size_num > min_group_size) {
+    stop(sprintf("sample_size (%d) is larger than the smallest group size (%d)", 
+                 sample_size_num, min_group_size))
+  }
+  
+  return(sample_size_num)
+}
+
+
+
+
+
+
+####################
+#### S3 methods ####
+####################
 
 
 #' Plot method for disparity_resample objects
@@ -360,15 +506,11 @@ return(results_list)
 #' Creates a confidence interval plot for disparity resample results
 #'
 #' @param x An object of class "disparity_resample"
-#' @param point_color A single color or vector of colors for point estimates passed to internal CI_plot.
-#'   If a vector, rules follow CI_plot: length 1 (recycled), length equal to number of x levels, or number of rows.
-#'   (default "darkblue").
-#' @param errorbar_color A single color or vector of colors for error bars (same length rules as point_color; default "darkred").
-#' @param ... Additional arguments passed to CI_plot
+#' @param ... Additional arguments
 #'
 #' @return A ggplot object
 #' @export
-plot.disparity_resample=function(x, point_color="darkblue", errorbar_color="darkred", ...) {
+plot.disparity_resample=function(x, ...) {
   # Check if results contain groups or single analysis
   if (any(x$results$group == "All") && nrow(x$results) == 1) {
     # Single group case - already labeled as "All"
@@ -383,8 +525,7 @@ plot.disparity_resample=function(x, point_color="darkblue", errorbar_color="dark
   # Create plot using internal CI_plot function
   p=CI_plot(data=plot_data, x_var="group", y_var="observed",
             ymin_var="CI_min", ymax_var="CI_max",
-            x_lab=x_lab, y_lab=x$chosen_statistic,
-            point_color=point_color, errorbar_color=errorbar_color, ...)
+            x_lab=x_lab, y_lab=x$chosen_statistic, ...)
   
 return(p)
 }
@@ -403,14 +544,32 @@ print.disparity_resample=function(x, ...) {
   
   cat("Disparity resampling results\n")
   cat("===========================\n\n")
-  cat("Statistic:", x$chosen_statistic, "\n\n")
+  cat("Statistic:", x$chosen_statistic, "\n")
+  
+  # Determine if CI=1 (range) or confidence interval
+  is_range = !is.null(x$CI_level) && x$CI_level == 1
+  
+  if (is_range) {
+    cat("Range: Full range (minimum to maximum) of resampled values\n\n")
+  } else {
+    ci_percent = if (!is.null(x$CI_level)) {
+      paste0(round(x$CI_level * 100), "%")
+    } else {
+      "95%"  # Default assumption if CI_level not stored
+    }
+    cat("Confidence level:", ci_percent, "\n\n")
+  }
   
   # Print results table
   print(x$results, row.names=FALSE)
   
   # Check for CI overlap if multiple groups
   if (nrow(x$results) > 1 && !any(x$results$group == "All")) {
-    cat("\nConfidence interval overlap assessment:\n")
+    if (is_range) {
+      cat("\nRange overlap assessment:\n")
+    } else {
+      cat("\nConfidence interval overlap assessment:\n")
+    }
     
     # Check all pairwise overlaps
     n_groups=nrow(x$results)
@@ -433,9 +592,17 @@ print.disparity_resample=function(x, ...) {
     # Check upper triangle only (avoid diagonal and duplicates)
     
     if (all_overlap) {
-      cat("All confidence intervals overlap.\n")
+      if (is_range) {
+        cat("All ranges overlap.\n")
+      } else {
+        cat("All confidence intervals overlap.\n")
+      }
     } else {
-      cat("At least one pair of confidence intervals does not overlap.\n")
+      if (is_range) {
+        cat("At least one pair of ranges does not overlap.\n")
+      } else {
+        cat("At least one pair of confidence intervals does not overlap.\n")
+      }
     }
   }
   
