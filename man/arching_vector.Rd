@@ -35,6 +35,6 @@ length(a$arching_vector_CPCA)
 Fruciano C., Schmidt, I., Ramirez Sanchez, M.M., Morek, W., Avila Valle, Z.A., Talijancic, I., Pecoraro, C., Schermann Legionnet, A. 2020. Tissue preservation can affect geometric morphometric analyses: a case study using fish body shape. Zoological Journal of the Linnean Society 188:148-162.
 }
 \seealso{
-\code{ProjectOrthogonal} for projection/removal of an effect (see also the functions that implement correction for arching in this package).
+\code{ProjectOrthogonal} for projection/removal of an effect
 }
 \keyword{datasets}
