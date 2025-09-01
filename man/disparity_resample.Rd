@@ -29,7 +29,7 @@ disparity_resample(
 `"multivariate_variance"`. Ignored for univariate data (vector input).}
 
 \item{CI}{Desired two-sided confidence interval level (default 0.95) used for percentile
-confidence intervals.}
+confidence intervals. Use CI=1 to display the full range (minimum to maximum) of resampled values.}
 
 \item{bootstrap_rarefaction}{Either `"bootstrap"` (default) for resampling with replacement or
 `"rarefaction"` for resampling without replacement.}
@@ -44,9 +44,11 @@ when `bootstrap_rarefaction=="rarefaction"`.}
 A list containing:
  \describe{
    \item{chosen_statistic}{Character vector of length 1 with the human-readable name of the statistic used.}
-   \item{results}{A data frame with columns `group`, `observed`, `CI_min`, `CI_max`. One row per group.}
+   \item{results}{A data frame with columns `group`, `observed`, `CI_min`, `CI_max`. One row per group.
+     When CI=1, `CI_min` and `CI_max` represent the minimum and maximum of resampled values rather than confidence intervals.}
    \item{resampled_values}{If a single group: numeric vector of length `n_resamples` with the resampled values.
      If multiple groups: a named list with one numeric vector (length `n_resamples`) per group.}
+   \item{CI_level}{The CI level used (between 0 and 1). When CI=1, ranges are computed instead of confidence intervals.}
 }
 
 The returned object has class "disparity_resample" and comes with associated S3 methods for 
