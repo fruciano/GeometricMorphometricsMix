@@ -19,8 +19,8 @@ number of tips).}
 only the observed phylogenetic-weighted regression is returned. Default
 is 1000.}
 
-\item{model}{Character; evolutionary model used for simulation. Passed to
-the PGLS simulation routine (e.g. "BM").}
+\item{model}{Character; evolutionary model used for simulation and tree scaling
+(can take values "BM" or "lambda").}
 
 \item{ncores}{Integer; number of cores to use for simulations. Default is 1.}
 }

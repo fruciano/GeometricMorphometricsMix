@@ -206,3 +206,18 @@ safe_parallel_lapply = function(X, FUN, ncores = (parallel::detectCores(logical 
   }
 }
 
+# Ancillary function to perform
+# a lambda transformation for a phylogenetic tree
+lambda_transform = function(tree, lambda) {
+  # variance–covariance matrix of the tree
+  V = vcv.phylo(tree)
+  
+  # apply Pagel's lambda
+  V_lambda = lambda * V
+  diag(V_lambda) = diag(V)  # variances unchanged
+  
+  # reconstruct a tree from the transformed matrix
+  tree_lambda = ape::vcv2phylo(V_lambda)
+  attr(tree_lambda, "order") = " "
+  return(tree_lambda)
+}

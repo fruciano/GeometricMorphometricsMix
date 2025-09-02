@@ -20,8 +20,8 @@
 #' @param nsim Integer; number of parametric simulations to perform. If 0,
 #'   only the observed phylogenetic-weighted regression is returned. Default
 #'   is 1000.
-#' @param model Character; evolutionary model used for simulation. Passed to
-#'   the PGLS simulation routine (e.g. "BM").
+#' @param model Character; evolutionary model used for simulation and tree scaling
+#' (can take values "BM" or "lambda").
 #' @param ncores Integer; number of cores to use for simulations. Default is 1.
 #'
 #' @return If `nsim == 0`, returns an object of class `phylo_wregr_fit`
@@ -99,33 +99,59 @@ phylo_wregression=function(tree, Y, X, nsim=1000, model="BM", ncores=1){
   if (missing(tree) || is.null(tree) || !inherits(tree, "phylo")) stop("Argument 'tree' must be a valid phylo object.")
   if (missing(Y) || is.null(Y) || (!is.numeric(Y) && !is.data.frame(Y) && !is.matrix(Y))) stop("Argument 'Y' must be numeric, matrix, or data.frame.")
   if (missing(X) || is.null(X) || (!is.numeric(X) && !is.factor(X))) stop("Argument 'X' must be numeric or factor.")
+  
+  # Fit PGLS model (this is used for simulations but also,
+  # in case the chosen model is "lambda", to obtain a value of "lambda"
+  # to scale the tree)
+  PGLS_model_fit = fit_pgls(tree, Y, X, model = model)
 
-  # Fit the phylogenetic weighted regression model
-  wmodel_fit = phylo_w_regr_fit(tree, Y, X)
-
-  if (nsim>0) {
-    # Routine for simulating data under a PGLS model for the whole tree
-    # To test for the effect of tree shape
-
-    # Fit PGLS model
-    PGLS_model_fit = fit_pgls(tree, Y, X, model = model)
-
-    # Use the class of the object produced by this function to determine if data
+    # Use the class of the object produced by the PGLS model fit to determine if data
     # is multivariate or univariate (essentially using the checks already implemented
     # in the fit_pgls() function)
     is_univariate = inherits(PGLS_model_fit, "phylolm")
 
+
+  if(model == "lambda") {
+    if(is_univariate){
+      lambda_value = PGLS_model_fit$optpar  
+    } else {
+      lambda_value = PGLS_model_fit$param
+    }
+    if(lambda_value==1) {
+     warning("The fitted value of lambda is 1, performing analysis using Brownian motion")
+     model = "BM"
+    } else {
+      tree=lambda_transform(tree, lambda_value)
+      PGLS_model_fit$tree = fit_pgls(tree, Y, X, model = "BM")
+      # Refit the model. This is not strictly necessary but for now
+      # we keep it like this to avoid problems with the tree
+    }
+  }
+
+  # Fit the phylogenetic weighted regression model
+  wmodel_fit = phylo_w_regr_fit(tree, Y, X)
+  
+  if (nsim>0) {
+    # Routine for simulating data under a PGLS model for the whole tree
+    # To test for the effect of tree shape
+
+
     # Simulate data under the fitted PGLS model
-    PGLS_simulations = PGLS_sim_gen(PGLS_model_fit, nsim = nsim, model = model)
+    PGLS_simulations = PGLS_sim_gen(PGLS_model_fit, nsim = nsim)
 
 
     # Fit the phylogenetic weighted regression model on each simulated dataset
+
+    packages_for_parallel=ifelse(is_univariate,
+                                  c("phylolm", "stats"),
+                                  c("mvMORPH", "stats"))
+
     PGLS_simulations_wregr_fits = safe_parallel_lapply(
       PGLS_simulations, function(sim_data) {
       fit = phylo_w_regr_fit(tree, Y=sim_data, X=X)
       return(fit$coefficients)
     }, ncores = ncores,
-        packages = c("mvMORPH", "stats"),
+        packages = packages_for_parallel,
         type = "auto")
 
     if (is_univariate){
