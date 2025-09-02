@@ -16,6 +16,12 @@
 #'
 #' If `bootstrap_rarefaction=="bootstrap"`, the function performs resampling with replacement
 #' (i.e., classical bootstrap) by sampling rows of the data matrix / data frame.
+#' Optionally, the user can specify a custom sample size via the `sample_size` argument.
+#' This allows comparison of bootstrap confidence intervals at the same sample size
+#' (essentially, this is rarefaction sampling with replacement), which can be useful
+#' to compare bootstrapped confidence intervals across different groups for statistics which
+#' are sensitive to sample size (at the expense of broader than necessary
+#' confidence intervals for groups that are larger).
 #'
 #' If `bootstrap_rarefaction=="rarefaction"`, the function performs resampling without replacement
 #' at the sample size indicated in `sample_size` (numeric) or, if `sample_size=="smallest"`,
@@ -23,11 +29,13 @@
 #' Rarefaction requires specifying a valute to the attribute `sample_size`; an error is returned otherwise.
 #'
 #' @section Observed estimate:
-#' For bootstrap resampling the observed estimate reported is the statistic computed on the
-#' original (non-resampled) data for each group. For rarefaction, because the purpose is to make
-#' groups comparable at a common (smaller) sample size, the observed estimate reported is the
-#' mean of the rarefied resampled values for that group (i.e., the mean across all rarefaction
-#' replicates).
+#' For bootstrap resampling at the original sample size, the observed estimate reported is the 
+#' statistic computed on the original (non-resampled) data for each group. For bootstrap resampling
+#' at a custom sample size, the observed estimate is the mean of the bootstrap resampled values 
+#' (for consistency with rarefaction when sample size differs from original). For rarefaction, 
+#' because the purpose is to make groups comparable at a common (smaller) sample size, the observed 
+#' estimate reported is the mean of the rarefied resampled values for that group (i.e., the mean 
+#' across all rarefaction replicates).
 #'
 #' @section Input data types:
 #' `Data` can be a data frame, a matrix, a vector, or a 3D array of landmark coordinates
@@ -57,10 +65,11 @@
 #' @param bootstrap_rarefaction Either `"bootstrap"` (default) for resampling with replacement or
 #'  `"rarefaction"` for resampling without replacement.
 #' @param sample_size Either `NULL` (default), a positive integer indicating the number of rows to
-#'  sample without replacement when `bootstrap_rarefaction=="rarefaction"`, or the character
-#'  `"smallest"` to use the size of the smallest group (all groups rarefied to that size). If
-#'  `"smallest"` is supplied but no groups are defined, an error is returned. Required (not `NULL`)
-#'  when `bootstrap_rarefaction=="rarefaction"`.
+#'  sample, or the character `"smallest"` to use the size of the smallest group (all groups 
+#'  resampled to that size). For `bootstrap_rarefaction=="rarefaction"`, sampling is without 
+#'  replacement and this parameter is required (not `NULL`). For `bootstrap_rarefaction=="bootstrap"`, 
+#'  sampling is with replacement; if `NULL`, uses original group sizes, otherwise uses the 
+#'  specified sample size. If `"smallest"` is supplied but no groups are defined, an error is returned.
 #'
 #' @return A list containing:
 #'  \describe{
@@ -183,6 +192,11 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
   if (bootstrap_rarefaction=="rarefaction") {
     sample_size_num = resolve_rarefaction_sample_size(sample_size, group_sizes)
   }
+  
+  # Bootstrap with custom sample size settings -----------------------------
+  if (bootstrap_rarefaction=="bootstrap" && !is.null(sample_size)) {
+    sample_size_num = resolve_bootstrap_sample_size(sample_size, group_sizes)
+  }
 
   # Preallocation of "storage"
   resampled_values_list=list()
@@ -203,11 +217,21 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
       }))
       observed_stat=mean(res_vals)
     } else if (bootstrap_rarefaction=="bootstrap") {
-      res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
-        sampled_idx=sample(seq_len(n_g), n_g, replace=TRUE)
-  if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
-      }))
-      observed_stat=compute_stat(Xg)
+      if (!is.null(sample_size)) {
+        # Bootstrap with custom sample size
+        res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
+          sampled_idx=sample(seq_len(n_g), sample_size_num, replace=TRUE)
+    if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+        }))
+        observed_stat=mean(res_vals)  # For consistency with rarefaction when sample size differs
+      } else {
+        # Standard bootstrap (original sample size)
+        res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
+          sampled_idx=sample(seq_len(n_g), n_g, replace=TRUE)
+    if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+        }))
+        observed_stat=compute_stat(Xg)  # Original data statistic
+      }
     } else { stop("bootstrap_rarefaction must be either 'bootstrap' or 'rarefaction'") }
 
     # Handle CI=1 as a special case for full range
@@ -287,6 +311,16 @@ validate_disparity_resample_inputs = function(Data, group, n_resamples, statisti
     if (is.null(sample_size)) { 
       stop("sample_size must be provided for rarefaction") 
     }
+    if (!identical(sample_size, "smallest")) {
+      sample_size_num = as.numeric(sample_size)
+      if (is.na(sample_size_num) || sample_size_num <= 0 || sample_size_num != as.integer(sample_size_num)) { 
+        stop("sample_size must be a positive integer or 'smallest'") 
+      }
+    }
+  }
+  
+  # Validate sample_size for bootstrap (when provided)
+  if (bootstrap_rarefaction == "bootstrap" && !is.null(sample_size)) {
     if (!identical(sample_size, "smallest")) {
       sample_size_num = as.numeric(sample_size)
       if (is.na(sample_size_num) || sample_size_num <= 0 || sample_size_num != as.integer(sample_size_num)) { 
@@ -433,9 +467,24 @@ validate_stat_reqs_disparity_resample = function(statistic, prepared_data, sampl
     min_group_size = min(prepared_data$group_sizes)
     
     if (bootstrap_rarefaction == "bootstrap") {
-      if (min_group_size <= n_vars) {
-        stop(sprintf("Convex hull volume requires more observations than variables in each group. Minimum group size: %d, Number of variables: %d", 
-                     min_group_size, n_vars))
+      if (!is.null(sample_size)) {
+        # Bootstrap with custom sample size
+        if (identical(sample_size, "smallest")) {
+          sample_size_num = min(prepared_data$group_sizes)
+        } else {
+          sample_size_num = as.numeric(sample_size)
+        }
+        
+        if (sample_size_num <= n_vars) {
+          stop(sprintf("Convex hull volume with bootstrap at custom sample size requires sample_size > number of variables. sample_size: %d, Number of variables: %d", 
+                       sample_size_num, n_vars))
+        }
+      } else {
+        # Standard bootstrap (original group sizes)
+        if (min_group_size <= n_vars) {
+          stop(sprintf("Convex hull volume requires more observations than variables in each group. Minimum group size: %d, Number of variables: %d", 
+                       min_group_size, n_vars))
+        }
       }
     } else if (bootstrap_rarefaction == "rarefaction" && !is.null(sample_size)) {
       # Resolve sample_size if it's "smallest"
@@ -487,6 +536,39 @@ resolve_rarefaction_sample_size = function(sample_size, group_sizes) {
     stop(sprintf("sample_size (%d) is larger than the smallest group size (%d)", 
                  sample_size_num, min_group_size))
   }
+  
+  return(sample_size_num)
+}
+
+
+#' Resolve bootstrap sample size parameter (when sample_size is specified for bootstrap)
+#'
+#' @param sample_size User-provided sample size (numeric or "smallest")
+#' @param group_sizes Table of group sizes
+#'
+#' @return Numeric sample size value
+#' @noRd
+resolve_bootstrap_sample_size = function(sample_size, group_sizes) {
+  
+  if (identical(sample_size, "smallest")) {
+    if (length(levels(as.factor(names(group_sizes)))) == 1) { 
+      stop("sample_size='smallest' requires multiple groups") 
+    }
+    sample_size_num = min(group_sizes)
+  } else {
+    sample_size_num = as.numeric(sample_size)
+    if (is.na(sample_size_num) || sample_size_num <= 0 || sample_size_num != as.integer(sample_size_num)) { 
+      stop("sample_size must be a positive integer or 'smallest'") 
+    }
+  }
+  
+  # Additional validations
+  if (sample_size_num < 2) {
+    stop("sample_size for bootstrap must be at least 2 for variance calculation")
+  }
+  
+  # Note: For bootstrap with replacement, sample_size can be larger than the original group size
+  # This is a key difference from rarefaction
   
   return(sample_size_num)
 }

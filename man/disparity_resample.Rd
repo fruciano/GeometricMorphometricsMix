@@ -35,10 +35,11 @@ confidence intervals. Use CI=1 to display the full range (minimum to maximum) of
 `"rarefaction"` for resampling without replacement.}
 
 \item{sample_size}{Either `NULL` (default), a positive integer indicating the number of rows to
-sample without replacement when `bootstrap_rarefaction=="rarefaction"`, or the character
-`"smallest"` to use the size of the smallest group (all groups rarefied to that size). If
-`"smallest"` is supplied but no groups are defined, an error is returned. Required (not `NULL`)
-when `bootstrap_rarefaction=="rarefaction"`.}
+sample, or the character `"smallest"` to use the size of the smallest group (all groups 
+resampled to that size). For `bootstrap_rarefaction=="rarefaction"`, sampling is without 
+replacement and this parameter is required (not `NULL`). For `bootstrap_rarefaction=="bootstrap"`, 
+sampling is with replacement; if `NULL`, uses original group sizes, otherwise uses the 
+specified sample size. If `"smallest"` is supplied but no groups are defined, an error is returned.}
 }
 \value{
 A list containing:
@@ -76,6 +77,12 @@ the (univariate) variance within each group (the attribute `statistic` is ignore
 
 If `bootstrap_rarefaction=="bootstrap"`, the function performs resampling with replacement
 (i.e., classical bootstrap) by sampling rows of the data matrix / data frame.
+Optionally, the user can specify a custom sample size via the `sample_size` argument.
+This allows comparison of bootstrap confidence intervals at the same sample size
+(essentially, this is rarefaction sampling with replacement), which can be useful
+to compare bootstrapped confidence intervals across different groups for statistics which
+are sensitive to sample size (at the expense of broader than necessary
+confidence intervals for groups that are larger).
 
 If `bootstrap_rarefaction=="rarefaction"`, the function performs resampling without replacement
 at the sample size indicated in `sample_size` (numeric) or, if `sample_size=="smallest"`,
@@ -94,11 +101,13 @@ Note how the computation here does not divide variance by sample size (other tha
 }
 \section{Observed estimate}{
 
-For bootstrap resampling the observed estimate reported is the statistic computed on the
-original (non-resampled) data for each group. For rarefaction, because the purpose is to make
-groups comparable at a common (smaller) sample size, the observed estimate reported is the
-mean of the rarefied resampled values for that group (i.e., the mean across all rarefaction
-replicates).
+For bootstrap resampling at the original sample size, the observed estimate reported is the 
+statistic computed on the original (non-resampled) data for each group. For bootstrap resampling
+at a custom sample size, the observed estimate is the mean of the bootstrap resampled values 
+(for consistency with rarefaction when sample size differs from original). For rarefaction, 
+because the purpose is to make groups comparable at a common (smaller) sample size, the observed 
+estimate reported is the mean of the rarefied resampled values for that group (i.e., the mean 
+across all rarefaction replicates).
 }
 
 \section{Input data types}{
