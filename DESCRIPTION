@@ -1,6 +1,6 @@
 Package: GeometricMorphometricsMix
 Title: A heterogeneous set of methods for shape and other multidimensional data
-Version: 0.4.1.1
+Version: 0.4.2.1
 Authors@R: person("Carmelo", "Fruciano", email = "carmelo.fruciano@unict.it", role = c("aut", "cre"))
 Description: Several methods for the analysis of shape and other multidimensional data. Originally developed to assist participants in my workshops, evolved into a heterogeneous set of functions to perform analyses usually not found in other packages.
 Depends: R (>= 3.4.0),
