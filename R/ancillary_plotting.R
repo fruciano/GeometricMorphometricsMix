@@ -7,15 +7,15 @@ utils::globalVariables(c("CI_point_color", "CI_errorbar_color"))
 #' Create confidence interval plot
 #'
 #' Creates a simple ggplot showing points with error bars for confidence intervals.
-#' Based on a data frame with group, observed values, and confidence interval limits.
+#' Based on a data frame with group, average values, and confidence interval limits.
 #'
 #' @param data A data frame containing the plotting data
 #' @param x_var Character string specifying the column name for x-axis values (default "group")
-#' @param y_var Character string specifying the column name for y-axis values (default "observed")
+#' @param y_var Character string specifying the column name for y-axis values (default "average")
 #' @param ymin_var Character string specifying the column name for lower CI limit (default "CI_min")
 #' @param ymax_var Character string specifying the column name for upper CI limit (default "CI_max")
 #' @param x_lab Character string for x-axis label (default "Group")
-#' @param y_lab Character string for y-axis label (default "Observed")
+#' @param y_lab Character string for y-axis label (default "Average")
 #' @param point_color A single color or a vector of colors for point estimates.
 #'   If length 1, the same color is used for all points. If length equals the
 #'   number of unique x-axis levels OR the number of rows in `data`, colors are
@@ -27,9 +27,9 @@ utils::globalVariables(c("CI_point_color", "CI_errorbar_color"))
 #' @return A ggplot object
 #'
 #' @noRd
-CI_plot=function(data, x_var="group", y_var="observed", 
+CI_plot=function(data, x_var="group", y_var="average", 
                  ymin_var="CI_min", ymax_var="CI_max",
-                 x_lab="Group", y_lab="Observed", 
+                 x_lab="Group", y_lab="Average", 
                  point_color="darkblue", errorbar_color="darkred", ...) {
   
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
