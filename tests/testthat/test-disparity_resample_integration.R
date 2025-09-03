@@ -2,13 +2,15 @@
 # Tests using package data and testing unusual edge cases
 
 test_that("disparity_resample works with brown_trout dataset", {
-  skip_if_not_available("brown_trout")
+  skip_if_not_installed("GeometricMorphometricsMix")
   
   data("brown_trout", package = "GeometricMorphometricsMix")
   
-  if (exists("brown_trout")) {
+  if (exists("brown_trout") && is.list(brown_trout)) {
     # Test with actual package data if available
-    result = disparity_resample(brown_trout, n_resamples = 50)
+    # Use the landmark coordinates from brown_trout
+    landmark_data = brown_trout$without_arching  # Use the corrected landmark data
+    result = disparity_resample(landmark_data, n_resamples = 50)
     expect_s3_class(result, "disparity_resample")
     expect_equal(result$results$group, "All")
   }
@@ -96,9 +98,13 @@ test_that("disparity_resample handles constant data", {
 
 test_that("disparity_resample validation with mixed data types", {
   # Test error handling with inappropriate data types
-  expect_error(disparity_resample("not_a_matrix"))
-  expect_error(disparity_resample(list(a = 1, b = 2)))
-  expect_error(disparity_resample(factor(1:10)))
+  # Suppress warnings about data coercion during error testing
+  expect_error(suppressWarnings(disparity_resample("not_a_matrix")), 
+               regexp = "matrix|numeric|data")
+  expect_error(disparity_resample(list(a = 1, b = 2)),
+               regexp = "matrix|numeric|data")
+  expect_error(disparity_resample(factor(1:10)),
+               regexp = "matrix|numeric|data")
 })
 
 test_that("disparity_resample handles unbalanced groups appropriately", {
@@ -145,8 +151,10 @@ test_that("disparity_resample with all missing data in one variable", {
   test_data = matrix(rnorm(20), nrow = 10, ncol = 2)
   test_data[, 2] = NA  # Make one column all NA
   
-  expect_warning(result = disparity_resample(test_data, n_resamples = 20))
-  expect_s3_class(result, "disparity_resample")
+  # Should error when no observations remain after removing missing data
+  # Suppress warnings about removing missing data during error testing
+  expect_error(suppressWarnings(disparity_resample(test_data, n_resamples = 20)),
+               regexp = "No observations remain|missing data")
 })
 
 test_that("disparity_resample error messages are informative", {

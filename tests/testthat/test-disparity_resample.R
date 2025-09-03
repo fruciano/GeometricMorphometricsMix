@@ -139,9 +139,10 @@ test_that("disparity_resample validates group requirements", {
 test_that("disparity_resample handles missing data correctly", {
   test_data = setup_test_data()
   
-  expect_warning(result = disparity_resample(test_data$missing_data, 
+  expect_warning(result <- disparity_resample(test_data$missing_data, 
                                              group = test_data$basic_groups, 
-                                             n_resamples = 10))
+                                             n_resamples = 10),
+                 regexp = "missing|NA|removed")
   
   # Should still return valid results after removing missing data
   expect_s3_class(result, "disparity_resample")
@@ -179,11 +180,14 @@ test_that("disparity_resample convex hull volume works with adequate data", {
 test_that("disparity_resample convex hull volume validates dimensions", {
   skip_if_not_installed("geometry")
   
-  test_data = setup_test_data()
+  # Create test data where convex hull would fail: few observations in high dimensions
+  small_high_dim_data = matrix(rnorm(6 * 10), nrow = 6, ncol = 10)  # 6 obs, 10 dims
+  small_groups = factor(c(rep("A", 3), rep("B", 3)))
   
   # Should fail when n <= p (insufficient observations for convex hull)
-  expect_error(disparity_resample(test_data$basic_data, group = test_data$basic_groups,
-                                 statistic = "convex_hull_volume"))
+  expect_error(disparity_resample(small_high_dim_data, group = small_groups,
+                                 statistic = "convex_hull_volume"),
+               regexp = "convex hull|dimensions|insufficient|observations")
 })
 
 test_that("disparity_resample Claramunt proper variance works", {
