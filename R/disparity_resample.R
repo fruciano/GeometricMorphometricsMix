@@ -28,12 +28,10 @@
 #' at the size of the smallest group (all groups are resampled to that size).
 #' Rarefaction requires specifying a valute to the attribute `sample_size`; an error is returned otherwise.
 #'
-#' @section Observed estimate:
-#' For bootstrap resampling at the original sample size, the observed estimate reported is the 
-#' statistic computed on the original (non-resampled) data for each group. For bootstrap resampling
-#' at a custom sample size, the observed estimate is the mean of the bootstrap resampled values 
-#' (for consistency with rarefaction when sample size differs from original). For rarefaction, 
-#' because the purpose is to make groups comparable at a common (smaller) sample size, the observed 
+#' @section Average estimate:
+#' For bootstrap resampling, the average estimate reported is the mean of the bootstrap 
+#' resampled values (for consistency across all bootstrap scenarios). For rarefaction, 
+#' because the purpose is to make groups comparable at a common (smaller) sample size, the average 
 #' estimate reported is the mean of the rarefied resampled values for that group (i.e., the mean 
 #' across all rarefaction replicates).
 #'
@@ -74,7 +72,7 @@
 #' @return A list containing:
 #'  \describe{
 #'    \item{chosen_statistic}{Character vector of length 1 with the human-readable name of the statistic used.}
-#'    \item{results}{A data frame with columns `group`, `observed`, `CI_min`, `CI_max`. One row per group.
+#'    \item{results}{A data frame with columns `group`, `average`, `CI_min`, `CI_max`. One row per group.
 #'      When CI=1, `CI_min` and `CI_max` represent the minimum and maximum of resampled values rather than confidence intervals.}
 #'    \item{resampled_values}{If a single group: numeric vector of length `n_resamples` with the resampled values.
 #'      If multiple groups: a named list with one numeric vector (length `n_resamples`) per group.}
@@ -215,7 +213,7 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
         sampled_idx=sample(seq_len(n_g), sample_size_num, replace=FALSE)
   if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
       }))
-      observed_stat=mean(res_vals)
+      average_stat=mean(res_vals)
     } else if (bootstrap_rarefaction=="bootstrap") {
       if (!is.null(sample_size)) {
         # Bootstrap with custom sample size
@@ -223,14 +221,14 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
           sampled_idx=sample(seq_len(n_g), sample_size_num, replace=TRUE)
     if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
         }))
-        observed_stat=mean(res_vals)  # For consistency with rarefaction when sample size differs
+        average_stat=mean(res_vals)  # Average of resampled estimates for consistency
       } else {
         # Standard bootstrap (original sample size)
         res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
           sampled_idx=sample(seq_len(n_g), n_g, replace=TRUE)
     if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
         }))
-        observed_stat=compute_stat(Xg)  # Original data statistic
+        average_stat=mean(res_vals)  # Average of resampled estimates
       }
     } else { stop("bootstrap_rarefaction must be either 'bootstrap' or 'rarefaction'") }
 
@@ -244,7 +242,7 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
     }
 
     resampled_values_list[[g]]=res_vals
-    results_rows[[g]]=data.frame(group=g, observed=observed_stat,
+    results_rows[[g]]=data.frame(group=g, average=average_stat,
                                  CI_min=CI_min, CI_max=CI_max,
                                  row.names=NULL)
   }
@@ -605,7 +603,7 @@ plot.disparity_resample=function(x, ...) {
   }
   
   # Create plot using internal CI_plot function
-  p=CI_plot(data=plot_data, x_var="group", y_var="observed",
+  p=CI_plot(data=plot_data, x_var="group", y_var="average",
             ymin_var="CI_min", ymax_var="CI_max",
             x_lab=x_lab, y_lab=x$chosen_statistic, ...)
   

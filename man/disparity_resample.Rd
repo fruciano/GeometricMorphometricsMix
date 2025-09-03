@@ -45,7 +45,7 @@ specified sample size. If `"smallest"` is supplied but no groups are defined, an
 A list containing:
  \describe{
    \item{chosen_statistic}{Character vector of length 1 with the human-readable name of the statistic used.}
-   \item{results}{A data frame with columns `group`, `observed`, `CI_min`, `CI_max`. One row per group.
+   \item{results}{A data frame with columns `group`, `average`, `CI_min`, `CI_max`. One row per group.
      When CI=1, `CI_min` and `CI_max` represent the minimum and maximum of resampled values rather than confidence intervals.}
    \item{resampled_values}{If a single group: numeric vector of length `n_resamples` with the resampled values.
      If multiple groups: a named list with one numeric vector (length `n_resamples`) per group.}
@@ -99,13 +99,11 @@ Because of the sensitivity of this statistic to outliers, usually rarefaction is
 "Multivariate variance" is also called "total variance", "Procrustes variance" (in geometric morphometrics) and "sum of univariate variances".
 Note how the computation here does not divide variance by sample size (other than the normal division performed in the computation of variances).
 }
-\section{Observed estimate}{
+\section{Average estimate}{
 
-For bootstrap resampling at the original sample size, the observed estimate reported is the 
-statistic computed on the original (non-resampled) data for each group. For bootstrap resampling
-at a custom sample size, the observed estimate is the mean of the bootstrap resampled values 
-(for consistency with rarefaction when sample size differs from original). For rarefaction, 
-because the purpose is to make groups comparable at a common (smaller) sample size, the observed 
+For bootstrap resampling, the average estimate reported is the mean of the bootstrap 
+resampled values (for consistency across all bootstrap scenarios). For rarefaction, 
+because the purpose is to make groups comparable at a common (smaller) sample size, the average 
 estimate reported is the mean of the rarefied resampled values for that group (i.e., the mean 
 across all rarefaction replicates).
 }
