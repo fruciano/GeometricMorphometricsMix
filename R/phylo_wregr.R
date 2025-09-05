@@ -137,7 +137,7 @@ phylo_wregression=function(tree, Y, X, nsim=1000, model="BM", ncores=1){
 
 
     # Simulate data under the fitted PGLS model
-    if(model %in% c("BM", "lambda"){
+    if(model %in% c("BM", "lambda")){
       PGLS_simulations = PGLS_sim_gen(PGLS_model_fit, nsim = nsim, model="BM")
       } else {
     PGLS_simulations = PGLS_sim_gen(PGLS_model_fit, nsim = nsim, model=model)
