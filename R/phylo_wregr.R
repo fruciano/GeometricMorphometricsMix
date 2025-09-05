@@ -137,8 +137,11 @@ phylo_wregression=function(tree, Y, X, nsim=1000, model="BM", ncores=1){
 
 
     # Simulate data under the fitted PGLS model
-    PGLS_simulations = PGLS_sim_gen(PGLS_model_fit, nsim = nsim)
-
+    if(model %in% c("BM", "lambda"){
+      PGLS_simulations = PGLS_sim_gen(PGLS_model_fit, nsim = nsim, model="BM")
+      } else {
+    PGLS_simulations = PGLS_sim_gen(PGLS_model_fit, nsim = nsim, model=model)
+    }
 
     # Fit the phylogenetic weighted regression model on each simulated dataset
 
