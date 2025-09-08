@@ -53,6 +53,7 @@ For example:
 \itemize{
   \item \code{future::plan(future::sequential)} for sequential processing
   \item \code{future::plan(future::multisession, workers = 4)} for parallel processing with 4 workers
+(works in most platforms including Windows)
   \item \code{future::plan(future::multicore, workers = 4)} for forked processes (Unix-like systems)
   \item \code{future::plan(future::cluster, workers = c("host1", "host2"))} for cluster computing
 }
@@ -65,7 +66,7 @@ The parallelization strategy is determined by the user's choice of future plan, 
 flexibility across different computing environments (local multicore, cluster, etc.). 
 The function performs parallelization at the level of individual trees within each treeset, 
 which is optimal for analyzing distributions of many trees. The future plan should be set up 
-by the user before calling this function using \code{future::plan()}.
+by the user before calling this function using \code{future::plan()} (see also examples).
 }
 
 \section{Citation}{
@@ -140,8 +141,8 @@ result_single = Kmultparallel(dataset_bm, treeset1)
 print(result_single)
 # Display summary of Kmult values
 # Notice how the range is very broad because we have high phylogenetic signal for the case
-# in which the dataset has been simulated under Brownian motion with the first tree, but low phylogenetic signal
-# when we use the other trees in the treeset.
+# in which the dataset has been simulated under Brownian motion with the first tree,
+# but low phylogenetic signal when we use the other trees in the treeset.
 
 plot(result_single)
 # Create density plot of Kmult distribution

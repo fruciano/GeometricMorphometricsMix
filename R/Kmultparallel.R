@@ -121,8 +121,8 @@
 #' print(result_single)
 #' # Display summary of Kmult values
 #' # Notice how the range is very broad because we have high phylogenetic signal for the case
-#' # in which the dataset has been simulated under Brownian motion with the first tree, but low phylogenetic signal
-#' # when we use the other trees in the treeset.
+#' # in which the dataset has been simulated under Brownian motion with the first tree,
+#' # but low phylogenetic signal when we use the other trees in the treeset.
 #' 
 #' plot(result_single)
 #' # Create density plot of Kmult distribution
@@ -332,7 +332,7 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
                 dataset = dataset_name,
                 tree_index = i
             )
-        })
+        }, future.packages = c("ape"), future.seed = TRUE)
         
         return(kmult_results)
     }

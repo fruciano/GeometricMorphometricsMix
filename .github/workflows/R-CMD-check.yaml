@@ -45,6 +45,11 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
+      - name: Install R package dependencies
+        run: |
+          Rscript -e "install.packages('remotes', repos = 'https://cloud.r-project.org')"
+          Rscript -e "remotes::install_deps(dependencies = TRUE)"
+
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
