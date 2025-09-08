@@ -16,18 +16,36 @@
 #'
 #' If `bootstrap_rarefaction=="bootstrap"`, the function performs resampling with replacement
 #' (i.e., classical bootstrap) by sampling rows of the data matrix / data frame.
+#' Optionally, the user can specify a custom sample size via the `sample_size` argument.
+#' This allows comparison of bootstrap confidence intervals at the same sample size
+#' (essentially, this is rarefaction sampling with replacement), which can be useful
+#' to compare bootstrapped confidence intervals across different groups for statistics which
+#' are sensitive to sample size (at the expense of broader than necessary
+#' confidence intervals for groups that are larger).
 #'
 #' If `bootstrap_rarefaction=="rarefaction"`, the function performs resampling without replacement
 #' at the sample size indicated in `sample_size` (numeric) or, if `sample_size=="smallest"`,
 #' at the size of the smallest group (all groups are resampled to that size).
 #' Rarefaction requires specifying a valute to the attribute `sample_size`; an error is returned otherwise.
 #'
-#' @section Observed estimate:
-#' For bootstrap resampling the observed estimate reported is the statistic computed on the
-#' original (non-resampled) data for each group. For rarefaction, because the purpose is to make
-#' groups comparable at a common (smaller) sample size, the observed estimate reported is the
-#' mean of the rarefied resampled values for that group (i.e., the mean across all rarefaction
-#' replicates).
+#' @section Parallelization:
+#' This function automatically uses parallel processing via the future framework,
+#' when the packages future and future.apply are installed.
+#' This is particularly useful for large datasets, large number of resamples or
+#' computationally intensive statistics (e.g., convex hull volume).
+#' The parallelization strategy is determined by the user's choice of future plan, providing 
+#' flexibility across different computing environments (local multicore, cluster, etc.). 
+#' The function performs parallelization at the level of individual bootstrap/rarefaction 
+#' replicates within each group. The future plan should be set up by the user before calling 
+#' this function using \code{future::plan()} (see examples). If no plan is set or the future 
+#' packages are not available, the function will use sequential processing.
+#'
+#' @section Average estimate:
+#' For bootstrap resampling, the average estimate reported is the mean of the bootstrap 
+#' resampled values (for consistency across all bootstrap scenarios). For rarefaction, 
+#' because the purpose is to make groups comparable at a common (smaller) sample size, the average 
+#' estimate reported is the mean of the rarefied resampled values for that group (i.e., the mean 
+#' across all rarefaction replicates).
 #'
 #' @section Input data types:
 #' `Data` can be a data frame, a matrix, a vector, or a 3D array of landmark coordinates
@@ -43,6 +61,22 @@
 #' @note "Multivariate variance" is also called "total variance", "Procrustes variance" (in geometric morphometrics) and "sum of univariate variances".
 #' Note how the computation here does not divide variance by sample size (other than the normal division performed in the computation of variances).
 #'
+#' @details 
+#' This function uses the future framework for parallel processing,
+#' requiring packages future and future.apply.
+#' Users should set up their preferred parallelization strategy using
+#' \code{future::plan()} before calling this function.
+#' For example:
+#' \itemize{
+#'   \item \code{future::plan(future::sequential)} for sequential processing
+#'   \item \code{future::plan(future::multisession, workers = 4)} for parallel processing with 4 workers
+#' (works on all platforms including Windows)
+#'   \item \code{future::plan(future::multicore, workers = 4)} for forked processes (Unix-like systems)
+#'   \item \code{future::plan(future::cluster, workers = c("host1", "host2"))} for cluster computing
+#' }
+#' If no plan is set or the future packages are not available,
+#' the function will use sequential processing.
+#'
 #' @param Data A data frame, matrix, vector, or 3D array. Observations (specimens) must be in rows
 #'  (if a 3D array is supplied, the third dimension is assumed to index specimens).
 #' @param group A factor or a vector indicating group membership (will be coerced to factor). If
@@ -57,15 +91,16 @@
 #' @param bootstrap_rarefaction Either `"bootstrap"` (default) for resampling with replacement or
 #'  `"rarefaction"` for resampling without replacement.
 #' @param sample_size Either `NULL` (default), a positive integer indicating the number of rows to
-#'  sample without replacement when `bootstrap_rarefaction=="rarefaction"`, or the character
-#'  `"smallest"` to use the size of the smallest group (all groups rarefied to that size). If
-#'  `"smallest"` is supplied but no groups are defined, an error is returned. Required (not `NULL`)
-#'  when `bootstrap_rarefaction=="rarefaction"`.
+#'  sample, or the character `"smallest"` to use the size of the smallest group (all groups 
+#'  resampled to that size). For `bootstrap_rarefaction=="rarefaction"`, sampling is without 
+#'  replacement and this parameter is required (not `NULL`). For `bootstrap_rarefaction=="bootstrap"`, 
+#'  sampling is with replacement; if `NULL`, uses original group sizes, otherwise uses the 
+#'  specified sample size. If `"smallest"` is supplied but no groups are defined, an error is returned.
 #'
 #' @return A list containing:
 #'  \describe{
 #'    \item{chosen_statistic}{Character vector of length 1 with the human-readable name of the statistic used.}
-#'    \item{results}{A data frame with columns `group`, `observed`, `CI_min`, `CI_max`. One row per group.
+#'    \item{results}{A data frame with columns `group`, `average`, `CI_min`, `CI_max`. One row per group.
 #'      When CI=1, `CI_min` and `CI_max` represent the minimum and maximum of resampled values rather than confidence intervals.}
 #'    \item{resampled_values}{If a single group: numeric vector of length `n_resamples` with the resampled values.
 #'      If multiple groups: a named list with one numeric vector (length `n_resamples`) per group.}
@@ -95,6 +130,12 @@
 #'   Data = rbind(X1, X2)
 #'   grp = factor(c(rep("A", nrow(X1)), rep("B", nrow(X2))))
 #'
+#'   # Sequential processing
+#'   # future::plan(future::sequential)  # Default sequential processing
+#'   
+#'   # Parallel processing (uncomment to use)
+#'   # future::plan(future::multisession, workers = 2)  # Use 2 workers
+#'
 #'   # Bootstrap multivariate variance
 #'   boot_res = disparity_resample(Data, group=grp, n_resamples=200,
 #'                                 statistic="multivariate_variance",
@@ -121,6 +162,9 @@
 #'  print(boot_res2)
 #'  # plot(boot_res2)
 #'  # Plot of the obtained (95%) confidence intervals (uncomment to plot)
+#'  
+#'  # Reset to sequential processing when done (optional)
+#'  # future::plan(future::sequential)
 #' }
 #'
 #' @import stats
@@ -128,6 +172,9 @@
 disparity_resample=function(Data, group=NULL, n_resamples=1000,
                             statistic="multivariate_variance", CI=0.95,
                             bootstrap_rarefaction="bootstrap", sample_size=NULL) {
+
+  # Check if future framework is available for parallel processing
+  use_future = requireNamespace("future", quietly = TRUE) && requireNamespace("future.apply", quietly = TRUE)
 
   # Input validation
   validate_disparity_resample_inputs(Data, group, n_resamples, statistic, CI, 
@@ -183,6 +230,11 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
   if (bootstrap_rarefaction=="rarefaction") {
     sample_size_num = resolve_rarefaction_sample_size(sample_size, group_sizes)
   }
+  
+  # Bootstrap with custom sample size settings -----------------------------
+  if (bootstrap_rarefaction=="bootstrap" && !is.null(sample_size)) {
+    sample_size_num = resolve_bootstrap_sample_size(sample_size, group_sizes)
+  }
 
   # Preallocation of "storage"
   resampled_values_list=list()
@@ -197,17 +249,48 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
 
     if (bootstrap_rarefaction=="rarefaction") {
       # sample_size validation already done above
-      res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
-        sampled_idx=sample(seq_len(n_g), sample_size_num, replace=FALSE)
-  if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
-      }))
-      observed_stat=mean(res_vals)
+      if (use_future) {
+        res_vals=unlist(future.apply::future_lapply(seq_len(n_resamples), function(i) {
+          sampled_idx=sample(seq_len(n_g), sample_size_num, replace=FALSE)
+    if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+        }, future.seed = TRUE, future.packages = c("geometry", "nlshrink")))
+      } else {
+        res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
+          sampled_idx=sample(seq_len(n_g), sample_size_num, replace=FALSE)
+    if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+        }))
+      }
+      average_stat=mean(res_vals)
     } else if (bootstrap_rarefaction=="bootstrap") {
-      res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
-        sampled_idx=sample(seq_len(n_g), n_g, replace=TRUE)
-  if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
-      }))
-      observed_stat=compute_stat(Xg)
+      if (!is.null(sample_size)) {
+        # Bootstrap with custom sample size
+        if (use_future) {
+          res_vals=unlist(future.apply::future_lapply(seq_len(n_resamples), function(i) {
+            sampled_idx=sample(seq_len(n_g), sample_size_num, replace=TRUE)
+      if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+          }, future.seed = TRUE, future.packages = c("geometry", "nlshrink")))
+        } else {
+          res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
+            sampled_idx=sample(seq_len(n_g), sample_size_num, replace=TRUE)
+      if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+          }))
+        }
+        average_stat=mean(res_vals)  # Average of resampled estimates for consistency
+      } else {
+        # Standard bootstrap (original sample size)
+        if (use_future) {
+          res_vals=unlist(future.apply::future_lapply(seq_len(n_resamples), function(i) {
+            sampled_idx=sample(seq_len(n_g), n_g, replace=TRUE)
+      if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+          }, future.seed = TRUE, future.packages = c("geometry", "nlshrink")))
+        } else {
+          res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
+            sampled_idx=sample(seq_len(n_g), n_g, replace=TRUE)
+      if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+          }))
+        }
+        average_stat=mean(res_vals)  # Average of resampled estimates
+      }
     } else { stop("bootstrap_rarefaction must be either 'bootstrap' or 'rarefaction'") }
 
     # Handle CI=1 as a special case for full range
@@ -220,7 +303,7 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
     }
 
     resampled_values_list[[g]]=res_vals
-    results_rows[[g]]=data.frame(group=g, observed=observed_stat,
+    results_rows[[g]]=data.frame(group=g, average=average_stat,
                                  CI_min=CI_min, CI_max=CI_max,
                                  row.names=NULL)
   }
@@ -287,6 +370,16 @@ validate_disparity_resample_inputs = function(Data, group, n_resamples, statisti
     if (is.null(sample_size)) { 
       stop("sample_size must be provided for rarefaction") 
     }
+    if (!identical(sample_size, "smallest")) {
+      sample_size_num = as.numeric(sample_size)
+      if (is.na(sample_size_num) || sample_size_num <= 0 || sample_size_num != as.integer(sample_size_num)) { 
+        stop("sample_size must be a positive integer or 'smallest'") 
+      }
+    }
+  }
+  
+  # Validate sample_size for bootstrap (when provided)
+  if (bootstrap_rarefaction == "bootstrap" && !is.null(sample_size)) {
     if (!identical(sample_size, "smallest")) {
       sample_size_num = as.numeric(sample_size)
       if (is.na(sample_size_num) || sample_size_num <= 0 || sample_size_num != as.integer(sample_size_num)) { 
@@ -433,9 +526,24 @@ validate_stat_reqs_disparity_resample = function(statistic, prepared_data, sampl
     min_group_size = min(prepared_data$group_sizes)
     
     if (bootstrap_rarefaction == "bootstrap") {
-      if (min_group_size <= n_vars) {
-        stop(sprintf("Convex hull volume requires more observations than variables in each group. Minimum group size: %d, Number of variables: %d", 
-                     min_group_size, n_vars))
+      if (!is.null(sample_size)) {
+        # Bootstrap with custom sample size
+        if (identical(sample_size, "smallest")) {
+          sample_size_num = min(prepared_data$group_sizes)
+        } else {
+          sample_size_num = as.numeric(sample_size)
+        }
+        
+        if (sample_size_num <= n_vars) {
+          stop(sprintf("Convex hull volume with bootstrap at custom sample size requires sample_size > number of variables. sample_size: %d, Number of variables: %d", 
+                       sample_size_num, n_vars))
+        }
+      } else {
+        # Standard bootstrap (original group sizes)
+        if (min_group_size <= n_vars) {
+          stop(sprintf("Convex hull volume requires more observations than variables in each group. Minimum group size: %d, Number of variables: %d", 
+                       min_group_size, n_vars))
+        }
       }
     } else if (bootstrap_rarefaction == "rarefaction" && !is.null(sample_size)) {
       # Resolve sample_size if it's "smallest"
@@ -492,6 +600,39 @@ resolve_rarefaction_sample_size = function(sample_size, group_sizes) {
 }
 
 
+#' Resolve bootstrap sample size parameter (when sample_size is specified for bootstrap)
+#'
+#' @param sample_size User-provided sample size (numeric or "smallest")
+#' @param group_sizes Table of group sizes
+#'
+#' @return Numeric sample size value
+#' @noRd
+resolve_bootstrap_sample_size = function(sample_size, group_sizes) {
+  
+  if (identical(sample_size, "smallest")) {
+    if (length(levels(as.factor(names(group_sizes)))) == 1) { 
+      stop("sample_size='smallest' requires multiple groups") 
+    }
+    sample_size_num = min(group_sizes)
+  } else {
+    sample_size_num = as.numeric(sample_size)
+    if (is.na(sample_size_num) || sample_size_num <= 0 || sample_size_num != as.integer(sample_size_num)) { 
+      stop("sample_size must be a positive integer or 'smallest'") 
+    }
+  }
+  
+  # Additional validations
+  if (sample_size_num < 2) {
+    stop("sample_size for bootstrap must be at least 2 for variance calculation")
+  }
+  
+  # Note: For bootstrap with replacement, sample_size can be larger than the original group size
+  # This is a key difference from rarefaction
+  
+  return(sample_size_num)
+}
+
+
 
 
 
@@ -523,7 +664,7 @@ plot.disparity_resample=function(x, ...) {
   }
   
   # Create plot using internal CI_plot function
-  p=CI_plot(data=plot_data, x_var="group", y_var="observed",
+  p=CI_plot(data=plot_data, x_var="group", y_var="average",
             ymin_var="CI_min", ymax_var="CI_max",
             x_lab=x_lab, y_lab=x$chosen_statistic, ...)
   

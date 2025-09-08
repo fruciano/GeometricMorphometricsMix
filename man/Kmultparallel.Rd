@@ -4,14 +4,7 @@
 \alias{Kmultparallel}
 \title{Parallel implementation of Adams' Kmult with additional support for multiple datasets and tree sets}
 \usage{
-Kmultparallel(
-  data,
-  trees,
-  burninpercent = 0,
-  iter = 0,
-  verbose = TRUE,
-  ncores = (parallel::detectCores(logical = FALSE) - 1)
-)
+Kmultparallel(data, trees, burninpercent = 0, iter = 0, verbose = TRUE)
 }
 \arguments{
 \item{data}{Either a data.frame/matrix with continuous (multivariate) phenotypes,
@@ -29,8 +22,6 @@ or a list where each element is a multiPhylo object representing a separate tree
 computation and are of doubtful utility when analyzing tree distributions)}
 
 \item{verbose}{logical, whether to print progress information (default TRUE)}
-
-\item{ncores}{number of cores to use for parallelization (default: detectCores(logical = FALSE) - 1)}
 }
 \value{
 The function outputs a data.frame with classes "parallel_Kmult" and "data.frame" containing columns:
@@ -54,15 +45,28 @@ with the aim of facilitating computation on a distribution of trees rather than 
 This version uses cross-platform parallel processing that works on Windows, Mac, and Linux systems.
 If one wanted to perform a computation of Kmult on a single tree, he/she would be
 advised to use the version implemented in the package geomorph, which receives regular updates.
+
+
+This function uses the future framework for parallel processing. Users should set up their 
+preferred parallelization strategy using \code{future::plan()} before calling this function.
+For example:
+\itemize{
+  \item \code{future::plan(future::sequential)} for sequential processing
+  \item \code{future::plan(future::multisession, workers = 4)} for parallel processing with 4 workers
+(works in most platforms including Windows)
+  \item \code{future::plan(future::multicore, workers = 4)} for forked processes (Unix-like systems)
+  \item \code{future::plan(future::cluster, workers = c("host1", "host2"))} for cluster computing
+}
+If no plan is set, the function will use the default sequential processing.
 }
 \section{Parallelization}{
 
-This function automatically uses parallel processing when beneficial. The parallelization
-is handled internally and works across different operating systems. On Windows, it uses
-a PSOCK cluster; on Unix-like systems (Mac/Linux), it tries to use forking and falls back
-to PSOCK if needed. The function performs parallelization at the level of individual trees
-within each treeset, which is optimal for analyzing distributions of many trees.
-The number of cores used is controlled by the \code{ncores} parameter.
+This function automatically uses parallel processing via the future framework when beneficial. 
+The parallelization strategy is determined by the user's choice of future plan, providing 
+flexibility across different computing environments (local multicore, cluster, etc.). 
+The function performs parallelization at the level of individual trees within each treeset, 
+which is optimal for analyzing distributions of many trees. The future plan should be set up 
+by the user before calling this function using \code{future::plan()} (see also examples).
 }
 
 \section{Citation}{
@@ -89,6 +93,8 @@ library(phytools)
 library(MASS)
 library(mvMORPH)
 library(ape)  # for drop.tip function
+library(future)
+library(future.apply)
 
 # Generate 20 random phylogenetic trees with 100 tips each
 all_trees = replicate(20, pbtree(n = 100), simplify = FALSE)
@@ -126,16 +132,17 @@ rownames(dataset_bm) = tree_pruned$tip.label
 # Generate 1 dataset evolving under Brownian motion
 # This dataset should display strong phylogenetic signal when combined with treeset1
 
-# Example 1: Single dataset and single treeset analysis
+# Example 1: Single dataset and single treeset analysis (sequential processing)
+future::plan(future::sequential)  # Use sequential processing
 result_single = Kmultparallel(dataset_bm, treeset1)
-# Analyze BM dataset with first treeset (uses default number of cores)
+# Analyze BM dataset with first treeset (sequential processing)
 
 # Use S3 methods to examine results
 print(result_single)
 # Display summary of Kmult values
 # Notice how the range is very broad because we have high phylogenetic signal for the case
-# in which the dataset has been simulated under Brownian motion with the first tree, but low phylogenetic signal
-# when we use the other trees in the treeset.
+# in which the dataset has been simulated under Brownian motion with the first tree,
+# but low phylogenetic signal when we use the other trees in the treeset.
 
 plot(result_single)
 # Create density plot of Kmult distribution
@@ -143,7 +150,10 @@ plot(result_single)
 # mismatch between the tree used and the true evolutionary history of the traits,
 # and the high phylogenetic signal when the correct tree is used.
 
-# Example 2: Multiple datasets and multiple treesets analysis
+# Example 2: Multiple datasets and multiple treesets analysis with parallel processing
+# Set up parallel processing with future
+future::plan(future::multisession, workers = 4)  # Use 4 worker processes
+
 # Combine datasets into a list
 all_datasets = list(random = dataset_random, brownian = dataset_bm)
 # Combine random and BM datasets
@@ -154,7 +164,7 @@ all_treesets = list(treeset1 = treeset1, treeset2 = treeset2)
 
 # Run comprehensive analysis on all combinations
 result_multiple = Kmultparallel(all_datasets, all_treesets)
-# Analyze all dataset-treeset combinations
+# Analyze all dataset-treeset combinations with parallel processing
 
 # Examine results using S3 methods
 print(result_multiple)
@@ -169,9 +179,10 @@ plot(result_multiple)
 plot(result_multiple, alpha = 0.5, title = "Kmult Distribution Across All Combinations")
 # Customize the plot appearance
 
-# Example 3: Using custom number of cores
-result_custom = Kmultparallel(dataset_bm, treeset1, ncores = 2)
-# Use only 2 cores for parallel processing
+# Example 3: Setting up parallel processing with future
+future::plan(future::multisession, workers = 4)
+result_parallel = Kmultparallel(dataset_bm, treeset1)
+# Use 4 worker processes for parallel processing
 }
 
 }
