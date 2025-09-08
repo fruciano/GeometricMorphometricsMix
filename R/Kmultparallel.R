@@ -12,12 +12,12 @@
 #' advised to use the version implemented in the package geomorph, which receives regular updates.
 #'
 #' @section Parallelization:
-#' This function automatically uses parallel processing when beneficial. The parallelization
-#' is handled internally and works across different operating systems. On Windows, it uses
-#' a PSOCK cluster; on Unix-like systems (Mac/Linux), it tries to use forking and falls back
-#' to PSOCK if needed. The function performs parallelization at the level of individual trees
-#' within each treeset, which is optimal for analyzing distributions of many trees.
-#' The number of cores used is controlled by the \code{ncores} parameter.
+#' This function automatically uses parallel processing via the future framework when beneficial. 
+#' The parallelization strategy is determined by the user's choice of future plan, providing 
+#' flexibility across different computing environments (local multicore, cluster, etc.). 
+#' The function performs parallelization at the level of individual trees within each treeset, 
+#' which is optimal for analyzing distributions of many trees. The future plan should be set up 
+#' by the user before calling this function using \code{future::plan()} (see also examples).
 #'
 #' @section Citation:
 #' If you use this function please kindly cite both
@@ -35,7 +35,19 @@
 #' (this should normally be left at the default value of 0 as permutations slow down
 #' computation and are of doubtful utility when analyzing tree distributions)
 #' @param verbose logical, whether to print progress information (default TRUE)
-#' @param ncores number of cores to use for parallelization (default: detectCores(logical = FALSE) - 1)
+#' 
+#' @details 
+#' This function uses the future framework for parallel processing. Users should set up their 
+#' preferred parallelization strategy using \code{future::plan()} before calling this function.
+#' For example:
+#' \itemize{
+#'   \item \code{future::plan(future::sequential)} for sequential processing
+#'   \item \code{future::plan(future::multisession, workers = 4)} for parallel processing with 4 workers
+#' (works in most platforms including Windows)
+#'   \item \code{future::plan(future::multicore, workers = 4)} for forked processes (Unix-like systems)
+#'   \item \code{future::plan(future::cluster, workers = c("host1", "host2"))} for cluster computing
+#' }
+#' If no plan is set, the function will use the default sequential processing.
 #'
 #' @return The function outputs a data.frame with classes "parallel_Kmult" and "data.frame" containing columns:
 #'  \describe{
@@ -61,6 +73,8 @@
 #' library(MASS)
 #' library(mvMORPH)
 #' library(ape)  # for drop.tip function
+#' library(future)
+#' library(future.apply)
 #' 
 #' # Generate 20 random phylogenetic trees with 100 tips each
 #' all_trees = replicate(20, pbtree(n = 100), simplify = FALSE)
@@ -98,16 +112,17 @@
 #' # Generate 1 dataset evolving under Brownian motion
 #' # This dataset should display strong phylogenetic signal when combined with treeset1
 #' 
-#' # Example 1: Single dataset and single treeset analysis
+#' # Example 1: Single dataset and single treeset analysis (sequential processing)
+#' future::plan(future::sequential)  # Use sequential processing
 #' result_single = Kmultparallel(dataset_bm, treeset1)
-#' # Analyze BM dataset with first treeset (uses default number of cores)
+#' # Analyze BM dataset with first treeset (sequential processing)
 #' 
 #' # Use S3 methods to examine results
 #' print(result_single)
 #' # Display summary of Kmult values
 #' # Notice how the range is very broad because we have high phylogenetic signal for the case
-#' # in which the dataset has been simulated under Brownian motion with the first tree, but low phylogenetic signal
-#' # when we use the other trees in the treeset.
+#' # in which the dataset has been simulated under Brownian motion with the first tree,
+#' # but low phylogenetic signal when we use the other trees in the treeset.
 #' 
 #' plot(result_single)
 #' # Create density plot of Kmult distribution
@@ -115,7 +130,10 @@
 #' # mismatch between the tree used and the true evolutionary history of the traits,
 #' # and the high phylogenetic signal when the correct tree is used.
 #' 
-#' # Example 2: Multiple datasets and multiple treesets analysis
+#' # Example 2: Multiple datasets and multiple treesets analysis with parallel processing
+#' # Set up parallel processing with future
+#' future::plan(future::multisession, workers = 4)  # Use 4 worker processes
+#' 
 #' # Combine datasets into a list
 #' all_datasets = list(random = dataset_random, brownian = dataset_bm)
 #' # Combine random and BM datasets
@@ -126,7 +144,7 @@
 #' 
 #' # Run comprehensive analysis on all combinations
 #' result_multiple = Kmultparallel(all_datasets, all_treesets)
-#' # Analyze all dataset-treeset combinations
+#' # Analyze all dataset-treeset combinations with parallel processing
 #' 
 #' # Examine results using S3 methods
 #' print(result_multiple)
@@ -141,9 +159,10 @@
 #' plot(result_multiple, alpha = 0.5, title = "Kmult Distribution Across All Combinations")
 #' # Customize the plot appearance
 #' 
-#' # Example 3: Using custom number of cores
-#' result_custom = Kmultparallel(dataset_bm, treeset1, ncores = 2)
-#' # Use only 2 cores for parallel processing
+#' # Example 3: Setting up parallel processing with future
+#' future::plan(future::multisession, workers = 4)
+#' result_parallel = Kmultparallel(dataset_bm, treeset1)
+#' # Use 4 worker processes for parallel processing
 #' }
 #'
 #' @references Adams DC. 2014. A Generalized K Statistic for Estimating Phylogenetic Signal from Shape and Other High-Dimensional Multivariate Data. Systematic Biology 63:685-697.
@@ -153,7 +172,12 @@
 #' @import stats
 #' @importFrom ape drop.tip vcv.phylo
 #' @export
-Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRUE, ncores = (parallel::detectCores(logical = FALSE)-1)) {
+Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRUE) {
+
+    # Check if future framework is available
+    if (!requireNamespace("future", quietly = TRUE) || !requireNamespace("future.apply", quietly = TRUE)) {
+        stop("Packages 'future' and 'future.apply' are required. Please install them with:\ninstall.packages(c('future', 'future.apply'))")
+    }
 
     # Standardize input formats
     # Convert single datasets/tree sets to lists for uniform processing
@@ -263,7 +287,7 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
             stop("Data must have row names matching tree tip labels")
         }
 
-        tree_processing_results = safe_parallel_lapply(current_trees, function(tree) {
+        tree_processing_results = future.apply::future_lapply(current_trees, function(tree) {
             # Determine which tips to keep (present both in tree and data)
             keep = intersect(tree$tip.label, available_data_tips)
             if (length(keep) < 3) {
@@ -283,7 +307,7 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
             data_reordered_tree = current_data[pruned_tree$tip.label, , drop = FALSE]
 
             list(pruned_tree = pruned_tree, data_reordered = data_reordered_tree)
-        }, ncores = ncores, packages = c("ape"))
+        }, future.packages = "ape")
 
         # Extract pruned trees and reordered data
         pruned_trees = lapply(tree_processing_results, function(x) x$pruned_tree)
@@ -299,7 +323,7 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
         
         # Compute Kmult for each tree
         tree_indices = seq_along(pruned_trees)
-    kmult_results = safe_parallel_lapply(tree_indices, function(i) {
+        kmult_results = future.apply::future_lapply(tree_indices, function(i) {
             result = Test_Kmult(data_reordered[[i]], pruned_trees[[i]], iter = iter)
             list(
                 kmult = result$phy.signal,
@@ -308,13 +332,13 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
                 dataset = dataset_name,
                 tree_index = i
             )
-        })
+        }, future.packages = c("ape"), future.seed = TRUE)
         
         return(kmult_results)
     }
     
     # Process all combinations sequentially. Only per-tree work inside each combination
-    # is parallelized using internal safe_parallel_lapply (to avoid nested parallel backends).
+    # is parallelized using future_lapply (to avoid nested parallel backends).
     all_results = lapply(seq_len(nrow(combinations)), process_combination)
     
     # Flatten results and convert to data.frame
