@@ -28,6 +28,18 @@
 #' at the size of the smallest group (all groups are resampled to that size).
 #' Rarefaction requires specifying a valute to the attribute `sample_size`; an error is returned otherwise.
 #'
+#' @section Parallelization:
+#' This function automatically uses parallel processing via the future framework,
+#' when the packages future and future.apply are installed.
+#' This is particularly useful for large datasets, large number of resamples or
+#' computationally intensive statistics (e.g., convex hull volume).
+#' The parallelization strategy is determined by the user's choice of future plan, providing 
+#' flexibility across different computing environments (local multicore, cluster, etc.). 
+#' The function performs parallelization at the level of individual bootstrap/rarefaction 
+#' replicates within each group. The future plan should be set up by the user before calling 
+#' this function using \code{future::plan()} (see examples). If no plan is set or the future 
+#' packages are not available, the function will use sequential processing.
+#'
 #' @section Average estimate:
 #' For bootstrap resampling, the average estimate reported is the mean of the bootstrap 
 #' resampled values (for consistency across all bootstrap scenarios). For rarefaction, 
@@ -48,6 +60,22 @@
 #'
 #' @note "Multivariate variance" is also called "total variance", "Procrustes variance" (in geometric morphometrics) and "sum of univariate variances".
 #' Note how the computation here does not divide variance by sample size (other than the normal division performed in the computation of variances).
+#'
+#' @details 
+#' This function uses the future framework for parallel processing,
+#' requiring packages future and future.apply.
+#' Users should set up their preferred parallelization strategy using
+#' \code{future::plan()} before calling this function.
+#' For example:
+#' \itemize{
+#'   \item \code{future::plan(future::sequential)} for sequential processing
+#'   \item \code{future::plan(future::multisession, workers = 4)} for parallel processing with 4 workers
+#' (works on all platforms including Windows)
+#'   \item \code{future::plan(future::multicore, workers = 4)} for forked processes (Unix-like systems)
+#'   \item \code{future::plan(future::cluster, workers = c("host1", "host2"))} for cluster computing
+#' }
+#' If no plan is set or the future packages are not available,
+#' the function will use sequential processing.
 #'
 #' @param Data A data frame, matrix, vector, or 3D array. Observations (specimens) must be in rows
 #'  (if a 3D array is supplied, the third dimension is assumed to index specimens).
@@ -102,6 +130,12 @@
 #'   Data = rbind(X1, X2)
 #'   grp = factor(c(rep("A", nrow(X1)), rep("B", nrow(X2))))
 #'
+#'   # Sequential processing
+#'   # future::plan(future::sequential)  # Default sequential processing
+#'   
+#'   # Parallel processing (uncomment to use)
+#'   # future::plan(future::multisession, workers = 2)  # Use 2 workers
+#'
 #'   # Bootstrap multivariate variance
 #'   boot_res = disparity_resample(Data, group=grp, n_resamples=200,
 #'                                 statistic="multivariate_variance",
@@ -128,6 +162,9 @@
 #'  print(boot_res2)
 #'  # plot(boot_res2)
 #'  # Plot of the obtained (95%) confidence intervals (uncomment to plot)
+#'  
+#'  # Reset to sequential processing when done (optional)
+#'  # future::plan(future::sequential)
 #' }
 #'
 #' @import stats
@@ -135,6 +172,9 @@
 disparity_resample=function(Data, group=NULL, n_resamples=1000,
                             statistic="multivariate_variance", CI=0.95,
                             bootstrap_rarefaction="bootstrap", sample_size=NULL) {
+
+  # Check if future framework is available for parallel processing
+  use_future = requireNamespace("future", quietly = TRUE) && requireNamespace("future.apply", quietly = TRUE)
 
   # Input validation
   validate_disparity_resample_inputs(Data, group, n_resamples, statistic, CI, 
@@ -209,25 +249,46 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
 
     if (bootstrap_rarefaction=="rarefaction") {
       # sample_size validation already done above
-      res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
-        sampled_idx=sample(seq_len(n_g), sample_size_num, replace=FALSE)
-  if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
-      }))
+      if (use_future) {
+        res_vals=unlist(future.apply::future_lapply(seq_len(n_resamples), function(i) {
+          sampled_idx=sample(seq_len(n_g), sample_size_num, replace=FALSE)
+    if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+        }, future.seed = TRUE, future.packages = c("geometry", "nlshrink")))
+      } else {
+        res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
+          sampled_idx=sample(seq_len(n_g), sample_size_num, replace=FALSE)
+    if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+        }))
+      }
       average_stat=mean(res_vals)
     } else if (bootstrap_rarefaction=="bootstrap") {
       if (!is.null(sample_size)) {
         # Bootstrap with custom sample size
-        res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
-          sampled_idx=sample(seq_len(n_g), sample_size_num, replace=TRUE)
-    if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
-        }))
+        if (use_future) {
+          res_vals=unlist(future.apply::future_lapply(seq_len(n_resamples), function(i) {
+            sampled_idx=sample(seq_len(n_g), sample_size_num, replace=TRUE)
+      if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+          }, future.seed = TRUE, future.packages = c("geometry", "nlshrink")))
+        } else {
+          res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
+            sampled_idx=sample(seq_len(n_g), sample_size_num, replace=TRUE)
+      if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+          }))
+        }
         average_stat=mean(res_vals)  # Average of resampled estimates for consistency
       } else {
         # Standard bootstrap (original sample size)
-        res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
-          sampled_idx=sample(seq_len(n_g), n_g, replace=TRUE)
-    if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
-        }))
+        if (use_future) {
+          res_vals=unlist(future.apply::future_lapply(seq_len(n_resamples), function(i) {
+            sampled_idx=sample(seq_len(n_g), n_g, replace=TRUE)
+      if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+          }, future.seed = TRUE, future.packages = c("geometry", "nlshrink")))
+        } else {
+          res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
+            sampled_idx=sample(seq_len(n_g), n_g, replace=TRUE)
+      if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+          }))
+        }
         average_stat=mean(res_vals)  # Average of resampled estimates
       }
     } else { stop("bootstrap_rarefaction must be either 'bootstrap' or 'rarefaction'") }

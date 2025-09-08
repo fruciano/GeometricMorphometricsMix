@@ -88,6 +88,22 @@ If `bootstrap_rarefaction=="rarefaction"`, the function performs resampling with
 at the sample size indicated in `sample_size` (numeric) or, if `sample_size=="smallest"`,
 at the size of the smallest group (all groups are resampled to that size).
 Rarefaction requires specifying a valute to the attribute `sample_size`; an error is returned otherwise.
+
+
+This function uses the future framework for parallel processing,
+requiring packages future and future.apply.
+Users should set up their preferred parallelization strategy using
+\code{future::plan()} before calling this function.
+For example:
+\itemize{
+  \item \code{future::plan(future::sequential)} for sequential processing
+  \item \code{future::plan(future::multisession, workers = 4)} for parallel processing with 4 workers
+(works on all platforms including Windows)
+  \item \code{future::plan(future::multicore, workers = 4)} for forked processes (Unix-like systems)
+  \item \code{future::plan(future::cluster, workers = c("host1", "host2"))} for cluster computing
+}
+If no plan is set or the future packages are not available,
+the function will use sequential processing.
 }
 \note{
 Because of how the computation works, convex hull volume computation requires the number of observations (specimens) to be (substantially) greater than the number of variables (dimensions).
@@ -99,6 +115,20 @@ Because of the sensitivity of this statistic to outliers, usually rarefaction is
 "Multivariate variance" is also called "total variance", "Procrustes variance" (in geometric morphometrics) and "sum of univariate variances".
 Note how the computation here does not divide variance by sample size (other than the normal division performed in the computation of variances).
 }
+\section{Parallelization}{
+
+This function automatically uses parallel processing via the future framework,
+when the packages future and future.apply are installed.
+This is particularly useful for large datasets, large number of resamples or
+computationally intensive statistics (e.g., convex hull volume).
+The parallelization strategy is determined by the user's choice of future plan, providing 
+flexibility across different computing environments (local multicore, cluster, etc.). 
+The function performs parallelization at the level of individual bootstrap/rarefaction 
+replicates within each group. The future plan should be set up by the user before calling 
+this function using \code{future::plan()} (see examples). If no plan is set or the future 
+packages are not available, the function will use sequential processing.
+}
+
 \section{Average estimate}{
 
 For bootstrap resampling, the average estimate reported is the mean of the bootstrap 
@@ -123,6 +153,12 @@ if (requireNamespace("MASS", quietly = TRUE)) {
   X2 = MASS::mvrnorm(35, mu=rep(2, 10), Sigma=diag(10))
   Data = rbind(X1, X2)
   grp = factor(c(rep("A", nrow(X1)), rep("B", nrow(X2))))
+
+  # Sequential processing
+  # future::plan(future::sequential)  # Default sequential processing
+  
+  # Parallel processing (uncomment to use)
+  # future::plan(future::multisession, workers = 2)  # Use 2 workers
 
   # Bootstrap multivariate variance
   boot_res = disparity_resample(Data, group=grp, n_resamples=200,
@@ -150,6 +186,9 @@ if (requireNamespace("MASS", quietly = TRUE)) {
  print(boot_res2)
  # plot(boot_res2)
  # Plot of the obtained (95\%) confidence intervals (uncomment to plot)
+ 
+ # Reset to sequential processing when done (optional)
+ # future::plan(future::sequential)
 }
 
 }
