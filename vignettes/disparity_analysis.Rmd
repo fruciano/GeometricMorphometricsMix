@@ -144,7 +144,7 @@ The plot method creates confidence interval plots for visual comparison of dispa
   
   
   cat("Plotting methods create ggplot2 confidence interval plots\n")
-  cat("showing observed values and confidence intervals for each group.\n")
+  cat("showing average values and confidence intervals for each group.\n")
 
 ```
 

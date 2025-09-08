@@ -35,16 +35,17 @@ confidence intervals. Use CI=1 to display the full range (minimum to maximum) of
 `"rarefaction"` for resampling without replacement.}
 
 \item{sample_size}{Either `NULL` (default), a positive integer indicating the number of rows to
-sample without replacement when `bootstrap_rarefaction=="rarefaction"`, or the character
-`"smallest"` to use the size of the smallest group (all groups rarefied to that size). If
-`"smallest"` is supplied but no groups are defined, an error is returned. Required (not `NULL`)
-when `bootstrap_rarefaction=="rarefaction"`.}
+sample, or the character `"smallest"` to use the size of the smallest group (all groups 
+resampled to that size). For `bootstrap_rarefaction=="rarefaction"`, sampling is without 
+replacement and this parameter is required (not `NULL`). For `bootstrap_rarefaction=="bootstrap"`, 
+sampling is with replacement; if `NULL`, uses original group sizes, otherwise uses the 
+specified sample size. If `"smallest"` is supplied but no groups are defined, an error is returned.}
 }
 \value{
 A list containing:
  \describe{
    \item{chosen_statistic}{Character vector of length 1 with the human-readable name of the statistic used.}
-   \item{results}{A data frame with columns `group`, `observed`, `CI_min`, `CI_max`. One row per group.
+   \item{results}{A data frame with columns `group`, `average`, `CI_min`, `CI_max`. One row per group.
      When CI=1, `CI_min` and `CI_max` represent the minimum and maximum of resampled values rather than confidence intervals.}
    \item{resampled_values}{If a single group: numeric vector of length `n_resamples` with the resampled values.
      If multiple groups: a named list with one numeric vector (length `n_resamples`) per group.}
@@ -76,11 +77,33 @@ the (univariate) variance within each group (the attribute `statistic` is ignore
 
 If `bootstrap_rarefaction=="bootstrap"`, the function performs resampling with replacement
 (i.e., classical bootstrap) by sampling rows of the data matrix / data frame.
+Optionally, the user can specify a custom sample size via the `sample_size` argument.
+This allows comparison of bootstrap confidence intervals at the same sample size
+(essentially, this is rarefaction sampling with replacement), which can be useful
+to compare bootstrapped confidence intervals across different groups for statistics which
+are sensitive to sample size (at the expense of broader than necessary
+confidence intervals for groups that are larger).
 
 If `bootstrap_rarefaction=="rarefaction"`, the function performs resampling without replacement
 at the sample size indicated in `sample_size` (numeric) or, if `sample_size=="smallest"`,
 at the size of the smallest group (all groups are resampled to that size).
 Rarefaction requires specifying a valute to the attribute `sample_size`; an error is returned otherwise.
+
+
+This function uses the future framework for parallel processing,
+requiring packages future and future.apply.
+Users should set up their preferred parallelization strategy using
+\code{future::plan()} before calling this function.
+For example:
+\itemize{
+  \item \code{future::plan(future::sequential)} for sequential processing
+  \item \code{future::plan(future::multisession, workers = 4)} for parallel processing with 4 workers
+(works on all platforms including Windows)
+  \item \code{future::plan(future::multicore, workers = 4)} for forked processes (Unix-like systems)
+  \item \code{future::plan(future::cluster, workers = c("host1", "host2"))} for cluster computing
+}
+If no plan is set or the future packages are not available,
+the function will use sequential processing.
 }
 \note{
 Because of how the computation works, convex hull volume computation requires the number of observations (specimens) to be (substantially) greater than the number of variables (dimensions).
@@ -92,13 +115,27 @@ Because of the sensitivity of this statistic to outliers, usually rarefaction is
 "Multivariate variance" is also called "total variance", "Procrustes variance" (in geometric morphometrics) and "sum of univariate variances".
 Note how the computation here does not divide variance by sample size (other than the normal division performed in the computation of variances).
 }
-\section{Observed estimate}{
+\section{Parallelization}{
 
-For bootstrap resampling the observed estimate reported is the statistic computed on the
-original (non-resampled) data for each group. For rarefaction, because the purpose is to make
-groups comparable at a common (smaller) sample size, the observed estimate reported is the
-mean of the rarefied resampled values for that group (i.e., the mean across all rarefaction
-replicates).
+This function automatically uses parallel processing via the future framework,
+when the packages future and future.apply are installed.
+This is particularly useful for large datasets, large number of resamples or
+computationally intensive statistics (e.g., convex hull volume).
+The parallelization strategy is determined by the user's choice of future plan, providing 
+flexibility across different computing environments (local multicore, cluster, etc.). 
+The function performs parallelization at the level of individual bootstrap/rarefaction 
+replicates within each group. The future plan should be set up by the user before calling 
+this function using \code{future::plan()} (see examples). If no plan is set or the future 
+packages are not available, the function will use sequential processing.
+}
+
+\section{Average estimate}{
+
+For bootstrap resampling, the average estimate reported is the mean of the bootstrap 
+resampled values (for consistency across all bootstrap scenarios). For rarefaction, 
+because the purpose is to make groups comparable at a common (smaller) sample size, the average 
+estimate reported is the mean of the rarefied resampled values for that group (i.e., the mean 
+across all rarefaction replicates).
 }
 
 \section{Input data types}{
@@ -116,6 +153,12 @@ if (requireNamespace("MASS", quietly = TRUE)) {
   X2 = MASS::mvrnorm(35, mu=rep(2, 10), Sigma=diag(10))
   Data = rbind(X1, X2)
   grp = factor(c(rep("A", nrow(X1)), rep("B", nrow(X2))))
+
+  # Sequential processing
+  # future::plan(future::sequential)  # Default sequential processing
+  
+  # Parallel processing (uncomment to use)
+  # future::plan(future::multisession, workers = 2)  # Use 2 workers
 
   # Bootstrap multivariate variance
   boot_res = disparity_resample(Data, group=grp, n_resamples=200,
@@ -143,6 +186,9 @@ if (requireNamespace("MASS", quietly = TRUE)) {
  print(boot_res2)
  # plot(boot_res2)
  # Plot of the obtained (95\%) confidence intervals (uncomment to plot)
+ 
+ # Reset to sequential processing when done (optional)
+ # future::plan(future::sequential)
 }
 
 }
