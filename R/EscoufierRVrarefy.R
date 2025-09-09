@@ -93,25 +93,25 @@
 #'
 #' @export
 RVrarefied = function(Block1, Block2, reps = 1000, samplesize, group = NULL, CI = 0.95) {
-         if (nrow(Block1) != nrow(Block2)) {
-           stop(paste("Error: the two blocks should have the same number of rows (observations)"))
-            }
-    
-    # Input validation
-    if (!is.null(group) && length(group) != nrow(Block1)) {
-        stop("Error: group vector must have the same length as the number of observations")
-    }
-    
-    if (CI <= 0 || CI >= 1) {
-        stop("Error: CI must be between 0 and 1")
-    }
-    
-    alpha = (1 - CI) / 2  # For two-sided CI
-    
-    # Handle single group analysis by treating as multi-group with one group
-    if (is.null(group)) {
-        group = rep("All", nrow(Block1))  # Create single group named "All"
-    }
+  # Basic input validation and coercion
+  validated = validate_blocks(Block1, Block2, samplesize)
+  Block1 = validated$Block1
+  Block2 = validated$Block2
+
+  if (!is.null(group) && length(group) != nrow(Block1)) {
+    stop("Error: group vector must have the same length as the number of observations")
+  }
+
+  if (CI <= 0 || CI >= 1) {
+    stop("Error: CI must be between 0 and 1")
+  }
+
+  alpha = (1 - CI) / 2  # For two-sided CI
+
+  # Handle single group analysis by treating as multi-group with one group
+  if (is.null(group)) {
+    group = rep("All", nrow(Block1))  # Create single group named "All"
+  }
     
     # Multi-group analysis (unified approach)
     group = as.factor(group)
@@ -127,17 +127,14 @@ RVrarefied = function(Block1, Block2, reps = 1000, samplesize, group = NULL, CI 
         if (nrow(Block1_g) < samplesize) {
             stop(paste("Error: group", g, "has fewer observations than the requested sample size"))
         }
-        
-        BothBlocks_g = cbind(Block1_g, Block2_g)
-        endB1 = ncol(Block1_g)
-        startB2 = endB1 + 1
-        sizeboth = ncol(BothBlocks_g)
-        RV_g = vector(length = reps)
-        
-        for (i in 1:reps) {
-            NewSamp = cbind(Block1_g, Block2_g)[sample(seq_len(nrow(Block1_g)), samplesize, replace = TRUE), ]
-            RV_g[i] = EscoufierRV(cbind(NewSamp[, 1:endB1]), cbind(NewSamp[, startB2:sizeboth]))
-        }
+    # Pre-allocate and sample by row indices to avoid repeated cbind
+    n_g = nrow(Block1_g)
+    RV_g = vector(length = reps)
+
+    for (i in 1:reps) {
+      idx = sample.int(n_g, samplesize, replace = TRUE)
+      RV_g[i] = EscoufierRV(Block1_g[idx, , drop = FALSE], Block2_g[idx, , drop = FALSE])
+    }
         
         if(TRUE %in% is.na(RV_g)) {
         warning(paste("Some of the rarefied RV for group", g, "have given NA \n
@@ -165,9 +162,41 @@ RVrarefied = function(Block1, Block2, reps = 1000, samplesize, group = NULL, CI 
     
     results_df = do.call(rbind, results_rows)
     
-    Results = list(results = results_df, AllRarefiedSamples = resampled_values_list)
-    class(Results) = c("EscoufierRVrarefy", "list")
-    return(Results)
+  Results = list(results = results_df, AllRarefiedSamples = resampled_values_list)
+  class(Results) = c("EscoufierRVrarefy", "list")
+  attr(Results, "CI") = CI
+  return(Results)
+}
+
+
+# Helper: validate and coerce input blocks
+validate_blocks = function(Block1, Block2, samplesize) {
+  # Ensure matrix-like and numeric
+  if (!is.matrix(Block1)) Block1 = as.matrix(Block1)
+  if (!is.matrix(Block2)) Block2 = as.matrix(Block2)
+
+  if (!is.numeric(Block1)) storage.mode(Block1) = "double"
+  if (!is.numeric(Block2)) storage.mode(Block2) = "double"
+
+  if (nrow(Block1) != nrow(Block2)) {
+    stop("Error: the two blocks should have the same number of rows (observations)")
+  }
+
+  if (!is.numeric(samplesize) || length(samplesize) != 1 || samplesize < 1) {
+    stop("Error: samplesize must be a single numeric value >= 1")
+  }
+
+  # Check for finite values
+  if (any(!is.finite(Block1))) stop("Error: Block1 contains non-finite values (NA/NaN/Inf)")
+  if (any(!is.finite(Block2))) stop("Error: Block2 contains non-finite values (NA/NaN/Inf)")
+
+  # Check for constant columns (zero variance)
+  var1 = apply(Block1, 2, stats::var)
+  var2 = apply(Block2, 2, stats::var)
+  if (any(var1 == 0)) warning("Warning: Block1 contains column(s) with zero variance")
+  if (any(var2 == 0)) warning("Warning: Block2 contains column(s) with zero variance")
+
+  return(list(Block1 = Block1, Block2 = Block2))
 }
 
 
@@ -280,8 +309,13 @@ print.EscoufierRVrarefy = function(x, ...) {
   cat("=========================================\n\n")
   cat("Statistic: Rarefied Escoufier RV coefficient\n")
   
-  # Note about CI interpretation - assume 95% if not stored
-  cat("Confidence level: 95% (approximate)\n\n")
+  # Note about CI interpretation - read from attribute if present
+  CI_attr = attr(x, "CI")
+  if (!is.null(CI_attr)) {
+    cat(paste0("Confidence level: ", format(100 * CI_attr, digits = 4), "%\n\n"))
+  } else {
+    cat("Confidence level: (not stored)\n\n")
+  }
   
   # Print results table
   print(x$results, row.names = FALSE)
@@ -314,6 +348,15 @@ print.EscoufierRVrarefy = function(x, ...) {
       cat("All confidence intervals overlap.\n")
     } else {
       cat("At least one pair of confidence intervals does not overlap.\n")
+    }
+  }
+  
+  # Report NA counts per group if present in AllRarefiedSamples
+  if (!is.null(x$AllRarefiedSamples)) {
+    na_counts = sapply(x$AllRarefiedSamples, function(v) sum(is.na(v)))
+    if (any(na_counts > 0)) {
+      cat('\nNumber of NA rarefied RV values per group:\n')
+      print(data.frame(group = names(na_counts), NA_count = as.integer(na_counts)), row.names = FALSE)
     }
   }
   
