@@ -42,7 +42,7 @@
 #' @return The function outputs an object of class "pls_fit" and "list" with the following elements:
 #'  \describe{
 #'   \item{XScores}{Scores along each singular (PLS) axis for the first block of variables (X)}
-#'   \item{YScores}{Scores along each singular (PLS) axis for the first block of variables (Y)}
+#'   \item{YScores}{Scores along each singular (PLS) axis for the second block of variables (Y)}
 #'   \item{U}{Left singular axes}
 #'   \item{V}{Right singular axes}
 #'   \item{D}{Singular values}
@@ -640,10 +640,8 @@ pls_major_axis=function(pls_object, new_data_x=NULL, new_data_y=NULL, axes_to_us
     {
       PLS_scores_temp=cbind(new_data_Xscores[,i], new_data_Yscores[,i])
       if (scale_PLS==TRUE){
-      PLS_scores_temp=do.call("cbind", lapply(seq(ncol(PLS_scores_temp)), function(cl){
-          (PLS_scores_temp[,cl]/PLS_scores_major_axis_find[[i]]$pls_scale[cl])-
-            PLS_scores_major_axis_find[[i]]$mean_pls_scores[cl]
-        }))
+        PLS_scores_temp=sweep(PLS_scores_temp, 2, PLS_scores_major_axis_find[[i]]$mean_pls_scores, "-")
+        PLS_scores_temp=sweep(PLS_scores_temp, 2, PLS_scores_major_axis_find[[i]]$pls_scale, "/")
       }
       new_data_mjp=PLS_scores_temp %*% PLS_scores_major_axis_find[[i]]$major_axis_rotation
     })
@@ -651,18 +649,19 @@ pls_major_axis=function(pls_object, new_data_x=NULL, new_data_y=NULL, axes_to_us
     # Compute projection of the PLS scores for the new data on the major axis of the old PLS
 
     new_data_revertPCAPLS=lapply(seq(axes_to_use), function(i) {
-      reversePCA(Scores = new_data_major_axis_proj[[i]],
-                 Eigenvectors = cbind(PLS_scores_major_axis_find[[i]]$major_axis_rotation),
-                 Mean = PLS_scores_major_axis_find[[i]]$mean_pls_scores
-      )
+      if (scale_PLS==TRUE) {
+        # For scaled PCA, manually reverse: multiply scores by rotation, then scale, then add mean
+        ZEt = new_data_major_axis_proj[[i]] %*% t(PLS_scores_major_axis_find[[i]]$major_axis_rotation)
+        ZEt = sweep(ZEt, 2, PLS_scores_major_axis_find[[i]]$pls_scale, "*")
+        ZEt = sweep(ZEt, 2, PLS_scores_major_axis_find[[i]]$mean_pls_scores, "+")
+        return(ZEt)
+      } else {
+        reversePCA(Scores = new_data_major_axis_proj[[i]],
+                   Eigenvectors = cbind(PLS_scores_major_axis_find[[i]]$major_axis_rotation),
+                   Mean = PLS_scores_major_axis_find[[i]]$mean_pls_scores
+        )
+      }
     })
-    if (scale_PLS==TRUE){
-      new_data_revertPCAPLS=lapply(seq(length(new_data_revertPCAPLS)), function(i){
-        do.call("cbind", lapply(seq(ncol(new_data_revertPCAPLS[[i]])), function(cl){
-          (new_data_revertPCAPLS[[i]][,cl]*PLS_scores_major_axis_find[[i]]$pls_scale[cl])
-        }))
-      })
-    }
     # Get back scores in the PLS space for the major axis projections of new data
 
     new_data_revertPCAPLS_major_axis_X=do.call("cbind", lapply(new_data_revertPCAPLS, function(X) X[,1]))

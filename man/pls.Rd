@@ -19,7 +19,7 @@ containing each block of variables
 The function outputs an object of class "pls_fit" and "list" with the following elements:
  \describe{
   \item{XScores}{Scores along each singular (PLS) axis for the first block of variables (X)}
-  \item{YScores}{Scores along each singular (PLS) axis for the first block of variables (Y)}
+  \item{YScores}{Scores along each singular (PLS) axis for the second block of variables (Y)}
   \item{U}{Left singular axes}
   \item{V}{Right singular axes}
   \item{D}{Singular values}
