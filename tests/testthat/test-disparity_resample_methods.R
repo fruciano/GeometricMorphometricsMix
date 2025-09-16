@@ -79,11 +79,15 @@ test_that("plot.disparity_resample works with multiple groups", {
   
   # Should return a ggplot object
   expect_s3_class(plot_obj, "ggplot")
-  
-  # Check basic plot structure
-  expect_true("data" %in% names(plot_obj))
-  expect_true("layers" %in% names(plot_obj))
-  expect_true("labels" %in% names(plot_obj))
+
+  # Check plot structure in a ggplot2-version-agnostic way
+  built = ggplot2::ggplot_build(plot_obj)
+  expect_s3_class(built, "ggplot_built")
+  # At least one layer worth of data should exist
+  expect_true(length(built$data) >= 1)
+  # Labels should be present on the built plot
+  expect_true(is.list(built$plot$labels))
+  expect_true(length(built$plot$labels) >= 1)
 })
 
 test_that("plot.disparity_resample works with single group", {
@@ -95,9 +99,11 @@ test_that("plot.disparity_resample works with single group", {
   
   # Should return a ggplot object
   expect_s3_class(plot_obj, "ggplot")
-  
-  # Should handle single group case appropriately
-  expect_true("data" %in% names(plot_obj))
+
+  # Should handle single group case appropriately (check via ggplot_build)
+  built = ggplot2::ggplot_build(plot_obj)
+  expect_s3_class(built, "ggplot_built")
+  expect_true(length(built$data) >= 1)
 })
 
 test_that("plot.disparity_resample handles range results", {
