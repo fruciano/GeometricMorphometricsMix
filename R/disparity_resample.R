@@ -647,11 +647,16 @@ resolve_bootstrap_sample_size = function(sample_size, group_sizes) {
 #' Creates a confidence interval plot for disparity resample results
 #'
 #' @param x An object of class "disparity_resample"
-#' @param ... Additional arguments
+#' @param point_color A single color or a vector of colors for point estimates.
+#'   If length 1, the same color is used for all points. If length equals the
+#'   number of groups, colors are assigned per group. (default "darkblue")
+#' @param errorbar_color A single color or a vector of colors for error bars.
+#'   Follows the same recycling rules as `point_color`. (default "darkred")
+#' @param ... Additional arguments passed to the underlying plotting function
 #'
 #' @return A ggplot object
 #' @export
-plot.disparity_resample=function(x, ...) {
+plot.disparity_resample=function(x, point_color = "darkblue", errorbar_color = "darkred", ...) {
   # Check if results contain groups or single analysis
   if (any(x$results$group == "All") && nrow(x$results) == 1) {
     # Single group case - already labeled as "All"
@@ -666,7 +671,8 @@ plot.disparity_resample=function(x, ...) {
   # Create plot using internal CI_plot function
   p=CI_plot(data=plot_data, x_var="group", y_var="average",
             ymin_var="CI_min", ymax_var="CI_max",
-            x_lab=x_lab, y_lab=x$chosen_statistic, ...)
+            x_lab=x_lab, y_lab=x$chosen_statistic, 
+            point_color = point_color, errorbar_color = errorbar_color, ...)
   
 return(p)
 }

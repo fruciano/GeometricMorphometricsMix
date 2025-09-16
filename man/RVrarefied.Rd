@@ -4,7 +4,7 @@
 \alias{RVrarefied}
 \title{Rarefied version of Escoufier RV coefficient}
 \usage{
-RVrarefied(Block1, Block2, reps = 1000, samplesize)
+RVrarefied(Block1, Block2, reps = 1000, samplesize, group = NULL, CI = 0.95)
 }
 \arguments{
 \item{Block1, Block2}{Matrices or data frames
@@ -14,13 +14,27 @@ containing each block of variables
 \item{reps}{number of resamplings to obtain the rarefied estimate}
 
 \item{samplesize}{sample size to which the rarefaction procedure is carried out}
+
+\item{group}{factor or vector indicating group membership for observations.
+If NULL (default), a single-group analysis is performed. If provided,
+the analysis is performed separately for each group.}
+
+\item{CI}{confidence interval level (default 0.95). Must be between 0 and 1.}
 }
 \value{
 The function outputs a list with the following elements:
  \describe{
-  \item{Rarefied_RV}{Mean rarefied RV}
-  \item{Quantiles}{2.5\%, 50\% (median) and 97.5\% percentiles of the rarefied RV}
-  \item{AllRarefiedSamples}{All RV values obtained using the rarefaction procedure}
+  \item{results}{A data frame with columns `group`, `Mean`, `Median`, `CI_min`, `CI_max`. 
+                 One row per group. For single-group analysis, group will be "All".}
+  \item{AllRarefiedSamples}{A list with all RV values obtained using the rarefaction procedure for each group.
+                            For single-group analysis, this will be a list with one element named "All".}
+}
+
+The returned object has class "EscoufierRVrarefy" and comes with associated S3 methods for 
+convenient display and visualization:
+\itemize{
+  \item \code{\link{print.EscoufierRVrarefy}}: Prints a formatted summary of results including confidence interval overlap assessment for multiple groups
+  \item \code{\link{plot.EscoufierRVrarefy}}: Creates a confidence interval plot using ggplot2
 }
 }
 \description{
@@ -35,7 +49,9 @@ as suggested by Fruciano et al 2013 - Plos One
 This can be useful to compare RV among groups with the same variables
 but different sample sizes (as RV depends on sample size, see Fruciano et al 2013,
 where this procedure is described).
-The idea is the one rarefies the two groups at the same sample size
+The idea is the one rarefies the two groups at the same sample size.
+Following the approach in Fruciano et al. 2013 - Plos One, "rarefaction" 
+is meant resampling to a smaller sample size with replacement (like in bootstrap).
 }
 \section{Notice}{
 
@@ -73,18 +89,22 @@ EscoufierRV(B[,1:20],B[,21:ncol(B)])
 # (this is because they two groups have very different
 # sample sizes, one 50 observations, the other 200)
 
-RarA=RVrarefied(A[,1:20],A[,21:ncol(A)],rep=1000,samplesize=30)
-RarB=RVrarefied(B[,1:20],B[,21:ncol(A)],rep=1000,samplesize=30)
-RarA$Rarefied_RV
-RarB$Rarefied_RV
+RarA=RVrarefied(A[,1:20],A[,21:ncol(A)],reps=1000,samplesize=30)
+RarB=RVrarefied(B[,1:20],B[,21:ncol(A)],reps=1000,samplesize=30)
+RarA$results  # Data frame with Mean, Median, CI_min, CI_max
+RarB$results  # Data frame with Mean, Median, CI_min, CI_max
 # Rarefying both groups at the same sample size
 # (in this case 30)
 # it is clear that the two groups have very similar levels
 # of association between blocks
 
-RarA$Quantiles
-RarB$Quantiles
-# And their intevals clearly overlap
+# Multi-group analysis with custom CI
+combined_data = rbind(A, B)
+group_labels = c(rep("GroupA", nrow(A)), rep("GroupB", nrow(B)))
+multi_result = RVrarefied(combined_data[,1:20], combined_data[,21:ncol(combined_data)], 
+                         reps=1000, samplesize=30, group=group_labels, CI=0.90)
+print(multi_result$results)  # Data frame with results for each group
+# Columns: group, Mean, Median, CI_min, CI_max
 
 }
 \references{
