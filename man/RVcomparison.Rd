@@ -2,38 +2,37 @@
 % Please edit documentation in R/RVcomparison.R
 \name{RVcomparison}
 \alias{RVcomparison}
-\title{Compare Escoufier RV coefficient between two groups}
+\title{Compare Escoufier RV coefficient between groups}
 \usage{
-RVcomparison(
-  Group1Block1,
-  Group1Block2,
-  Group2Block1,
-  Group2Block2,
-  perm = 999,
-  center = TRUE
-)
+RVcomparison(Block1, Block2, group, perm = 999, center = TRUE)
 }
 \arguments{
-\item{Group1Block1, Group1Block2, Group2Block1, Group2Block2}{Matrices or data frames
-containing the data for each group of observations (specimens) and each block of variables
+\item{Block1, Block2}{Matrices or data frames
+containing each block of variables
 (observations in rows, variables in columns).}
+
+\item{group}{factor or vector indicating group membership for observations.}
 
 \item{perm}{number of permutations for the test}
 
-\item{center}{whether the two groups should be mean-centered prior to the test}
+\item{center}{whether the groups should be mean-centered prior to the test}
 }
 \value{
-The function outputs a list with the following elements:
+A data frame with one row per pairwise comparison and the following columns:
  \describe{
-  \item{ObservedRVgrp1}{Observed Escoufier RV for group 1}
-  \item{ObservedRVgrp2}{Observed Escoufier RV for group 2}
-  \item{ObservedAbsoluteDifference}{Absolute difference in the observed Escoufier RV between the two groups}
-  \item{pvalue}{p value of the permutation test}
+  \item{group1}{Name of the first group in the comparison}
+  \item{group2}{Name of the second group in the comparison}
+  \item{Observed_RV_group1}{Observed Escoufier RV for the first group in the comparison}
+  \item{Observed_RV_group2}{Observed Escoufier RV for the second group in the comparison}
+  \item{Absolute_difference_in_RV}{Absolute difference in the observed Escoufier RV between the two groups}
+  \item{p_value}{p value of the permutation test}
 }
+For multiple groups, the data frame includes additional columns identifying the groups being compared.
 }
 \description{
-Performs a permutation test for the difference in
-Escoufier RV between two groups
+Performs permutation tests for the difference in
+Escoufier RV between groups. For multiple groups, performs
+pairwise comparisons between all pairs of groups.
 }
 \details{
 This function is one of the solutions proposed by Fruciano et al. 2013
@@ -65,45 +64,40 @@ and Escoufier 1973 (because the procedure is based on Escoufier RV)
 
 \examples{
 
-if(!require(lmf)){ install.packages("lmf", repos="https://cran.mirror.garr.it/CRAN/") }
-# Install package lmf if not available
-
+library(MASS)
 set.seed(123)
 
-S1=diag(100)
-# Use uncorrelated variables for the first group
+# Create sample data with different correlation structures
+S1 = diag(50)  # Uncorrelated variables for group 1
+S2 = diag(50)
+S2[11:50, 11:50] = 0.3  # Some correlation in second block for group 2
+S2 = (S2 + t(S2)) / 2  # Ensure symmetry
+diag(S2) = 1
 
-S2=diag(100)
-S2[21:100,21:100]=rnorm((100-20)^2, 0.1, 0.03^2)
-S2[1:20,1:20]=rnorm(20^2,0.01,0.03^2)
-lower=S2[lower.tri(S2)]
-S2=t(S2)
-S2[lower.tri(S2)]=lower
-diag(S2)=1
-S2=lmf::nearPD(S2)
-# Create an ad hoc covariance matrix for the second group
+# Generate data for two groups
+A = mvrnorm(30, mu = rep(0, 50), Sigma = S1)
+B = mvrnorm(40, mu = rep(0, 50), Sigma = S2)
 
+# Combine data and create group labels
+combined_data1 = A[, 1:20]
+combined_data2 = A[, 21:50]
+combined_data1 = rbind(combined_data1, B[, 1:20])
+combined_data2 = rbind(combined_data2, B[, 21:50])
+groups = c(rep("GroupA", 30), rep("GroupB", 40))
 
-A=MASS::mvrnorm(50, mu=rep(0,100), Sigma=S1)
-B=MASS::mvrnorm(100, mu=rep(10,100), Sigma=S2)
-# Create two multivariate normal random datasets
-# using the covariance matrices above
-# We are going to use the first 20 variables as block 1
-# and the subsequent variables as block 2
+# Perform RV comparison
+result = RVcomparison(combined_data1, combined_data2, group = groups, perm = 99)
+print(result)
 
-EscoufierRV(A[,1:20], A[,21:ncol(A)])
-EscoufierRV(B[,1:20], B[,21:ncol(B)])
-# Notice that the two observed Escoufier RV are different
-# However, this difference might be due to the
-# different number of observations for the two groups
+# Example with three groups for pairwise comparisons
+C = mvrnorm(25, mu = rep(0, 50), Sigma = diag(50))
+combined_data1_3grp = rbind(combined_data1, C[, 1:20])
+combined_data2_3grp = rbind(combined_data2, C[, 21:50])
+groups_3 = c(groups, rep("GroupC", 25))
 
-RVcomparison(A[,1:20], A[,21:ncol(A)], B[,1:20], B[,21:ncol(B)])
-# One of the solutions is to perform a permutation test,
-# which shows us that these differences are actually significant
-# (another, complementary, solution is to compute rarefied estimates
-# using the function EscoufierRVrarefy)
-RVrarefied(A[,1:20], A[,21:ncol(A)], samplesize=40)$Rarefied_RV
-RVrarefied(B[,1:20], B[,21:ncol(B)], samplesize=40)$Rarefied_RV
+result_3grp = RVcomparison(combined_data1_3grp, combined_data2_3grp, 
+                          group = groups_3, perm = 99)
+print(result_3grp)
 
 }
 \references{
