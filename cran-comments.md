@@ -1,6 +1,8 @@
 ## Test environments
 * Local: R 4.5.1 on Windows 11 Pro
 * GitHub Actions: ubuntu-latest (release, devel, oldrel), macOS-latest, windows-latest
+* R-hub: R-devel/Fedora Linux 38, R-devel/Ubuntu 22.04.5 LTS
+
 
 ## R CMD check results
 
@@ -8,3 +10,21 @@
 
 ## Notes
 * This is a new submission.
+
+### Additional information
+During local checks with vignette building enabled (Quarto + Pandoc installed), a cosmetic message appears once:
+
+```
+ERROR: Unknown command "TMPDIR=...". Did you mean command "create"?
+```
+
+This originates from an internal `system2()` call (in upstream tooling, not in this package) that invokes `quarto -V` while passing the temporary directory via the `env` argument on Windows, which Quarto interprets as a positional argument. The vignette build proceeds successfully (Pandoc 3.6.3; Quarto 1.8.25) and the message has no impact on the rendered vignettes. Setting `TMPDIR` in the environment prior to running the check suppresses it. No action required for CRAN.
+
+The single NOTE reported is:
+
+```
+checking for future file timestamps ... NOTE
+	unable to verify current time
+```
+
+This is an occasional Windows timing artifact (system clock / filesystem resolution); continuous integration does not reproduce additional issues, and there are no generated files with future timestamps. All other checks pass cleanly.
