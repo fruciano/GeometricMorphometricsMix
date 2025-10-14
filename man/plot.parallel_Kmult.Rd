@@ -7,11 +7,14 @@
 \method{plot}{parallel_Kmult}(x, alpha = 0.25, title = NULL, x_lab = "Kmult", ...)
 }
 \arguments{
-\item{x}{An object of class 'parallel_Kmult' produced by \code{\link{Kmultparallel}}}
+\item{x}{An object of class 'parallel_Kmult' produced by
+\code{\link{Kmultparallel}}}
 
-\item{alpha}{Transparency level for density plots (default 0.25)}
+\item{alpha}{Transparency level for density plots (0-1,
+default = 0.25)}
 
-\item{title}{Character string for plot title (default NULL for automatic title)}
+\item{title}{Character string for plot title (default NULL for
+automatic title)}
 
 \item{x_lab}{Character string for x-axis label (default "Kmult")}
 
@@ -21,8 +24,9 @@
 A ggplot object
 }
 \description{
-Creates density plots of Kmult values, with separate densities for each
-combination of dataset and treeset (if multiple combinations are present).
+Creates density plots of Kmult values, with separate densities for
+each combination of dataset and treeset (if multiple combinations are
+present).
 }
 \examples{
 \dontrun{

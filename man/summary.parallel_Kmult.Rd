@@ -7,7 +7,8 @@
 \method{summary}{parallel_Kmult}(object, ...)
 }
 \arguments{
-\item{object}{An object of class 'parallel_Kmult' produced by \code{\link{Kmultparallel}}}
+\item{object}{An object of class 'parallel_Kmult' produced by
+\code{\link{Kmultparallel}}}
 
 \item{...}{Additional arguments (currently not used)}
 }

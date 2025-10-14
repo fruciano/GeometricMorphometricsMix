@@ -13,25 +13,33 @@ pls_major_axis(
 )
 }
 \arguments{
-\item{pls_object}{object of class "pls_fit" obtained from the function pls}
+\item{pls_object}{object of class "pls_fit" obtained from the
+function pls}
 
-\item{new_data_x, new_data_y}{(optional) matrices or data frames containing new data}
+\item{new_data_x, new_data_y}{(optional) matrices or data frames
+containing new data}
 
-\item{axes_to_use}{number of pairs of PLS axes to use in the computation
-(by default, this is performed only on the first axis)}
+\item{axes_to_use}{number of pairs of PLS axes to use in the
+computation (by default, this is performed only on the first axis)}
 
-\item{scale_PLS}{logical indicating whether PLS scores for different blocks
-should be scaled prior to computing the major axis}
+\item{scale_PLS}{logical indicating whether PLS scores for
+different blocks should be scaled prior to computing the major axis}
 }
 \value{
-The function outputs a list with the following elements (please, see the Details section for explanations on their sub-elements):
+The function outputs a list with the following elements
+(please, see the Details section for explanations on their
+sub-elements):
  \describe{
   \item{original_major_axis_projection}{For each PLS axis pair,
-  results of the computation of major axis and projection of the original data on each axis}
-  \item{original_major_axis_predictions_reversed}{Data obtained back-transforming the scores
-  on the major axis into the original space (e.g., shape)}
-  \item{new_data_results}{(only if new data has been provided) PLS scores for the new data,
-  scores of the new data on the major axis, preditions for the new data back-transformed into the original space (e.g., shape)}
+  results of the computation of major axis and projection of the
+  original data on each axis}
+  \item{original_major_axis_predictions_reversed}{Data obtained
+  back-transforming the scores on the major axis into the original
+  space (e.g., shape)}
+  \item{new_data_results}{(only if new data has been provided) PLS
+  scores for the new data, scores of the new data on the major
+  axis, preditions for the new data back-transformed into the
+  original space (e.g., shape)}
 }
 }
 \description{
@@ -39,52 +47,85 @@ Project data on the major axis of PLS scores and
 obtain associated predictions
 }
 \details{
-This function acts on a pls_fit object obtained from the function pls.
-More in detail, the function:
+This function acts on a pls_fit object obtained from the function
+pls. More in detail, the function:
  \itemize{
-  \item Projects the original data onto the major axis for each pair of PLS axes (obtaining for each observation of the original data a score along this axis).
-  \item For each observation (specimen) of the original data, obtains the shape predicted by its score along the major axis.
-  \item (Optionally) if new data is provided, these data are first projected in the original PLS space and then the two operations above are performed on the new data.
+  \item Projects the original data onto the major axis for each
+  pair of PLS axes (obtaining for each observation of the original
+  data a score along this axis).
+  \item For each observation (specimen) of the original data,
+  obtains the shape predicted by its score along the major axis.
+  \item (Optionally) if new data is provided, these data are first
+  projected in the original PLS space and then the two operations
+  above are performed on the new data.
  }
-A more in-depth explanation with a figure which allows for a more intuitive understanding
-is provided in Fruciano et al 2020
-The idea is to obtain individual-level estimates of the shape predicted by a PLS model.
-This can be useful, for instance, to quantify to which extent the shape of a given individual from one group
-resembles the shape that individual would have according to the model computed in another group.
-This can be done by obtaining predictions with this function and then computing the distance between
-the actual shape observed for each individual and its prediction obtained from this function.
-This is, indeed, how this approach has been used in Fruciano et al 2020.
+A more in-depth explanation with a figure which allows for a more
+intuitive understanding is provided in Fruciano et al 2020
+The idea is to obtain individual-level estimates of the shape
+predicted by a PLS model.
+This can be useful, for instance, to quantify to which extent the
+shape of a given individual from one group resembles the shape that
+individual would have according to the model computed in another
+group.
+This can be done by obtaining predictions with this function and
+then computing the distance between the actual shape observed for
+each individual and its prediction obtained from this function.
+This is, indeed, how this approach has been used in Fruciano et al
+2020.
 
-The function returns a list with two or three main elements which are themselves lists.
-The most useful elements for the final user are highlighted in boldface.
+The function returns a list with two or three main elements which
+are themselves lists.
+The most useful elements for the final user are highlighted in
+boldface.
 
-\emph{original_major_axis_projection} is a list containing as many elements as specified in axes_to_use (default 1).
-Each of this elements contains the details of the computation of the major axis
-(as a PCA of PLS scores for a pair of axes), and in particular:
+\emph{original_major_axis_projection} is a list containing as many
+elements as specified in axes_to_use (default 1).
+Each of this elements contains the details of the computation of
+the major axis (as a PCA of PLS scores for a pair of axes), and in
+particular:
 \describe{
   \item{major_axis_rotation}{Eigenvector}
-  \item{mean_pls_scores}{Mean scores for that axis pair used in the computation}
+  \item{mean_pls_scores}{Mean scores for that axis pair used in
+  the computation}
   \item{pls_scale}{Scaling factor used}
-  \item{\strong{original_data_PLS_projection}}{Scores of the original data on the major axis}
+  \item{\strong{original_data_PLS_projection}}{Scores of the
+  original data on the major axis}
 }
 
-\emph{original_major_axis_predictions_reversed} contains the predictions of the PLS model for the original data,
-back-transformed to the original space (i.e., if the original data was shape, this will be shape).
-If axes_to_use > 1, these predictions will be based on the major axis computed for all pairs of axes considered.
+\emph{original_major_axis_predictions_reversed} contains the
+predictions of the PLS model for the original data,
+back-transformed to the original space (i.e., if the original data
+was shape, this will be shape).
+If axes_to_use > 1, these predictions will be based on the major
+axis computed for all pairs of axes considered.
 This element has two sub-elements:
 \describe{
   \item{\strong{Block1}}{Prediction for block 1}
   \item{\strong{Block2}}{Prediction for block 2}
 }
 
-\emph{new_data_results} is only returned when new data is provided and contains the results of the
-analyses obtained using a previous PLS model on new data and, in particular:
+\emph{new_data_results} is only returned when new data is provided
+and contains the results of the analyses obtained using a previous
+PLS model on new data and, in particular:
 \describe{
-  \item{\strong{new_data_Xscores}}{PLS scores of the new data using the old model for the first block}
-  \item{\strong{new_data_Yscores}}{PLS scores of the new data using the old model for the second block}
-  \item{\strong{new_data_major_axis_proj}}{Scores of the new data on the major axis computed using the PLS model provided in pls_object. If axes_to_use > 1, each column corresponds to a separate major axis}
-  \item{\strong{new_data_Block1_proj_prediction_revert}}{Predictions for Block 1 of the new data obtained by first computing the major axis projections (element new_data_major_axis_proj) and then back-transforming these projections to the original space (e.g., shape)}
-  \item{\strong{new_data_Block2_proj_prediction_revert}}{Predictions for Block 2 of the new data obtained by first computing the major axis projections (element new_data_major_axis_proj) and then back-transforming these projections to the original space (e.g., shape)}
+  \item{\strong{new_data_Xscores}}{PLS scores of the new data
+  using the old model for the first block}
+  \item{\strong{new_data_Yscores}}{PLS scores of the new data
+  using the old model for the second block}
+  \item{\strong{new_data_major_axis_proj}}{Scores of the new data
+  on the major axis computed using the PLS model provided in
+  pls_object. If axes_to_use > 1, each column corresponds to a
+  separate major axis}
+  \item{\strong{new_data_Block1_proj_prediction_revert}}{
+  Predictions for Block 1 of the new data obtained by first
+  computing the major axis projections (element
+  new_data_major_axis_proj) and then back-transforming these
+  projections to the original space (e.g., shape)}
+  \item{\strong{new_data_Block2_proj_prediction_revert}}{
+  Predictions for Block 2 of the new data obtained by first
+  computing the major axis projections (element
+  new_data_major_axis_proj) and then back-transforming these
+  projections to the original space (e.g., shape)}
 }
 }
 \section{Citation}{
@@ -95,7 +136,9 @@ If you use this function, please cite Fruciano et al. 2020.
 \section{Notice}{
 
 \itemize{
-  \item If new data is provided, this is first centered to the same average as in the original analysis, then it is translated back to the original scale.
+  \item If new data is provided, this is first centered to the
+  same average as in the original analysis, then it is translated
+  back to the original scale.
 }
 }
 
@@ -112,12 +155,16 @@ data(iris)
 # Import the iris dataset
 versicolor_data=iris[iris$Species=="versicolor",]
 # Select only the specimens belonging to the species Iris versicolor
-versicolor_sepal=versicolor_data[,grep("Sepal", colnames(versicolor_data))]
-versicolor_petal=versicolor_data[,grep("Petal", colnames(versicolor_data))]
+versicolor_sepal=versicolor_data[,grep("Sepal",
+                                       colnames(versicolor_data))]
+versicolor_petal=versicolor_data[,grep("Petal",
+                                       colnames(versicolor_data))]
 # Separate sepal and petal data for I. versicolor
 
 
-PLS_sepal_petal_versicolor=pls(versicolor_sepal, versicolor_petal, perm=99)
+PLS_sepal_petal_versicolor=pls(versicolor_sepal,
+                               versicolor_petal,
+                               perm=99)
 summary(PLS_sepal_petal_versicolor)
 # Compute the PLS for I. versicolor
 
@@ -127,19 +174,23 @@ plot(PLS_sepal_petal_versicolor$XScores[,1],
      asp = 1,
      xlab = "PLS 1 Block 1 scores",
      ylab = "PLS 1 Block 2 scores")
-# Plot the scores for the original data on the first pair of PLS axes (one axis per block)
-# This is the data based on which we will compute the major axis direction
+# Plot the scores for the original data on the first pair of PLS
+# axes (one axis per block)
+# This is the data based on which we will compute the major axis
+# direction
 # Imagine fitting a line through those point, that is the major axis
 
-Pred_major_axis_versicolor=pls_major_axis(PLS_sepal_petal_versicolor, axes_to_use=1)
+Pred_major_axis_versicolor=pls_major_axis(PLS_sepal_petal_versicolor,
+                                          axes_to_use=1)
 # Compute for I. versicolor the projections to the major axis
-# using only the first pair of PLS axes (and scaling the scores prior to the computation)
+# using only the first pair of PLS axes (and scaling the scores
+# prior to the computation)
 
 hist(Pred_major_axis_versicolor$original_major_axis_projection[[1]]$original_data_PLS_projection,
      main="Original data - projections on the major axis - based on the first pair of PLS axes",
      xlab="Major axis score")
-# Plot distribution of PLS scores for each individual in the original data
-# (I. versicolor)
+# Plot distribution of PLS scores for each individual in the
+# original data (I. versicolor)
 # projected on the major axis for the first pair of PLS axis
 
 Pred_major_axis_versicolor$original_major_axis_predictions_reversed$Block1
@@ -147,8 +198,9 @@ Pred_major_axis_versicolor$original_major_axis_predictions_reversed$Block2
 # Shape for each individual of the original data (I. versicolor)
 # predicted by its position along the major axis
 
-# Now we will use the data from new species (I. setosa and I virginica)
-# and obtain predictions from the PLS model obtained for I. versicolor
+# Now we will use the data from new species (I. setosa and I
+# virginica) and obtain predictions from the PLS model obtained for
+# I. versicolor
 
 # The easiest is to use the data for all three species
 # as if they were both new data
@@ -159,15 +211,16 @@ all_sepal=iris[,grep("Sepal", colnames(iris))]
 all_petal=iris[,grep("Petal", colnames(iris))]
 # Separate sepals and petals (they are the two blocks)
 
-Pred_major_axis_versicolor_newdata=pls_major_axis(pls_object=PLS_sepal_petal_versicolor,
-                                          new_data_x = all_sepal,
-                                          new_data_y = all_petal,
-                                          axes_to_use=1)
+Pred_major_axis_versicolor_newdata=pls_major_axis(
+  pls_object=PLS_sepal_petal_versicolor,
+  new_data_x = all_sepal,
+  new_data_y = all_petal,
+  axes_to_use=1)
 # Perform the major axis computation using new data
 # Notice that:
 # - we are using the old PLS model (computed on versicolor only)
-# - we are adding the new data in the same order as in the original model
-#   (i.e., new_data_x is sepal data, new_data_y is petal data)
+# - we are adding the new data in the same order as in the original
+#   model (i.e., new_data_x is sepal data, new_data_y is petal data)
 
 
 plot(Pred_major_axis_versicolor_newdata$new_data_results$new_data_Xscores[,1],
@@ -176,14 +229,17 @@ plot(Pred_major_axis_versicolor_newdata$new_data_results$new_data_Xscores[,1],
      xlab = "Old PLS, Axis 1, Block 1",
      ylab = "Old PLS, Axis 1, Block 2")
 # Plot the new data (both versicolor and setosa)
-# in the space of the first pair of PLS axes computed only on versicolor
+# in the space of the first pair of PLS axes computed only on
+# versicolor
 # The three species follow a quite similar trajectories
 # but they have different average value on the major axis
 
-# To visualize this better, we can plot the scores along the major axis
-# for the three species
+# To visualize this better, we can plot the scores along the major
+# axis for the three species
 boxplot(Pred_major_axis_versicolor_newdata$new_data_results$new_data_major_axis_proj[,1]~
-iris$Species, xlab="Species", ylab="Score on the major axis")
+        iris$Species,
+        xlab="Species",
+        ylab="Score on the major axis")
 
 # We can also visualize the deviations from the major axis
 # For instance by putting the predictions of the two blocks together
@@ -194,20 +250,25 @@ predictions_all_data=cbind(
 # Get the predictions for the two blocks (sepals and petals)
 # and put them back together
 
-Euc_dist_from_predictions=unlist(lapply(seq(nrow(iris)), function(i)
+Euc_dist_from_predictions=unlist(lapply(seq(nrow(iris)),
+                                         function(i)
   dist(rbind(iris[i,1:4],predictions_all_data[i,]))))
 # for each flower, compute the Euclidean distance between
 # the original values and what is predicted by the model
 
 boxplot(Euc_dist_from_predictions~iris$Species,
-        xlab="Species", ylab="Euclidean distance from prediction")
+        xlab="Species",
+        ylab="Euclidean distance from prediction")
 # I. setosa is the one which deviates the most from the prediction
 
 
 
 }
 \references{
-Fruciano C, Colangelo P, Castiglia R, Franchini P. 2020. Does divergence from normal patterns of integration increase as chromosomal fusions increase in number? A test on a house mouse hybrid zone. Current Zoology 66:527–538.
+Fruciano C, Colangelo P, Castiglia R, Franchini P.
+2020. Does divergence from normal patterns of integration increase
+as chromosomal fusions increase in number? A test on a house mouse
+hybrid zone. Current Zoology 66:527–538.
 }
 \seealso{
 \code{\link{pls}}

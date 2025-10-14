@@ -1,69 +1,96 @@
-#' Parallel implementation of Adams' Kmult with additional support for multiple datasets and tree sets
+#' Parallel implementation of Adams' Kmult with additional support for
+#' multiple datasets and tree sets
 #'
-#' Parallel implementation of Kmult, a measure of phylogenetic signal which
-#' is a multivariate equivalent of Blomberg's K. This version supports multiple
-#' datasets and tree sets, computing Kmult for all combinations.
+#' Parallel implementation of Kmult, a measure of phylogenetic signal
+#' which is a multivariate equivalent of Blomberg's K. This version
+#' supports multiple datasets and tree sets, computing Kmult for all
+#' combinations.
 #'
-#' This is an updated and improved version of the function included in Fruciano et al. 2017.
+#' This is an updated and improved version of the function included in
+#' Fruciano et al. 2017.
 #' It performs the computation of Adams' Kmult (Adams 2014) in parallel
-#' with the aim of facilitating computation on a distribution of trees rather than a single tree.
-#' This version uses cross-platform parallel processing that works on Windows, Mac, and Linux systems.
-#' If one wanted to perform a computation of Kmult on a single tree, he/she would be
-#' advised to use the version implemented in the package geomorph, which receives regular updates.
+#' with the aim of facilitating computation on a distribution of trees
+#' rather than a single tree.
+#' This version uses cross-platform parallel processing that works on
+#' Windows, Mac, and Linux systems.
+#' If one wanted to perform a computation of Kmult on a single tree,
+#' he/she would be advised to use the version implemented in the
+#' package geomorph, which receives regular updates.
 #'
 #' @section Parallelization:
-#' This function automatically uses parallel processing via the future framework when beneficial. 
-#' The parallelization strategy is determined by the user's choice of future plan, providing 
-#' flexibility across different computing environments (local multicore, cluster, etc.). 
-#' The function performs parallelization at the level of individual trees within each treeset, 
-#' which is optimal for analyzing distributions of many trees. The future plan should be set up 
-#' by the user before calling this function using \code{future::plan()} (see also examples).
+#' This function automatically uses parallel processing via the future
+#' framework when beneficial.
+#' The parallelization strategy is determined by the user's choice of
+#' future plan, providing flexibility across different computing
+#' environments (local multicore, cluster, etc.).
+#' The function performs parallelization at the level of individual
+#' trees within each treeset, which is optimal for analyzing
+#' distributions of many trees. The future plan should be set up by the
+#' user before calling this function using \code{future::plan()} (see
+#' also examples).
 #'
 #' @section Citation:
 #' If you use this function please kindly cite both
-#' Fruciano et al. 2017 (because you're using this parallelized function) and
-#' Adams 2014 (because the function computes Adams' Kmult)
+#' Fruciano et al. 2017 (because you're using this parallelized
+#' function) and Adams 2014 (because the function computes Adams' Kmult)
 #'
-#' @param data Either a data.frame/matrix with continuous (multivariate) phenotypes,
-#' or a list where each element is a data.frame/matrix representing a separate dataset.
+#' @param data Either a data.frame/matrix with continuous (multivariate)
+#' phenotypes, or a list where each element is a data.frame/matrix
+#' representing a separate dataset.
 #' Row names should match species names in the phylogenetic trees.
-#' @param trees Either a multiPhylo object containing a collection of trees (single tree set),
-#' or a list where each element is a multiPhylo object representing a separate tree set.
-#' @param burninpercent percentage of trees in each tree set to discard as burn-in
-#' (by default no tree is discarded)
+#' @param trees Either a multiPhylo object containing a collection of
+#' trees (single tree set), or a list where each element is a
+#' multiPhylo object representing a separate tree set.
+#' @param burninpercent percentage of trees in each tree set to discard
+#' as burn-in (by default no tree is discarded)
 #' @param iter number of permutations to be used in the permutation test
-#' (this should normally be left at the default value of 0 as permutations slow down
-#' computation and are of doubtful utility when analyzing tree distributions)
-#' @param verbose logical, whether to print progress information (default TRUE)
+#' (this should normally be left at the default value of 0 as
+#' permutations slow down computation and are of doubtful utility when
+#' analyzing tree distributions)
+#' @param verbose logical, whether to print progress information
+#' (default TRUE)
 #' 
 #' @details 
-#' This function uses the future framework for parallel processing. Users should set up their 
-#' preferred parallelization strategy using \code{future::plan()} before calling this function.
+#' This function uses the future framework for parallel processing.
+#' Users should set up their preferred parallelization strategy using
+#' \code{future::plan()} before calling this function.
 #' For example:
 #' \itemize{
-#'   \item \code{future::plan(future::sequential)} for sequential processing
-#'   \item \code{future::plan(future::multisession, workers = 4)} for parallel processing with 4 workers
+#'   \item \code{future::plan(future::sequential)} for sequential
+#'   processing
+#'   \item \code{future::plan(future::multisession, workers = 4)} for
+#'   parallel processing with 4 workers
 #' (works in most platforms including Windows)
-#'   \item \code{future::plan(future::multicore, workers = 4)} for forked processes (Unix-like systems)
-#'   \item \code{future::plan(future::cluster, workers = c("host1", "host2"))} for cluster computing
+#'   \item \code{future::plan(future::multicore, workers = 4)} for
+#'   forked processes (Unix-like systems)
+#'   \item \code{future::plan(future::cluster, workers = c("host1",
+#'   "host2"))} for cluster computing
 #' }
-#' If no plan is set, the function will use the default sequential processing.
+#' If no plan is set, the function will use the default sequential
+#' processing.
 #'
-#' @return The function outputs a data.frame with classes "parallel_Kmult" and "data.frame" containing columns:
+#' @return The function outputs a data.frame with classes
+#' "parallel_Kmult" and "data.frame" containing columns:
 #'  \describe{
 #'   \item{Kmult}{Value of Kmult for each tree-dataset combination}
-#'   \item{p value}{p value for the significance of the test (only if iter > 0)}
-#'   \item{treeset}{Identifier for the tree set (name from list or number)}
-#'   \item{dataset}{Identifier for the dataset (name from list or number)}
+#'   \item{p value}{p value for the significance of the test (only if
+#'   iter > 0)}
+#'   \item{treeset}{Identifier for the tree set (name from list or
+#'   number)}
+#'   \item{dataset}{Identifier for the dataset (name from list or
+#'   number)}
 #'   \item{tree_index}{Index of the tree within its tree set}
 #' }
 #'
 #' @section S3 Methods:
 #' The returned object has specialized S3 methods:
 #' \itemize{
-#'   \item \code{\link{print.parallel_Kmult}}: Provides a summary of Kmult ranges for each dataset-treeset combination
-#'   \item \code{\link{plot.parallel_Kmult}}: Creates density plots of Kmult values grouped by dataset-treeset combinations
-#'   \item \code{\link{summary.parallel_Kmult}}: Provides detailed summary statistics for the analysis results
+#'   \item \code{\link{print.parallel_Kmult}}: Provides a summary of
+#'   Kmult ranges for each dataset-treeset combination
+#'   \item \code{\link{plot.parallel_Kmult}}: Creates density plots of
+#'   Kmult values grouped by dataset-treeset combinations
+#'   \item \code{\link{summary.parallel_Kmult}}: Provides detailed
+#'   summary statistics for the analysis results
 #' }
 #'
 #' @examples
@@ -100,7 +127,8 @@
 #' tree_temp = treeset1[[1]]
 #' # Get only the first 40 tips to match our data size
 #' tips_to_keep = tree_temp$tip.label[1:40]
-#' tree_pruned = ape::drop.tip(tree_temp, setdiff(tree_temp$tip.label, tips_to_keep))
+# tree_pruned = ape::drop.tip(tree_temp,
+#                             setdiff(tree_temp$tip.label, tips_to_keep))
 #' 
 #' # Simulate data under Brownian motion
 #' sim_data = mvSIM(tree = tree_pruned, nsim = 1, model = "BM1", 
@@ -110,9 +138,11 @@
 #' dataset_bm = as.matrix(sim_data)
 #' rownames(dataset_bm) = tree_pruned$tip.label
 #' # Generate 1 dataset evolving under Brownian motion
-#' # This dataset should display strong phylogenetic signal when combined with treeset1
+#' # This dataset should display strong phylogenetic signal when combined
+# with treeset1
 #' 
-#' # Example 1: Single dataset and single treeset analysis (sequential processing)
+#' # Example 1: Single dataset and single treeset analysis (sequential
+#' # processing)
 #' future::plan(future::sequential)  # Use sequential processing
 #' result_single = Kmultparallel(dataset_bm, treeset1)
 #' # Analyze BM dataset with first treeset (sequential processing)
@@ -120,19 +150,22 @@
 #' # Use S3 methods to examine results
 #' print(result_single)
 #' # Display summary of Kmult values
-#' # Notice how the range is very broad because we have high phylogenetic signal for the case
-#' # in which the dataset has been simulated under Brownian motion with the first tree,
-#' # but low phylogenetic signal when we use the other trees in the treeset.
+#' # Notice how the range is very broad because we have high
+#' # phylogenetic signal for the case in which the dataset has been
+#' # simulated under Brownian motion with the first tree, but low
+#' # phylogenetic signal when we use the other trees in the treeset.
 #' 
 #' plot(result_single)
 #' # Create density plot of Kmult distribution
-#' # Notice the bimodal distribution with low phylogenetic signal corresponding to a
-#' # mismatch between the tree used and the true evolutionary history of the traits,
-#' # and the high phylogenetic signal when the correct tree is used.
+#' # Notice the bimodal distribution with low phylogenetic signal
+#' # corresponding to a mismatch between the tree used and the true
+#' # evolutionary history of the traits, and the high phylogenetic
+#' # signal when the correct tree is used.
 #' 
-#' # Example 2: Multiple datasets and multiple treesets analysis with parallel processing
+#' # Example 2: Multiple datasets and multiple treesets analysis with
+#' # parallel processing
 #' # Set up parallel processing with future
-#' future::plan(future::multisession, workers = 4)  # Use 4 worker processes
+#' future::plan(future::multisession, workers = 4)
 #' 
 #' # Combine datasets into a list
 #' all_datasets = list(random = dataset_random, brownian = dataset_bm)
@@ -153,10 +186,12 @@
 #' plot(result_multiple)
 #' # Create grouped density plots by combination
 #' # Notice how the distribution of Kmult when we use the random dataset
-#' # has a strong peak at small values (no phylogenetic signal, as expected)
+#' # has a strong peak at small values (no phylogenetic signal, as
+#' # expected)
 #' 
 #' # Custom plotting with different transparency
-#' plot(result_multiple, alpha = 0.5, title = "Kmult Distribution Across All Combinations")
+#' plot(result_multiple, alpha = 0.5,
+#'      title = "Kmult Distribution Across All Combinations")
 #' # Customize the plot appearance
 #' 
 #' # Example 3: Setting up parallel processing with future
@@ -165,18 +200,28 @@
 #' # Use 4 worker processes for parallel processing
 #' }
 #'
-#' @references Adams DC. 2014. A Generalized K Statistic for Estimating Phylogenetic Signal from Shape and Other High-Dimensional Multivariate Data. Systematic Biology 63:685-697.
-#' @references Fruciano C, Celik MA, Butler K, Dooley T, Weisbecker V, Phillips MJ. 2017. Sharing is caring? Measurement error and the issues arising from combining 3D morphometric datasets. Ecology and Evolution 7:7034-7046.
+#' @references Adams DC. 2014. A Generalized K Statistic for Estimating
+#' Phylogenetic Signal from Shape and Other High-Dimensional
+#' Multivariate Data. Systematic Biology 63:685-697.
+#' @references Fruciano C, Celik MA, Butler K, Dooley T, Weisbecker V,
+#' Phillips MJ. 2017. Sharing is caring? Measurement error and the
+#' issues arising from combining 3D morphometric datasets. Ecology and
+#' Evolution 7:7034-7046.
 #'
 #'
 #' @import stats
 #' @importFrom ape drop.tip vcv.phylo
 #' @export
-Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRUE) {
+Kmultparallel = function(data, trees, burninpercent = 0, iter = 0,
+                         verbose = TRUE) {
 
     # Check if future framework is available
-    if (!requireNamespace("future", quietly = TRUE) || !requireNamespace("future.apply", quietly = TRUE)) {
-        stop("Packages 'future' and 'future.apply' are required. Please install them with:\ninstall.packages(c('future', 'future.apply'))")
+    if (!requireNamespace("future", quietly = TRUE) ||
+        !requireNamespace("future.apply", quietly = TRUE)) {
+        stop(paste("Packages 'future' and 'future.apply' are required.",
+                   "Please install them with:",
+                   "install.packages(c('future', 'future.apply'))",
+                   sep = "\n"))
     }
 
     # Standardize input formats
@@ -185,9 +230,11 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
         data = list(dataset1 = data)
         data_names = "1"
     } else if (is.list(data)) {
-        data_names = if (is.null(names(data))) as.character(seq_along(data)) else names(data)
+        data_names = if (is.null(names(data)))
+          as.character(seq_along(data)) else names(data)
     } else {
-        stop("data must be a data.frame, matrix, or list of data.frames/matrices")
+        stop(paste("data must be a data.frame, matrix, or list of",
+                   "data.frames/matrices"))
     }
     
     if (inherits(trees, "multiPhylo")) {
@@ -253,15 +300,18 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
             stop("Data must have row names matching tree tip labels")
         }
         if (nrow(current_data) < 3) {
-            stop(sprintf("Dataset '%s' has fewer than 3 rows (%d). Kmult requires at least 3 observations.",
+            stop(sprintf(paste("Dataset '%s' has fewer than 3 rows (%d).",
+                               "Kmult requires at least 3 observations."),
                         dataset_name, nrow(current_data)))
         }
         if (ncol(current_data) < 1) {
-            stop(sprintf("Dataset '%s' has no columns. Kmult requires at least 1 variable.",
+            stop(sprintf(paste("Dataset '%s' has no columns.",
+                               "Kmult requires at least 1 variable."),
                         dataset_name))
         }
-        if (any(is.na(current_data))) {
-            stop(sprintf("Dataset '%s' contains missing values (NA). Kmult requires complete data.",
+        if (anyNA(current_data)) {
+            stop(sprintf(paste("Dataset '%s' contains missing values (NA).",
+                               "Kmult requires complete data."),
                         dataset_name))
         }
         
@@ -271,7 +321,10 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
         common_tips = intersect(first_tree_tips, available_data_tips)
         
         if (length(common_tips) < 3) {
-            stop(sprintf("Dataset '%s' and treeset '%s' have fewer than 3 matching tips (%d common tips found). Kmult requires at least 3 matching tips.",
+            stop(sprintf(paste("Dataset '%s' and treeset '%s' have",
+                               "fewer than 3 matching tips (%d common",
+                               "tips found). Kmult requires at least 3",
+                               "matching tips."),
                         dataset_name, treeset_name, length(common_tips)))
         }
         
@@ -287,23 +340,30 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
               all(sort(tips) == sort(first_tips))
         }, FUN.VALUE = logical(1)))
         
-        # Robust pruning: for each tree compute the intersection of tree tip labels and data rownames
-        # and prune only the tips not present in the data. This avoids assumptions about identical tip
-        # sets and reports trees that would be left with fewer than 3 tips.
+        # Robust pruning: for each tree compute the intersection of tree
+        # tip labels and data rownames and prune only the tips not
+        # present in the data. This avoids assumptions about identical
+        # tip sets and reports trees that would be left with fewer than
+        # 3 tips.
         available_data_tips = row.names(current_data)
         if (is.null(available_data_tips)) {
             stop("Data must have row names matching tree tip labels")
         }
 
-        tree_processing_results = future.apply::future_lapply(current_trees, function(tree) {
-            # Determine which tips to keep (present both in tree and data)
+        tree_processing_results = future.apply::future_lapply(
+          current_trees, function(tree) {
+            # Determine which tips to keep (present both in tree and
+            # data)
             keep = intersect(tree$tip.label, available_data_tips)
             if (length(keep) < 3) {
-                stop(sprintf("Dataset '%s' and treeset '%s': tree has only %d matching tips after pruning (need >= 3)",
+                stop(sprintf(paste("Dataset '%s' and treeset '%s': tree",
+                                   "has only %d matching tips after",
+                                   "pruning (need >= 3)"),
                              dataset_name, treeset_name, length(keep)))
             }
 
-            # If some tips must be dropped, prune them; otherwise keep original tree
+            # If some tips must be dropped, prune them; otherwise keep
+            # original tree
             if (length(keep) == length(tree$tip.label)) {
                 pruned_tree = tree
             } else {
@@ -311,10 +371,13 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
                 pruned_tree = ape::drop.tip(tree, droplist_tree)
             }
 
-            # Reorder data for this pruned tree according to pruned tip labels
-            data_reordered_tree = current_data[pruned_tree$tip.label, , drop = FALSE]
+            # Reorder data for this pruned tree according to pruned tip
+            # labels
+            data_reordered_tree = current_data[pruned_tree$tip.label, ,
+                                               drop = FALSE]
 
-            list(pruned_tree = pruned_tree, data_reordered = data_reordered_tree)
+            list(pruned_tree = pruned_tree,
+                 data_reordered = data_reordered_tree)
         }, future.packages = "ape")
 
         # Extract pruned trees and reordered data
@@ -338,8 +401,10 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
         
         # Compute Kmult for each tree
         tree_indices = seq_along(pruned_trees)
-        kmult_results = future.apply::future_lapply(tree_indices, function(i) {
-            result = Test_Kmult(data_reordered[[i]], pruned_trees[[i]], iter = iter)
+        kmult_results = future.apply::future_lapply(tree_indices,
+                                                     function(i) {
+            result = Test_Kmult(data_reordered[[i]], pruned_trees[[i]],
+                                iter = iter)
             list(
                 kmult = result$phy.signal,
                 pvalue = result$pvalue,
@@ -352,7 +417,8 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
         return(kmult_results)
     }
     
-    # Process all combinations sequentially. Only per-tree work inside each combination
+    # Process all combinations sequentially. Only per-tree work inside
+    # each combination is parallelized.
     # is parallelized using future_lapply (to avoid nested parallel backends).
     all_results = lapply(seq_len(nrow(combinations)), process_combination)
     
@@ -385,15 +451,19 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
     if (verbose) {
         cat("Analysis completed successfully.\n")
         cat(sprintf("Results summary:\n"))
-        cat(sprintf("- Total Kmult values computed: %d\n", nrow(result_df)))
-        cat(sprintf("- Overall Kmult range: %.4f - %.4f\n", min(result_df$Kmult), max(result_df$Kmult)))
+        cat(sprintf("- Total Kmult values computed: %d\n",
+                    nrow(result_df)))
+        cat(sprintf("- Overall Kmult range: %.4f - %.4f\n",
+                    min(result_df$Kmult), max(result_df$Kmult)))
         
         # Check for potential issues
         if (any(result_df$Kmult < 0)) {
-            cat("- Warning: Some negative Kmult values detected. This may indicate computational issues.\n")
+            cat(paste("- Warning: Some negative Kmult values detected.",
+                      "This may indicate computational issues.\n"))
         }
         if (any(result_df$Kmult > 10)) {
-            cat("- Note: Some very high Kmult values detected (>10). Verify results are reasonable.\n")
+            cat(paste("- Note: Some very high Kmult values detected (>10).",
+                      "Verify results are reasonable.\n"))
         }
         cat("\n")
     }
@@ -411,14 +481,20 @@ Test_Kmult <- function(x, phy, iter = 999) {
         ones <- array(1, N)
         C <- ape::vcv.phylo(phy)
         C <- C[row.names(x), row.names(x)]
-        a.obs <- colSums(solve(C)) %*% x/sum(solve(C))  #evol.vcv code
+        a.obs <- colSums(solve(C)) %*% x/sum(solve(C))
+        # evol.vcv code
         distmat <- as.matrix(dist(rbind(as.matrix(x), a.obs)))
-        MSEobs.d <- sum(distmat[(1:N), (N + 1)]^2)  #sum distances root vs. tips
+        MSEobs.d <- sum(distmat[(1:N), (N + 1)]^2)
+        # sum distances root vs. tips
         eigC <- eigen(C)
-        D.mat <- solve(eigC$vectors %*% diag(sqrt(eigC$values)) %*% t(eigC$vectors))
-        dist.adj <- as.matrix(dist(rbind((D.mat %*% (x - (ones %*% a.obs))), 0)))
-        MSE.d <- sum(dist.adj[(1:N), (N + 1)]^2)  #sum distances for transformed data)
-        K.denom <- (sum(diag(C)) - N * solve(t(ones) %*% solve(C) %*% ones))/(N - 1)
+        D.mat <- solve(eigC$vectors %*% diag(sqrt(eigC$values)) %*%
+                       t(eigC$vectors))
+        dist.adj <- as.matrix(dist(rbind((D.mat %*% (x - (ones %*%
+                                                           a.obs))), 0)))
+        MSE.d <- sum(dist.adj[(1:N), (N + 1)]^2)
+        # sum distances for transformed data
+        K.denom <- (sum(diag(C)) - N *
+                    solve(t(ones) %*% solve(C) %*% ones))/(N - 1)
         K.stat <- (MSEobs.d/MSE.d)/K.denom
         return(K.stat)
     }
@@ -443,10 +519,11 @@ Test_Kmult <- function(x, phy, iter = 999) {
 
 #' Print method for parallel_Kmult objects
 #'
-#' Provides a summary of Kmult analysis results showing the range of Kmult values
-#' for each combination of dataset and treeset.
+#' Provides a summary of Kmult analysis results showing the range of
+#' Kmult values for each combination of dataset and treeset.
 #'
-#' @param x An object of class 'parallel_Kmult' produced by \code{\link{Kmultparallel}}
+#' @param x An object of class 'parallel_Kmult' produced by
+#' \code{\link{Kmultparallel}}
 #' @param ... Additional arguments (currently not used)
 #'
 #' @return Invisibly returns the input object
@@ -480,8 +557,10 @@ print.parallel_Kmult = function(x, ...) {
         
         cat(sprintf("%s\n", combo))
         cat(sprintf("  Trees analyzed: %d\n", n_trees))
-        cat(sprintf("  Kmult range: %.4f - %.4f\n", kmult_range[1], kmult_range[2]))
-        cat(sprintf("  Kmult mean (SD): %.4f (%.4f)\n\n", kmult_mean, kmult_sd))
+        cat(sprintf("  Kmult range: %.4f - %.4f\n",
+                    kmult_range[1], kmult_range[2]))
+        cat(sprintf("  Kmult mean (SD): %.4f (%.4f)\n\n",
+                    kmult_mean, kmult_sd))
     }
     
     # Check if p-values are present
@@ -495,12 +574,16 @@ print.parallel_Kmult = function(x, ...) {
 
 #' Plot method for parallel_Kmult objects
 #'
-#' Creates density plots of Kmult values, with separate densities for each
-#' combination of dataset and treeset (if multiple combinations are present).
+#' Creates density plots of Kmult values, with separate densities for
+#' each combination of dataset and treeset (if multiple combinations are
+#' present).
 #'
-#' @param x An object of class 'parallel_Kmult' produced by \code{\link{Kmultparallel}}
-#' @param alpha Transparency level for density plots (default 0.25)
-#' @param title Character string for plot title (default NULL for automatic title)
+#' @param x An object of class 'parallel_Kmult' produced by
+#' \code{\link{Kmultparallel}}
+#' @param alpha Transparency level for density plots (0-1,
+#' default = 0.25)
+#' @param title Character string for plot title (default NULL for
+#' automatic title)
 #' @param x_lab Character string for x-axis label (default "Kmult")
 #' @param ... Additional arguments passed to the plotting function
 #'
@@ -517,10 +600,12 @@ print.parallel_Kmult = function(x, ...) {
 #' }
 #'
 #' @export
-plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL, x_lab = "Kmult", ...) {
+plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL,
+                               x_lab = "Kmult", ...) {
     
     # Create combination identifier for grouping
-    x$combination = paste0("Dataset:", x$dataset, " - Treeset:", x$treeset)
+    x$combination = paste0("Dataset:", x$dataset, " - Treeset:",
+                           x$treeset)
     
     # Check if there are multiple combinations
     unique_combinations = unique(x$combination)
@@ -536,7 +621,8 @@ plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL, x_lab = "Kmult", .
     }
     
     if (!requireNamespace("ggplot2", quietly = TRUE)) {
-        stop("Package 'ggplot2' is required for plotting parallel_Kmult objects")
+        stop(paste("Package 'ggplot2' is required for plotting",
+                   "parallel_Kmult objects"))
     }
     
     # Create local bindings to avoid R CMD check 'no visible binding' notes
@@ -552,11 +638,14 @@ plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL, x_lab = "Kmult", .
             ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
     } else {
         # Multiple combinations - use grouped density plot
-        p = ggplot2::ggplot(x, ggplot2::aes(x = Kmult, fill = combination)) +
+        p = ggplot2::ggplot(x, ggplot2::aes(x = Kmult,
+                                            fill = combination)) +
             ggplot2::geom_density(alpha = alpha) +
             ggplot2::theme_classic() +
-            ggplot2::labs(x = x_lab, y = "Density", fill = "Combination", title = title) +
-            ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
+            ggplot2::labs(x = x_lab, y = "Density",
+                         fill = "Combination", title = title) +
+            ggplot2::theme(plot.title =
+                           ggplot2::element_text(hjust = 0.5))
     }
     
     return(p)
@@ -567,7 +656,8 @@ plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL, x_lab = "Kmult", .
 #'
 #' Provides detailed summary statistics for Kmult analysis results.
 #'
-#' @param object An object of class 'parallel_Kmult' produced by \code{\link{Kmultparallel}}
+#' @param object An object of class 'parallel_Kmult' produced by
+#' \code{\link{Kmultparallel}}
 #' @param ... Additional arguments (currently not used)
 #'
 #' @return Invisibly returns the input object
@@ -587,7 +677,8 @@ summary.parallel_Kmult = function(object, ...) {
     # Overall statistics
     cat("Overall Statistics:\n")
     cat(sprintf("  Total observations: %d\n", nrow(object)))
-    cat(sprintf("  Kmult range: %.4f - %.4f\n", min(object$Kmult), max(object$Kmult)))
+    cat(sprintf("  Kmult range: %.4f - %.4f\n",
+                min(object$Kmult), max(object$Kmult)))
     cat(sprintf("  Kmult mean: %.4f\n", mean(object$Kmult)))
     cat(sprintf("  Kmult median: %.4f\n", median(object$Kmult)))
     cat(sprintf("  Kmult standard deviation: %.4f\n", sd(object$Kmult)))
@@ -608,20 +699,25 @@ summary.parallel_Kmult = function(object, ...) {
     })
     for (i in seq_len(nrow(dataset_summary))) {
         stats = dataset_summary$Kmult[i, ]
-        cat(sprintf("  Dataset %s: n=%d, mean=%.4f (SD=%.4f), range=%.4f-%.4f\n",
-                   dataset_summary$dataset[i], stats[1], stats[2], stats[3], stats[4], stats[5]))
+        cat(sprintf(paste("  Dataset %s: n=%d, mean=%.4f (SD=%.4f),",
+                          "range=%.4f-%.4f\n"),
+                   dataset_summary$dataset[i], stats[1], stats[2],
+                   stats[3], stats[4], stats[5]))
     }
     cat("\n")
     
     # By treeset
     cat("By Treeset:\n")
     treeset_summary = aggregate(Kmult ~ treeset, object, function(x) {
-        c(n = length(x), mean = mean(x), sd = sd(x), min = min(x), max = max(x))
+        c(n = length(x), mean = mean(x), sd = sd(x), min = min(x),
+          max = max(x))
     })
     for (i in seq_len(nrow(treeset_summary))) {
         stats = treeset_summary$Kmult[i, ]
-        cat(sprintf("  Treeset %s: n=%d, mean=%.4f (SD=%.4f), range=%.4f-%.4f\n",
-                   treeset_summary$treeset[i], stats[1], stats[2], stats[3], stats[4], stats[5]))
+        cat(sprintf(paste("  Treeset %s: n=%d, mean=%.4f (SD=%.4f),",
+                          "range=%.4f-%.4f\n"),
+                   treeset_summary$treeset[i], stats[1], stats[2],
+                   stats[3], stats[4], stats[5]))
     }
     
     invisible(object)

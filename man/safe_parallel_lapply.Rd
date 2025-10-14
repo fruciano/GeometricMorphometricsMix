@@ -50,16 +50,18 @@ cluster if forking is not available or fails. If \code{ncores == 1}
 this simply calls \code{lapply}.
 }
 \details{
-This function is used internally by a few functions in this package but is exported
-so that users can reuse it for lightweight cross-platform parallel
-work (for example on Windows where forking is not available).
+This function is used internally by a few functions in this
+package but is exported so that users can reuse it for lightweight
+cross-platform parallel work (for example on Windows where forking
+is not available).
 }
 \examples{
 \dontrun{
 # simple usage
 safe_parallel_lapply(1:4, function(i) i^2, ncores = 2)
 
-# more complex example: simulate work with a pause to compare serial vs parallel timing
+# more complex example: simulate work with a pause to compare
+# serial vs parallel timing
 slow_task = function(i) {
   # simulate a time-consuming operation (0.5 seconds)
   Sys.sleep(0.5)

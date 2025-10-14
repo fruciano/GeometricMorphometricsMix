@@ -83,12 +83,12 @@ test_that("RVcomparison input validation works correctly", {
   # Test error for negative perm
   expect_error(RVcomparison(test_data$Block1_2grp, test_data$Block2_2grp, 
                            group = test_data$groups_2grp, perm = -5),
-               "perm must be a positive integer")
+               "perm must be a single positive integer")
   
   # Test error for non-integer perm
   expect_error(RVcomparison(test_data$Block1_2grp, test_data$Block2_2grp, 
                            group = test_data$groups_2grp, perm = 2.5),
-               "perm must be a positive integer")
+               "perm must be a single positive integer")
   
   # Test error for NA values in Block1
   Block1_with_NA = test_data$Block1_2grp

@@ -8,14 +8,22 @@
 #'
 #' The object is a list with the following elements:
 #' \describe{
-#'   \item{GPA_consensus_used}{A matrix of landmark coordinates for the GPA consensus to which the models have been aligned (brown trout dataset in this package)}
-#'   \item{arching_vector_CPCA}{A numeric vector of shape change obtained using common principal component analysis as detailed in Fruciano et al. 2020.}
+#'   \item{GPA_consensus_used}{A matrix of landmark coordinates for
+#'   the GPA consensus to which the models have been aligned (brown
+#'   trout dataset in this package)}
+#'   \item{arching_vector_CPCA}{A numeric vector of shape change
+#'   obtained using common principal component analysis as detailed in
+#'   Fruciano et al. 2020.}
 #' }
 #'
 #' @docType data
 #' @usage data(arching_vector)
 #' @format A list with two components as described above.
-#' @references Fruciano C., Schmidt, I., Ramirez Sanchez, M.M., Morek, W., Avila Valle, Z.A., Talijancic, I., Pecoraro, C., Schermann Legionnet, A. 2020. Tissue preservation can affect geometric morphometric analyses: a case study using fish body shape. Zoological Journal of the Linnean Society 188:148-162.
+#' @references Fruciano C., Schmidt, I., Ramirez Sanchez, M.M.,
+#' Morek, W., Avila Valle, Z.A., Talijancic, I., Pecoraro, C.,
+#' Schermann Legionnet, A. 2020. Tissue preservation can affect
+#' geometric morphometric analyses: a case study using fish body
+#' shape. Zoological Journal of the Linnean Society 188:148-162.
 #' @seealso \code{ProjectOrthogonal} for projection/removal of an effect
 #' @keywords datasets
 #' @examples

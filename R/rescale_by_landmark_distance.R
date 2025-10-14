@@ -3,16 +3,21 @@
 #' Convenience function which rescales a dataset of landmarks
 #' based on a vector of distances between two landmarks
 #'
-#' This function can be useful when one has the distance between two landmarks
-#' (e.g., obtained with a caliper), but a scale has not been set
-#' when acquiring the data (for instance, a scale bar was missing on photos,
-#' so configuration of landmarks are scaled in pixels).
+#' This function can be useful when one has the distance between
+#' two landmarks (e.g., obtained with a caliper), but a scale has
+#' not been set when acquiring the data (for instance, a scale bar
+#' was missing on photos, so configuration of landmarks are scaled
+#' in pixels).
 #'
-#' @param Data array k x p x n of k landmarks and p dimensions for n observations (specimens)
-#' @param lm1,lm2 index of the two landmarks whose inter-landmark distance is known
-#' @param lengths vector of n lengths (distances between lm1 and lm2 in the appropriate scale)
+#' @param Data array k x p x n of k landmarks and p dimensions for n
+#'   observations (specimens)
+#' @param lm1,lm2 index of the two landmarks whose inter-landmark
+#'   distance is known
+#' @param lengths vector of n lengths (distances between lm1 and lm2
+#'   in the appropriate scale)
 #'
-#' @return The function outputs an array k x p x n of rescaled landmark coordinates
+#' @return The function outputs an array k x p x n of rescaled
+#'   landmark coordinates
 #'
 #'
 #'
