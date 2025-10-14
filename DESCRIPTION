@@ -3,7 +3,7 @@ Title: Heterogeneous Methods for Shape and Other Multidimensional Data
 Version: 0.6.0.0
 Authors@R: person("Carmelo", "Fruciano", email = "carmelo.fruciano@unict.it", role = c("aut", "cre"))
 Description: Several methods for the analysis of shape and other multidimensional data.
-Depends: R (>= 3.4.0),
+Depends: R (>= 3.5.0),
   ape,
   stats,
   corpcor
