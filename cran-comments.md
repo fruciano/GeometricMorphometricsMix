@@ -3,6 +3,7 @@
 * GitHub Actions: ubuntu-latest (release, devel, oldrel), macOS-latest, windows-latest
 * R-hub: R-devel/Fedora Linux 38, R-devel/Ubuntu 22.04.5 LTS
 
+
 ## R CMD check results
 
 0 errors | 0 warnings | 1 note
