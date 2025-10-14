@@ -7,19 +7,20 @@
 BTailTest(Reference, Test, boot = 1000)
 }
 \arguments{
-\item{Reference}{Matrix or data frame containing data for the reference group
-(observations in rows, variables in columns).}
+\item{Reference}{Matrix or data frame containing data for the
+reference group (observations in rows, variables in columns).}
 
-\item{Test}{Matrix or data frame containing data for the test group
-(observations in rows, variables in columns).}
+\item{Test}{Matrix or data frame containing data for the test
+group (observations in rows, variables in columns).}
 
 \item{boot}{number of bootstrap replicates}
 }
 \value{
 The function outputs a list with the following elements:
  \describe{
-  \item{BootstrappedSamplesEstimates}{Estimates of both multivariate variance and
-        mean pairwise Euclidean distance for each of the bootstrapped samples}
+  \item{BootstrappedSamplesEstimates}{Estimates of both
+        multivariate variance and mean pairwise Euclidean distance
+        for each of the bootstrapped samples}
   \item{pvalues}{p values obtained for the test}
 }
 }
@@ -31,10 +32,11 @@ papers (e.g., Fruciano et al. 2014, 2016).
 \details{
 This is a test of the difference in disparity between two groups:
 a reference and a test group.
-The function proceeds by computing a bootstrapped distribution of the
-test statistics (multivariate variance and mean pairwise Euclidean distances in this implementation)
-in the reference sample and then comparing the statistics observed in the test sample to this
-distribution to obtain p-values.
+The function proceeds by computing a bootstrapped distribution of
+the test statistics (multivariate variance and mean pairwise
+Euclidean distances in this implementation) in the reference sample
+and then comparing the statistics observed in the test sample to
+this distribution to obtain p-values.
 }
 \section{Citation}{
 
@@ -43,12 +45,22 @@ please cite Navarro (2003)
 }
 
 \references{
-Navarro N. 2003. MDA: a MATLAB-based program for morphospace-disparity analysis. Computers & Geosciences 29:655-664.
+Navarro N. 2003. MDA: a MATLAB-based program for
+  morphospace-disparity analysis. Computers & Geosciences
+  29:655-664.
 
-Fruciano C, Franchini P, Raffini F, Fan S, Meyer A. 2016. Are sympatrically speciating Midas cichlid fish special? Patterns of morphological and genetic variation in the closely related species Archocentrus centrarchus. Ecology and Evolution 6:4102-4114.
+Fruciano C, Franchini P, Raffini F, Fan S, Meyer A.
+  2016. Are sympatrically speciating Midas cichlid fish special?
+  Patterns of morphological and genetic variation in the closely
+  related species Archocentrus centrarchus. Ecology and Evolution
+  6:4102-4114.
 
-Fruciano C, Pappalardo AM, Tigano C, Ferrito V. 2014. Phylogeographical relationships of Sicilian brown trout and the effects of genetic introgression on morphospace occupation. Biological Journal of the Linnean Society 112:387-398.
+Fruciano C, Pappalardo AM, Tigano C, Ferrito V. 2014.
+  Phylogeographical relationships of Sicilian brown trout and the
+  effects of genetic introgression on morphospace occupation.
+  Biological Journal of the Linnean Society 112:387-398.
 }
 \seealso{
-\code{\link{rarefied_convex_hull}}, \code{\link{rarefied_disparity}}
+\code{\link{disparity_resample}},
+  \code{\link{disparity_test}}
 }

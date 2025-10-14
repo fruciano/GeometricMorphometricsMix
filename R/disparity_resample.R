@@ -1,65 +1,96 @@
-#' Resampling-based estimates (bootstrap or rarefaction) of disparity / morphospace occupation
+#' Resampling-based estimates (bootstrap or rarefaction) of disparity
+#' / morphospace occupation
 #'
-#' Provides a unified interface to obtain resampled (bootstrap or rarefied)
-#' estimates of several disparity / morphospace occupation statistics.
+#' Provides a unified interface to obtain resampled (bootstrap or
+#' rarefied) estimates of several disparity / morphospace occupation
+#' statistics.
 #'
-#' The function allows choosing among the following multivariate statistics:
+#' The function allows choosing among the following multivariate
+#' statistics:
 #' \itemize{
-#'  \item Multivariate variance (trace of the covariance matrix; sum of variances)
+#'  \item Multivariate variance (trace of the covariance matrix; sum
+#'  of variances)
 #'  \item Mean pairwise Euclidean distance
 #'  \item Convex hull volume (n-dimensional)
-#'  \item Claramunt proper variance (Claramunt 2010) based on a linear shrinkage covariance matrix
+#'  \item Claramunt proper variance (Claramunt 2010) based on a linear
+#'  shrinkage covariance matrix
 #' }
 #'
-#' If the input `Data` is univariate (i.e., a vector), the analysis defaults to computing
-#' the (univariate) variance within each group (the attribute `statistic` is ignored).
+#' If the input `Data` is univariate (i.e., a vector), the analysis
+#' defaults to computing the (univariate) variance within each group
+#' (the attribute `statistic` is ignored).
 #'
-#' If `bootstrap_rarefaction=="bootstrap"`, the function performs resampling with replacement
-#' (i.e., classical bootstrap) by sampling rows of the data matrix / data frame.
-#' Optionally, the user can specify a custom sample size via the `sample_size` argument.
-#' This allows comparison of bootstrap confidence intervals at the same sample size
-#' (essentially, this is rarefaction sampling with replacement), which can be useful
-#' to compare bootstrapped confidence intervals across different groups for statistics which
-#' are sensitive to sample size (at the expense of broader than necessary
-#' confidence intervals for groups that are larger).
+#' If `bootstrap_rarefaction=="bootstrap"`, the function performs
+#' resampling with replacement (i.e., classical bootstrap) by sampling
+#' rows of the data matrix / data frame.
+#' Optionally, the user can specify a custom sample size via the
+#' `sample_size` argument.
+#' This allows comparison of bootstrap confidence intervals at the
+#' same sample size (essentially, this is rarefaction sampling with
+#' replacement), which can be useful to compare bootstrapped
+#' confidence intervals across different groups for statistics which
+#' are sensitive to sample size (at the expense of broader than
+#' necessary confidence intervals for groups that are larger).
 #'
-#' If `bootstrap_rarefaction=="rarefaction"`, the function performs resampling without replacement
-#' at the sample size indicated in `sample_size` (numeric) or, if `sample_size=="smallest"`,
-#' at the size of the smallest group (all groups are resampled to that size).
-#' Rarefaction requires specifying a valute to the attribute `sample_size`; an error is returned otherwise.
+#' If `bootstrap_rarefaction=="rarefaction"`, the function performs
+#' resampling without replacement at the sample size indicated in
+#' `sample_size` (numeric) or, if `sample_size=="smallest"`, at the
+#' size of the smallest group (all groups are resampled to that size).
+#' Rarefaction requires specifying a valute to the attribute
+#' `sample_size`; an error is returned otherwise.
 #'
 #' @section Parallelization:
-#' This function automatically uses parallel processing via the future framework,
-#' when the packages future and future.apply are installed.
-#' This is particularly useful for large datasets, large number of resamples or
-#' computationally intensive statistics (e.g., convex hull volume).
-#' The parallelization strategy is determined by the user's choice of future plan, providing 
-#' flexibility across different computing environments (local multicore, cluster, etc.). 
-#' The function performs parallelization at the level of individual bootstrap/rarefaction 
-#' replicates within each group. The future plan should be set up by the user before calling 
-#' this function using \code{future::plan()} (see examples). If no plan is set or the future 
-#' packages are not available, the function will use sequential processing.
+#' This function automatically uses parallel processing via the future
+#' framework, when the packages future and future.apply are installed.
+#' This is particularly useful for large datasets, large number of
+#' resamples or computationally intensive statistics (e.g., convex
+#' hull volume).
+#' The parallelization strategy is determined by the user's choice of
+#' future plan, providing flexibility across different computing
+#' environments (local multicore, cluster, etc.). 
+#' The function performs parallelization at the level of individual
+#' bootstrap/rarefaction replicates within each group. The future plan
+#' should be set up by the user before calling this function using
+#' \code{future::plan()} (see examples). If no plan is set or the
+#' future packages are not available, the function will use sequential
+#' processing.
 #'
 #' @section Average estimate:
-#' For bootstrap resampling, the average estimate reported is the mean of the bootstrap 
-#' resampled values (for consistency across all bootstrap scenarios). For rarefaction, 
-#' because the purpose is to make groups comparable at a common (smaller) sample size, the average 
-#' estimate reported is the mean of the rarefied resampled values for that group (i.e., the mean 
-#' across all rarefaction replicates).
+#' For bootstrap resampling, the average estimate reported is the mean
+#' of the bootstrap resampled values (for consistency across all
+#' bootstrap scenarios). For rarefaction, because the purpose is to
+#' make groups comparable at a common (smaller) sample size, the
+#' average estimate reported is the mean of the rarefied resampled
+#' values for that group (i.e., the mean across all rarefaction
+#' replicates).
 #'
 #' @section Input data types:
-#' `Data` can be a data frame, a matrix, a vector, or a 3D array of landmark coordinates
-#' (e.g., p landmarks x k dimensions x n specimens). In the latter case, the array is converted
-#' internally to a 2D matrix with specimens in rows and (landmark * dimension) variables in columns.
+#' `Data` can be a data frame, a matrix, a vector, or a 3D array of
+#' landmark coordinates (e.g., p landmarks x k dimensions x n
+#' specimens). In the latter case, the array is converted internally
+#' to a 2D matrix with specimens in rows and (landmark * dimension)
+#' variables in columns.
 #'
-#' @note Because of how the computation works, convex hull volume computation requires the number of observations (specimens) to be (substantially) greater than the number of variables (dimensions).
-#' In case of shape or similar, consider using the scores along the first (few/several) principal components.
-#' Sometimes errors are thrown due to near-zero components, in this case try reducing the number of principal components used.
-#' Examples of use of this statistic with geometric morphometric data include Drake & Klingenberg 2010 (American Naturalist), Fruciano et al. 2012 (Environmental Biology of Fishes) and Fruciano et al. 2014 (Biological Journal of the Linnean Society).
-#' Because of the sensitivity of this statistic to outliers, usually rarefaction is preferred to bootstrapping.
+#' @note Because of how the computation works, convex hull volume
+#' computation requires the number of observations (specimens) to be
+#' (substantially) greater than the number of variables (dimensions).
+#' In case of shape or similar, consider using the scores along the
+#' first (few/several) principal components.
+#' Sometimes errors are thrown due to near-zero components, in this
+#' case try reducing the number of principal components used.
+#' Examples of use of this statistic with geometric morphometric data
+#' include Drake & Klingenberg 2010 (American Naturalist), Fruciano
+#' et al. 2012 (Environmental Biology of Fishes) and Fruciano et al.
+#' 2014 (Biological Journal of the Linnean Society).
+#' Because of the sensitivity of this statistic to outliers, usually
+#' rarefaction is preferred to bootstrapping.
 #'
-#' @note "Multivariate variance" is also called "total variance", "Procrustes variance" (in geometric morphometrics) and "sum of univariate variances".
-#' Note how the computation here does not divide variance by sample size (other than the normal division performed in the computation of variances).
+#' @note "Multivariate variance" is also called "total variance",
+#' "Procrustes variance" (in geometric morphometrics) and "sum of
+#' univariate variances".
+#' Note how the computation here does not divide variance by sample
+#' size (other than the normal division performed in the computation
+#' of variances).
 #'
 #' @details 
 #' This function uses the future framework for parallel processing,
@@ -68,58 +99,96 @@
 #' \code{future::plan()} before calling this function.
 #' For example:
 #' \itemize{
-#'   \item \code{future::plan(future::sequential)} for sequential processing
-#'   \item \code{future::plan(future::multisession, workers = 4)} for parallel processing with 4 workers
-#' (works on all platforms including Windows)
-#'   \item \code{future::plan(future::multicore, workers = 4)} for forked processes (Unix-like systems)
-#'   \item \code{future::plan(future::cluster, workers = c("host1", "host2"))} for cluster computing
+#'   \item \code{future::plan(future::sequential)} for sequential
+#'   processing
+#'   \item \code{future::plan(future::multisession, workers = 4)} for
+#'   parallel processing with 4 workers (works on all platforms
+#'   including Windows)
+#'   \item \code{future::plan(future::multicore, workers = 4)} for
+#'   forked processes (Unix-like systems)
+#'   \item \code{future::plan(future::cluster, workers =
+#'   c("host1", "host2"))} for cluster computing
 #' }
 #' If no plan is set or the future packages are not available,
 #' the function will use sequential processing.
 #'
-#' @param Data A data frame, matrix, vector, or 3D array. Observations (specimens) must be in rows
-#'  (if a 3D array is supplied, the third dimension is assumed to index specimens).
-#' @param group A factor or a vector indicating group membership (will be coerced to factor). If
-#'  `NULL` (default) a single analysis is performed on the full dataset.
+#' @param Data A data frame, matrix, vector, or 3D array.
+#'   Observations (specimens) must be in rows (if a 3D array is
+#'   supplied, the third dimension is assumed to index specimens).
+#' @param group A factor or a vector indicating group membership (will
+#'   be coerced to factor). If `NULL` (default) a single analysis is
+#'   performed on the full dataset.
 #' @param n_resamples Number of resampling replicates (default 1000).
-#' @param statistic Character string identifying the statistic to compute. One of
-#'  `"multivariate_variance"`, `"mean_pairwise_euclidean_distance"`, `"convex_hull_volume"`,
-#'  `"claramunt_proper_variance"`. Default is
-#'  `"multivariate_variance"`. Ignored for univariate data (vector input).
-#' @param CI Desired two-sided confidence interval level (default 0.95) used for percentile
-#'  confidence intervals. Use CI=1 to display the full range (minimum to maximum) of resampled values.
-#' @param bootstrap_rarefaction Either `"bootstrap"` (default) for resampling with replacement or
-#'  `"rarefaction"` for resampling without replacement.
-#' @param sample_size Either `NULL` (default), a positive integer indicating the number of rows to
-#'  sample, or the character `"smallest"` to use the size of the smallest group (all groups 
-#'  resampled to that size). For `bootstrap_rarefaction=="rarefaction"`, sampling is without 
-#'  replacement and this parameter is required (not `NULL`). For `bootstrap_rarefaction=="bootstrap"`, 
-#'  sampling is with replacement; if `NULL`, uses original group sizes, otherwise uses the 
-#'  specified sample size. If `"smallest"` is supplied but no groups are defined, an error is returned.
+#' @param statistic Character string identifying the statistic to
+#'   compute. One of `"multivariate_variance"`,
+#'   `"mean_pairwise_euclidean_distance"`, `"convex_hull_volume"`,
+#'   `"claramunt_proper_variance"`. Default is
+#'   `"multivariate_variance"`. Ignored for univariate data (vector
+#'   input).
+#' @param CI Desired two-sided confidence interval level (default 0.95)
+#'   used for percentile confidence intervals. Use CI=1 to display the
+#'   full range (minimum to maximum) of resampled values.
+#' @param bootstrap_rarefaction Either `"bootstrap"` (default) for
+#'   resampling with replacement or `"rarefaction"` for resampling
+#'   without replacement.
+#' @param sample_size Either `NULL` (default), a positive integer
+#'   indicating the number of rows to sample, or the character
+#'   `"smallest"` to use the size of the smallest group (all groups 
+#'   resampled to that size). For `bootstrap_rarefaction=="rarefaction"`,
+#'   sampling is without replacement and this parameter is required
+#'   (not `NULL`). For `bootstrap_rarefaction=="bootstrap"`, sampling
+#'   is with replacement; if `NULL`, uses original group sizes,
+#'   otherwise uses the specified sample size. If `"smallest"` is
+#'   supplied but no groups are defined, an error is returned.
 #'
 #' @return A list containing:
 #'  \describe{
-#'    \item{chosen_statistic}{Character vector of length 1 with the human-readable name of the statistic used.}
-#'    \item{results}{A data frame with columns `group`, `average`, `CI_min`, `CI_max`. One row per group.
-#'      When CI=1, `CI_min` and `CI_max` represent the minimum and maximum of resampled values rather than confidence intervals.}
-#'    \item{resampled_values}{If a single group: numeric vector of length `n_resamples` with the resampled values.
-#'      If multiple groups: a named list with one numeric vector (length `n_resamples`) per group.}
-#'    \item{CI_level}{The CI level used (between 0 and 1). When CI=1, ranges are computed instead of confidence intervals.}
+#'    \item{chosen_statistic}{Character vector of length 1 with the
+#'    human-readable name of the statistic used.}
+#'    \item{results}{A data frame with columns `group`, `average`,
+#'    `CI_min`, `CI_max`. One row per group.
+#'      When CI=1, `CI_min` and `CI_max` represent the minimum and
+#'      maximum of resampled values rather than confidence intervals.}
+#'    \item{resampled_values}{If a single group: numeric vector of
+#'    length `n_resamples` with the resampled values.
+#'      If multiple groups: a named list with one numeric vector
+#'      (length `n_resamples`) per group.}
+#'    \item{CI_level}{The CI level used (between 0 and 1). When CI=1,
+#'    ranges are computed instead of confidence intervals.}
 #' }
 #' 
-#' The returned object has class "disparity_resample" and comes with associated S3 methods for 
-#' convenient display and visualization:
+#' The returned object has class "disparity_resample" and comes with
+#' associated S3 methods for convenient display and visualization:
 #' \itemize{
-#'   \item \code{\link{print.disparity_resample}}: Prints a formatted summary of results including confidence interval overlap assessment for multiple groups
-#'   \item \code{\link{plot.disparity_resample}}: Creates a confidence interval plot using ggplot2
+#'   \item \code{\link{print.disparity_resample}}: Prints a formatted
+#'   summary of results including confidence interval overlap
+#'   assessment for multiple groups
+#'   \item \code{\link{plot.disparity_resample}}: Creates a confidence
+#'   interval plot using ggplot2
 #' }
 #'
-#' @references Drake AG, Klingenberg CP. 2010. Large-scale diversification of skull shape in domestic dogs: disparity and modularity. American Naturalist 175:289-301.
-#' @references Claramunt S. 2010. Discovering exceptional diversifications at continental scales: the case of the endemic families of Neotropical Suboscine passerines. Evolution 64:2004-2019.
-#' @references Fruciano C, Tigano C, Ferrito V. 2012. Body shape variation and colour change during growth in a protogynous fish. Environmental Biology of Fishes 94:615-622.
-#' @references Fruciano C, Pappalardo AM, Tigano C, Ferrito V. 2014. Phylogeographical relationships of Sicilian brown trout and the effects of genetic introgression on morphospace occupation. Biological Journal of the Linnean Society 112:387-398.
-#' @references Fruciano C, Franchini P, Raffini F, Fan S, Meyer A. 2016. Are sympatrically speciating Midas cichlid fish special? Patterns of morphological and genetic variation in the closely related species Archocentrus centrarchus. Ecology and Evolution 6:4102-4114.
-#' @seealso \code{\link{disparity_test}}, \code{\link{print.disparity_resample}}, \code{\link{plot.disparity_resample}}
+#' @references Drake AG, Klingenberg CP. 2010. Large-scale
+#' diversification of skull shape in domestic dogs: disparity and
+#' modularity. American Naturalist 175:289-301.
+#' @references Claramunt S. 2010. Discovering exceptional
+#' diversifications at continental scales: the case of the endemic
+#' families of Neotropical Suboscine passerines. Evolution
+#' 64:2004-2019.
+#' @references Fruciano C, Tigano C, Ferrito V. 2012. Body shape
+#' variation and colour change during growth in a protogynous fish.
+#' Environmental Biology of Fishes 94:615-622.
+#' @references Fruciano C, Pappalardo AM, Tigano C, Ferrito V. 2014.
+#' Phylogeographical relationships of Sicilian brown trout and the
+#' effects of genetic introgression on morphospace occupation.
+#' Biological Journal of the Linnean Society 112:387-398.
+#' @references Fruciano C, Franchini P, Raffini F, Fan S, Meyer A.
+#' 2016. Are sympatrically speciating Midas cichlid fish special?
+#' Patterns of morphological and genetic variation in the closely
+#' related species Archocentrus centrarchus. Ecology and Evolution
+#' 6:4102-4114.
+#' @seealso \code{\link{disparity_test}},
+#' \code{\link{print.disparity_resample}},
+#' \code{\link{plot.disparity_resample}}
 #'
 #' @examples
 #' set.seed(123)
@@ -137,9 +206,11 @@
 #'   # future::plan(future::multisession, workers = 2)  # Use 2 workers
 #'
 #'   # Bootstrap multivariate variance
-#'   boot_res = disparity_resample(Data, group=grp, n_resamples=200,
-#'                                 statistic="multivariate_variance",
-#'                                 bootstrap_rarefaction="bootstrap")
+#'   boot_res = disparity_resample(
+#'     Data, group=grp, n_resamples=200,
+#'     statistic="multivariate_variance",
+#'     bootstrap_rarefaction="bootstrap"
+#'   )
 #'   # Direct access to results table
 #'   boot_res$results
 #'   
@@ -149,16 +220,23 @@
 #'   # Using the plot method to visualize results
 #'   # plot(boot_res)  # Uncomment to create confidence interval plot
 #'
-#'   # Rarefaction (to the smallest group size) of mean pairwise Euclidean distance
-#'   rar_res = disparity_resample(Data, group=grp, n_resamples=200,
-#'                                statistic="mean_pairwise_euclidean_distance",
-#'                                bootstrap_rarefaction="rarefaction", sample_size="smallest")
+#'   # Rarefaction (to the smallest group size) of mean pairwise
+#'   # Euclidean distance
+#'   rar_res = disparity_resample(
+#'     Data, group=grp, n_resamples=200,
+#'     statistic="mean_pairwise_euclidean_distance",
+#'     bootstrap_rarefaction="rarefaction", sample_size="smallest"
+#'   )
 #'# Now simulate a third group with larger variance
 #'  X3 = MASS::mvrnorm(15, mu=rep(0, 10), Sigma=diag(10)*1.5)
-#'  grp2 = factor(c(rep("A", nrow(X1)), rep("B", nrow(X2)), rep("C", nrow(X3))))
-#'  boot_res2 = disparity_resample(Data=rbind(X1, X2, X3), group=grp2, n_resamples=1000,
-#'                                 statistic="multivariate_variance",
-#'                                 bootstrap_rarefaction="bootstrap")
+#'  grp2 = factor(
+#'    c(rep("A", nrow(X1)), rep("B", nrow(X2)), rep("C", nrow(X3)))
+#'  )
+#'  boot_res2 = disparity_resample(
+#'    Data=rbind(X1, X2, X3), group=grp2, n_resamples=1000,
+#'    statistic="multivariate_variance",
+#'    bootstrap_rarefaction="bootstrap"
+#'  )
 #'  print(boot_res2)
 #'  # plot(boot_res2)
 #'  # Plot of the obtained (95%) confidence intervals (uncomment to plot)
@@ -171,14 +249,18 @@
 #' @export
 disparity_resample=function(Data, group=NULL, n_resamples=1000,
                             statistic="multivariate_variance", CI=0.95,
-                            bootstrap_rarefaction="bootstrap", sample_size=NULL) {
+                            bootstrap_rarefaction="bootstrap",
+                            sample_size=NULL) {
 
   # Check if future framework is available for parallel processing
-  use_future = requireNamespace("future", quietly = TRUE) && requireNamespace("future.apply", quietly = TRUE)
+  use_future = requireNamespace("future", quietly = TRUE) &&
+    requireNamespace("future.apply", quietly = TRUE)
 
   # Input validation
-  validate_disparity_resample_inputs(Data, group, n_resamples, statistic, CI, 
-                                     bootstrap_rarefaction, sample_size)
+  validate_disparity_resample_inputs(
+    Data, group, n_resamples, statistic, CI, 
+    bootstrap_rarefaction, sample_size
+  )
   
   # Data preparation and processing
   prepared_data = prepare_data_disparity_resample(Data, group)
@@ -196,27 +278,35 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
   validate_groups_disparity_resample(group_sizes)
 
   # Statistic validation
-  validate_stat_reqs_disparity_resample(statistic, prepared_data, sample_size, bootstrap_rarefaction)
+  validate_stat_reqs_disparity_resample(
+    statistic, prepared_data, sample_size, bootstrap_rarefaction
+  )
 
   # Statistic setup and labeling
-  stat_label_map=list(multivariate_variance="Multivariate variance",
-                      mean_pairwise_euclidean_distance="Mean pairwise Euclidean distance",
-                      convex_hull_volume="Convex hull volume",
-                      claramunt_proper_variance="Claramunt proper variance",
-                      variance_univariate="Variance")
+  stat_label_map=list(
+    multivariate_variance="Multivariate variance",
+    mean_pairwise_euclidean_distance=
+      "Mean pairwise Euclidean distance",
+    convex_hull_volume="Convex hull volume",
+    claramunt_proper_variance="Claramunt proper variance",
+    variance_univariate="Variance"
+  )
 
   chosen_statistic = if (original_input_is_vector) {
     stat_label_map$variance_univariate
   } else { stat_label_map[[statistic]] }
 
-  # Helper to compute one statistic -------------------------------------------------
+  # Helper to compute one statistic ---------------------------
   compute_stat=function(X) {
     if (original_input_is_vector) { return(var(X)) }
     if (statistic=="multivariate_variance") { return(muvar(X)) }
-    if (statistic=="mean_pairwise_euclidean_distance") { return(meanpairwiseEuclideanD(X)) }
+    if (statistic=="mean_pairwise_euclidean_distance") {
+      return(meanpairwiseEuclideanD(X))
+    }
     if (statistic=="convex_hull_volume") {
       if (!requireNamespace("geometry", quietly = TRUE)) {
-        stop("Package 'geometry' is required for convex hull volume") }
+        stop("Package 'geometry' is required for convex hull volume")
+      }
       return(geometry::convhulln(X, options="FA")$vol)
     }
   if (statistic=="claramunt_proper_variance") {
@@ -244,20 +334,38 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
 
   for (g in group_levels) {
     idx=which(group_factor==g)
-    Xg = if (original_input_is_vector) { Data[idx] } else { Data[idx,,drop=FALSE] }
+    Xg = if (original_input_is_vector) {
+      Data[idx]
+    } else {
+      Data[idx,,drop=FALSE]
+    }
     n_g = length(idx)
 
     if (bootstrap_rarefaction=="rarefaction") {
       # sample_size validation already done above
       if (use_future) {
-        res_vals=unlist(future.apply::future_lapply(seq_len(n_resamples), function(i) {
-          sampled_idx=sample(seq_len(n_g), sample_size_num, replace=FALSE)
-    if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
-        }, future.seed = TRUE, future.packages = c("geometry", "nlshrink")))
+        res_vals=unlist(future.apply::future_lapply(
+          seq_len(n_resamples), function(i) {
+          sampled_idx=sample(
+            seq_len(n_g), sample_size_num, replace=FALSE
+          )
+          if (original_input_is_vector) {
+            compute_stat(Xg[sampled_idx])
+          } else {
+            compute_stat(Xg[sampled_idx,,drop=FALSE])
+          }
+        }, future.seed = TRUE,
+           future.packages = c("geometry", "nlshrink")))
       } else {
         res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
-          sampled_idx=sample(seq_len(n_g), sample_size_num, replace=FALSE)
-    if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+          sampled_idx=sample(
+            seq_len(n_g), sample_size_num, replace=FALSE
+          )
+          if (original_input_is_vector) {
+            compute_stat(Xg[sampled_idx])
+          } else {
+            compute_stat(Xg[sampled_idx,,drop=FALSE])
+          }
         }))
       }
       average_stat=mean(res_vals)
@@ -265,33 +373,63 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
       if (!is.null(sample_size)) {
         # Bootstrap with custom sample size
         if (use_future) {
-          res_vals=unlist(future.apply::future_lapply(seq_len(n_resamples), function(i) {
-            sampled_idx=sample(seq_len(n_g), sample_size_num, replace=TRUE)
-      if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
-          }, future.seed = TRUE, future.packages = c("geometry", "nlshrink")))
+          res_vals=unlist(future.apply::future_lapply(
+            seq_len(n_resamples), function(i) {
+            sampled_idx=sample(
+              seq_len(n_g), sample_size_num, replace=TRUE
+            )
+            if (original_input_is_vector) {
+              compute_stat(Xg[sampled_idx])
+            } else {
+              compute_stat(Xg[sampled_idx,,drop=FALSE])
+            }
+          }, future.seed = TRUE,
+             future.packages = c("geometry", "nlshrink")))
         } else {
           res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
-            sampled_idx=sample(seq_len(n_g), sample_size_num, replace=TRUE)
-      if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+            sampled_idx=sample(
+              seq_len(n_g), sample_size_num, replace=TRUE
+            )
+            if (original_input_is_vector) {
+              compute_stat(Xg[sampled_idx])
+            } else {
+              compute_stat(Xg[sampled_idx,,drop=FALSE])
+            }
           }))
         }
-        average_stat=mean(res_vals)  # Average of resampled estimates for consistency
+        # Average of resampled estimates for consistency
+        average_stat=mean(res_vals)
       } else {
         # Standard bootstrap (original sample size)
         if (use_future) {
-          res_vals=unlist(future.apply::future_lapply(seq_len(n_resamples), function(i) {
+          res_vals=unlist(future.apply::future_lapply(
+            seq_len(n_resamples), function(i) {
             sampled_idx=sample(seq_len(n_g), n_g, replace=TRUE)
-      if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
-          }, future.seed = TRUE, future.packages = c("geometry", "nlshrink")))
+            if (original_input_is_vector) {
+              compute_stat(Xg[sampled_idx])
+            } else {
+              compute_stat(Xg[sampled_idx,,drop=FALSE])
+            }
+          }, future.seed = TRUE,
+             future.packages = c("geometry", "nlshrink")))
         } else {
           res_vals=unlist(lapply(seq_len(n_resamples), function(i) {
             sampled_idx=sample(seq_len(n_g), n_g, replace=TRUE)
-      if (original_input_is_vector) { compute_stat(Xg[sampled_idx]) } else { compute_stat(Xg[sampled_idx,,drop=FALSE]) }
+            if (original_input_is_vector) {
+              compute_stat(Xg[sampled_idx])
+            } else {
+              compute_stat(Xg[sampled_idx,,drop=FALSE])
+            }
           }))
         }
         average_stat=mean(res_vals)  # Average of resampled estimates
       }
-    } else { stop("bootstrap_rarefaction must be either 'bootstrap' or 'rarefaction'") }
+    } else {
+      stop(
+        "bootstrap_rarefaction must be either 'bootstrap' or ",
+        "'rarefaction'"
+      )
+    }
 
     # Handle CI=1 as a special case for full range
     if (CI == 1) {
@@ -299,7 +437,9 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
       CI_max = max(res_vals)
     } else {
       CI_min = quantile(res_vals, probs=alpha, names=FALSE, type=7)
-      CI_max = quantile(res_vals, probs=1-alpha, names=FALSE, type=7)
+      CI_max = quantile(
+        res_vals, probs=1-alpha, names=FALSE, type=7
+      )
     }
 
     resampled_values_list[[g]]=res_vals
@@ -316,7 +456,7 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
     results_df$group = "All"
   }
 
-  # resampled_values output formatting ---------------------------------------------
+  # resampled_values output formatting --------------------------
   resampled_values_out = if (length(group_levels)==1) {
     unname(resampled_values_list[[1]])
   } else { resampled_values_list }
@@ -341,18 +481,25 @@ return(results_list)
 #' @param group Group factor for validation  
 #' @param n_resamples Number of resamples for validation
 #' @param statistic Statistic choice for validation
-#' @param CI Confidence interval level for validation (0 < CI <= 1, where CI=1 means full range)
+#' @param CI Confidence interval level for validation
+#'   (0 < CI <= 1, where CI=1 means full range)
 #' @param bootstrap_rarefaction Resampling method for validation
 #' @param sample_size Sample size for rarefaction validation
 #'
 #' @return NULL (throws errors if validation fails)
 #' @noRd
-validate_disparity_resample_inputs = function(Data, group, n_resamples, statistic, CI, 
-                                               bootstrap_rarefaction, sample_size) {
+validate_disparity_resample_inputs = function(
+  Data, group, n_resamples, statistic, CI, 
+  bootstrap_rarefaction, sample_size
+) {
   
   # Validate CI parameter
   if (!is.numeric(CI) || length(CI) != 1 || CI <= 0 || CI > 1) {
-    stop("CI must be a single numeric value between 0 and 1 (inclusive). Use CI=1 to display the full range of resampled values.")
+    stop(
+      "CI must be a single numeric value between 0 and 1 ",
+      "(inclusive). Use CI=1 to display the full range of ",
+      "resampled values."
+    )
   }
   
   # Validate n_resamples

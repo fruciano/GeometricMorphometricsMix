@@ -18,16 +18,21 @@ containing each block of variables
 \item{center}{whether the groups should be mean-centered prior to the test}
 }
 \value{
-A data frame with one row per pairwise comparison and the following columns:
+A data frame with one row per pairwise comparison and the
+  following columns:
  \describe{
   \item{group1}{Name of the first group in the comparison}
   \item{group2}{Name of the second group in the comparison}
-  \item{Observed_RV_group1}{Observed Escoufier RV for the first group in the comparison}
-  \item{Observed_RV_group2}{Observed Escoufier RV for the second group in the comparison}
-  \item{Absolute_difference_in_RV}{Absolute difference in the observed Escoufier RV between the two groups}
+  \item{Observed_RV_group1}{Observed Escoufier RV for the first
+    group in the comparison}
+  \item{Observed_RV_group2}{Observed Escoufier RV for the second
+    group in the comparison}
+  \item{Absolute_difference_in_RV}{Absolute difference in the
+    observed Escoufier RV between the two groups}
   \item{p_value}{p value of the permutation test}
 }
-For multiple groups, the data frame includes additional columns identifying the groups being compared.
+For multiple groups, the data frame includes additional columns
+identifying the groups being compared.
 }
 \description{
 Performs permutation tests for the difference in
@@ -35,15 +40,16 @@ Escoufier RV between groups. For multiple groups, performs
 pairwise comparisons between all pairs of groups.
 }
 \details{
-This function is one of the solutions proposed by Fruciano et al. 2013
-to deal with the fact that values of Escoufier RV coefficient (Escoufier 1973),
-which is routinely used to quantify the levels of association between multivariate
-blocks of variables (landmark coordinates in the case of morphometric data,
-but it might be any multivariate dataset)
-are not comparable across groups with different number of observations/individuals
-(Smilde et al. 2009; Fruciano et al. 2013).
-The solution is a permutation test. This test was originally implemented by Adriano Franchini
-in the Java program RVcomparator,
+This function is one of the solutions proposed by Fruciano et al.
+2013 to deal with the fact that values of Escoufier RV coefficient
+(Escoufier 1973), which is routinely used to quantify the levels
+of association between multivariate blocks of variables (landmark
+coordinates in the case of morphometric data, but it might be any
+multivariate dataset)
+are not comparable across groups with different number of
+observations/individuals (Smilde et al. 2009; Fruciano et al. 2013).
+The solution is a permutation test. This test was originally
+implemented by Adriano Franchini in the Java program RVcomparator,
 of which this function is an updated and improved version
 }
 \section{Notice}{
@@ -86,7 +92,8 @@ combined_data2 = rbind(combined_data2, B[, 21:50])
 groups = c(rep("GroupA", 30), rep("GroupB", 40))
 
 # Perform RV comparison
-result = RVcomparison(combined_data1, combined_data2, group = groups, perm = 99)
+result = RVcomparison(combined_data1, combined_data2,
+                      group = groups, perm = 99)
 print(result)
 
 # Example with three groups for pairwise comparisons
@@ -101,11 +108,16 @@ print(result_3grp)
 
 }
 \references{
-Escoufier Y. 1973. Le Traitement des Variables Vectorielles. Biometrics 29:751-760.
+Escoufier Y. 1973. Le Traitement des Variables
+  Vectorielles. Biometrics 29:751-760.
 
-Fruciano C, Franchini P, Meyer A. 2013. Resampling-Based Approaches to Study Variation in Morphological Modularity. PLoS ONE 8:e69376.
+Fruciano C, Franchini P, Meyer A. 2013.
+  Resampling-Based Approaches to Study Variation in Morphological
+  Modularity. PLoS ONE 8:e69376.
 
-Smilde AK, Kiers HA, Bijlsma S, Rubingh CM, van Erk MJ. 2009. Matrix correlations for high-dimensional data: the modified RV-coefficient. Bioinformatics 25:401-405.
+Smilde AK, Kiers HA, Bijlsma S, Rubingh CM, van Erk MJ.
+  2009. Matrix correlations for high-dimensional data: the modified
+  RV-coefficient. Bioinformatics 25:401-405.
 }
 \seealso{
 \code{\link{EscoufierRV}}

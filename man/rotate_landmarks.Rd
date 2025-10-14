@@ -9,29 +9,42 @@ rotate_landmarks(LMdata, rotation, radians = TRUE, center = TRUE)
 \arguments{
 \item{LMdata}{matrix k x p of k landmarks and p dimensions}
 
-\item{rotation}{vector containing the rotation angle(s) (a single rotation for 2D data, three rotations for 3D data)}
+\item{rotation}{vector containing the rotation angle(s) (a single
+rotation for 2D data, three rotations for 3D data)}
 
-\item{radians}{a logical on whether the angle(s) are provided in radians (default) or not}
+\item{radians}{a logical on whether the angle(s) are provided in
+radians (default) or not}
 
-\item{center}{a logical on whether the rotation should be on the centered configuration}
+\item{center}{a logical on whether the rotation should be on the
+centered configuration}
 }
 \value{
-The function outputs a matrix k x p of the original configuration of landmarks
-rotated according to the user-supplied rotation
+The function outputs a matrix k x p of the original
+  configuration of landmarks rotated according to the user-supplied
+  rotation
 }
 \description{
-Rotates a single 2D or 3D landmark configuration about the origin of the coordinate system.
+Rotates a single 2D or 3D landmark configuration about the
+origin of the coordinate system.
 }
 \details{
-This function can be useful to change the orientation of data for display purposes
-It could also be used to empirically check the rotation-invariance of an analysis.
-Notice that this function works on a single configuration of landmarks provided as a k x p matrix of k landmarks in p dimensions (i.e., p is 2 for 2D data and 3 for 3D data)
-As user-supplied rotation, the function expects a single number in the case of 2D data (rotation on the plane),
-a vector with three values (corresponding to rotation relative to the three axes) in 3D.
-If center=TRUE (default), first the configuration of landmarks is centered,
-then the rotation is performed,
-and finally the landmark coordinated are translated back to the original position.
-This accomplishes rotating the landmark configuration around its center
+This function can be useful to change the orientation of data
+for display purposes
+It could also be used to empirically check the rotation-invariance
+of an analysis.
+Notice that this function works on a single configuration of
+landmarks provided as a k x p matrix of k landmarks in p
+dimensions (i.e., p is 2 for 2D data and 3 for 3D data)
+As user-supplied rotation, the function expects a single number
+in the case of 2D data (rotation on the plane),
+a vector with three values (corresponding to rotation relative to
+the three axes) in 3D.
+If center=TRUE (default), first the configuration of landmarks is
+centered, then the rotation is performed,
+and finally the landmark coordinated are translated back to the
+original position.
+This accomplishes rotating the landmark configuration around its
+center
 }
 \examples{
 library(ggplot2)
@@ -52,12 +65,16 @@ GraphLims=range(BothPolys4Plotting[,1:2])
 # limits of the plot
 
 ggplot() +
-geom_polygon(data=BothPolys4Plotting, mapping=aes(x=X, y=Y, group=Polygon,fill=Polygon),alpha=0.5) +
+geom_polygon(data=BothPolys4Plotting,
+             mapping=aes(x=X, y=Y, group=Polygon, fill=Polygon),
+             alpha=0.5) +
 geom_point(data=BothPolys4Plotting, aes(x=X, y=Y, color=Polygon)) +
-geom_text(data=BothPolys4Plotting, aes(x=X, y=Y, label=Landmark), hjust=1, vjust=1, size=4)+
+geom_text(data=BothPolys4Plotting, aes(x=X, y=Y, label=Landmark),
+          hjust=1, vjust=1, size=4)+
 coord_fixed(ratio=1, xlim=GraphLims, ylim=GraphLims)+
 theme_classic()
-# Plot the two polygons (landmarks are numbered for ease of visualization)
+# Plot the two polygons (landmarks are numbered for ease of
+# visualization)
 
 
 }

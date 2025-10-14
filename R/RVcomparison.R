@@ -4,15 +4,16 @@
 #' Escoufier RV between groups. For multiple groups, performs
 #' pairwise comparisons between all pairs of groups.
 #'
-#' This function is one of the solutions proposed by Fruciano et al. 2013
-#' to deal with the fact that values of Escoufier RV coefficient (Escoufier 1973),
-#' which is routinely used to quantify the levels of association between multivariate
-#' blocks of variables (landmark coordinates in the case of morphometric data,
-#' but it might be any multivariate dataset)
-#' are not comparable across groups with different number of observations/individuals
-#' (Smilde et al. 2009; Fruciano et al. 2013).
-#' The solution is a permutation test. This test was originally implemented by Adriano Franchini
-#' in the Java program RVcomparator,
+#' This function is one of the solutions proposed by Fruciano et al.
+#' 2013 to deal with the fact that values of Escoufier RV coefficient
+#' (Escoufier 1973), which is routinely used to quantify the levels
+#' of association between multivariate blocks of variables (landmark
+#' coordinates in the case of morphometric data, but it might be any
+#' multivariate dataset)
+#' are not comparable across groups with different number of
+#' observations/individuals (Smilde et al. 2009; Fruciano et al. 2013).
+#' The solution is a permutation test. This test was originally
+#' implemented by Adriano Franchini in the Java program RVcomparator,
 #' of which this function is an updated and improved version
 #'
 #' @section Notice:
@@ -36,20 +37,30 @@
 #'
 #' @seealso \code{\link{EscoufierRV}}
 #' @seealso \code{\link{RVrarefied}}
-#' @return A data frame with one row per pairwise comparison and the following columns:
+#' @return A data frame with one row per pairwise comparison and the
+#'   following columns:
 #'  \describe{
 #'   \item{group1}{Name of the first group in the comparison}
 #'   \item{group2}{Name of the second group in the comparison}
-#'   \item{Observed_RV_group1}{Observed Escoufier RV for the first group in the comparison}
-#'   \item{Observed_RV_group2}{Observed Escoufier RV for the second group in the comparison}
-#'   \item{Absolute_difference_in_RV}{Absolute difference in the observed Escoufier RV between the two groups}
+#'   \item{Observed_RV_group1}{Observed Escoufier RV for the first
+#'     group in the comparison}
+#'   \item{Observed_RV_group2}{Observed Escoufier RV for the second
+#'     group in the comparison}
+#'   \item{Absolute_difference_in_RV}{Absolute difference in the
+#'     observed Escoufier RV between the two groups}
 #'   \item{p_value}{p value of the permutation test}
 #' }
-#' For multiple groups, the data frame includes additional columns identifying the groups being compared.
+#' For multiple groups, the data frame includes additional columns
+#' identifying the groups being compared.
 #'
-#' @references Escoufier Y. 1973. Le Traitement des Variables Vectorielles. Biometrics 29:751-760.
-#' @references Fruciano C, Franchini P, Meyer A. 2013. Resampling-Based Approaches to Study Variation in Morphological Modularity. PLoS ONE 8:e69376.
-#' @references Smilde AK, Kiers HA, Bijlsma S, Rubingh CM, van Erk MJ. 2009. Matrix correlations for high-dimensional data: the modified RV-coefficient. Bioinformatics 25:401-405.
+#' @references Escoufier Y. 1973. Le Traitement des Variables
+#'   Vectorielles. Biometrics 29:751-760.
+#' @references Fruciano C, Franchini P, Meyer A. 2013.
+#'   Resampling-Based Approaches to Study Variation in Morphological
+#'   Modularity. PLoS ONE 8:e69376.
+#' @references Smilde AK, Kiers HA, Bijlsma S, Rubingh CM, van Erk MJ.
+#'   2009. Matrix correlations for high-dimensional data: the modified
+#'   RV-coefficient. Bioinformatics 25:401-405.
 #' @examples
 #'
 #' library(MASS)
@@ -74,7 +85,8 @@
 #' groups = c(rep("GroupA", 30), rep("GroupB", 40))
 #'
 #' # Perform RV comparison
-#' result = RVcomparison(combined_data1, combined_data2, group = groups, perm = 99)
+#' result = RVcomparison(combined_data1, combined_data2,
+#'                       group = groups, perm = 99)
 #' print(result)
 #'
 #' # Example with three groups for pairwise comparisons
@@ -145,15 +157,18 @@ RVcomparison = function(Block1, Block2, group, perm = 999, center = TRUE) {
     
     # Center data if requested
     if (center == TRUE) {
-      Group1 = scale(cbind(Group1Block1, Group1Block2), center = TRUE, scale = FALSE)
-      Group2 = scale(cbind(Group2Block1, Group2Block2), center = TRUE, scale = FALSE)
+      Group1 = scale(cbind(Group1Block1, Group1Block2),
+                     center = TRUE, scale = FALSE)
+      Group2 = scale(cbind(Group2Block1, Group2Block2),
+                     center = TRUE, scale = FALSE)
       Both = rbind(Group1, Group2)
       Group1Block1 = Group1[, 1:nvarblk1, drop = FALSE]
       Group1Block2 = Group1[, (nvarblk1 + 1):vartot, drop = FALSE]
       Group2Block1 = Group2[, 1:nvarblk1, drop = FALSE]
       Group2Block2 = Group2[, (nvarblk1 + 1):vartot, drop = FALSE]
     } else {
-      Both = cbind(rbind(Group1Block1, Group2Block1), rbind(Group1Block2, Group2Block2))
+      Both = cbind(rbind(Group1Block1, Group2Block1),
+                   rbind(Group1Block2, Group2Block2))
     }
     
     # Calculate observed RV values
@@ -168,12 +183,16 @@ RVcomparison = function(Block1, Block2, group, perm = 999, center = TRUE) {
     
     RVdiffperm = unlist(lapply(PermutedSets, function(x)
       abs(
-        EscoufierRV(x[1:ngrp1, 1:nvarblk1, drop = FALSE], x[1:ngrp1, (nvarblk1 + 1):vartot, drop = FALSE]) -
-          EscoufierRV(x[(ngrp1 + 1):obstot, 1:nvarblk1, drop = FALSE], x[(ngrp1 + 1):obstot, (nvarblk1 + 1):vartot, drop = FALSE])
+        EscoufierRV(x[1:ngrp1, 1:nvarblk1, drop = FALSE],
+                    x[1:ngrp1, (nvarblk1 + 1):vartot, drop = FALSE]) -
+          EscoufierRV(x[(ngrp1 + 1):obstot, 1:nvarblk1, drop = FALSE],
+                      x[(ngrp1 + 1):obstot, (nvarblk1 + 1):vartot,
+                        drop = FALSE])
       )
     ))
     
-    pvalue = (length(which(RVdiffperm >= obsAbsDiffRV)) + 1) / (perm + 1)
+    pvalue = (length(which(RVdiffperm >= obsAbsDiffRV)) + 1) /
+             (perm + 1)
     
     # Store results
     results$group1[i] = grp1_name
@@ -195,8 +214,9 @@ validate_RVcomparison_inputs = function(Block1, Block2, group, perm) {
   }
   
   # Validate perm parameter
-  if (!is.numeric(perm) || length(perm) != 1 || perm != round(perm) || perm <= 0) {
-    stop("perm must be a positive integer")
+  if (!is.numeric(perm) || length(perm) != 1 || perm != round(perm) ||
+      perm <= 0) {
+    stop("perm must be a single positive integer")
   }
   
   # Convert to data frames if they aren't already
@@ -212,10 +232,10 @@ validate_RVcomparison_inputs = function(Block1, Block2, group, perm) {
   }
   
   # Check that blocks contain only numeric data
-  if (!all(sapply(Block1, is.numeric))) {
+  if (!all(vapply(Block1, is.numeric, FUN.VALUE = logical(1)))) {
     stop("Block1 must contain only numeric variables")
   }
-  if (!all(sapply(Block2, is.numeric))) {
+  if (!all(vapply(Block2, is.numeric, FUN.VALUE = logical(1)))) {
     stop("Block2 must contain only numeric variables")
   }
   

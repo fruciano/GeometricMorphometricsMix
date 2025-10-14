@@ -57,9 +57,10 @@ pdistance=function(X1, X2) {
 #' cluster if forking is not available or fails. If \code{ncores == 1}
 #' this simply calls \code{lapply}. 
 #'
-#' This function is used internally by a few functions in this package but is exported
-#' so that users can reuse it for lightweight cross-platform parallel
-#' work (for example on Windows where forking is not available).
+#' This function is used internally by a few functions in this
+#' package but is exported so that users can reuse it for lightweight
+#' cross-platform parallel work (for example on Windows where forking
+#' is not available).
 #'
 #' @param X A list or vector to iterate over.
 #' @param FUN A function to apply to each element of \code{X}.
@@ -83,7 +84,8 @@ pdistance=function(X1, X2) {
 #' # simple usage
 #' safe_parallel_lapply(1:4, function(i) i^2, ncores = 2)
 #'
-#' # more complex example: simulate work with a pause to compare serial vs parallel timing
+#' # more complex example: simulate work with a pause to compare
+#' # serial vs parallel timing
 #' slow_task = function(i) {
 #'   # simulate a time-consuming operation (0.5 seconds)
 #'   Sys.sleep(0.5)
@@ -108,9 +110,11 @@ pdistance=function(X1, X2) {
 #' identical(unlist(res_serial), unlist(res_parallel))
 #' }
 #' @export
-safe_parallel_lapply = function(X, FUN, ncores = (parallel::detectCores(logical = FALSE)-1),
-                                packages = NULL, export = NULL, seed = NULL,
-                                type = c("auto", "mclapply", "psock")) {
+safe_parallel_lapply = function(
+  X, FUN, ncores = (parallel::detectCores(logical = FALSE)-1),
+  packages = NULL, export = NULL, seed = NULL,
+  type = c("auto", "mclapply", "psock")
+) {
   type = match.arg(type)
   ncores = as.integer(max(1, min(length(X), ncores)))
 
@@ -129,24 +133,30 @@ safe_parallel_lapply = function(X, FUN, ncores = (parallel::detectCores(logical 
     # ensure cluster is stopped on exit of this function
     on.exit(parallel::stopCluster(cl), add = TRUE)
 
-    if (!is.null(export)) parallel::clusterExport(cl, export, envir = parent.frame())
+    if (!is.null(export)) parallel::clusterExport(cl, export,
+                                                   envir = parent.frame())
     if (!is.null(packages)) {
       # export the packages vector so workers can access it
-      parallel::clusterExport(cl, varlist = "packages", envir = parent.frame())
+      parallel::clusterExport(cl, varlist = "packages",
+                              envir = parent.frame())
       parallel::clusterEvalQ(cl, {
         for (pk in packages) {
-          try(require(pk, character.only = TRUE), silent = TRUE)
+          try(loadNamespace(pk), silent = TRUE)
         }
         NULL
       })
     }
     if (!is.null(seed)) parallel::clusterSetRNGStream(cl, seed)
 
-    # run in a tryCatch to ensure cluster is stopped and errors are informative
+    # run in a tryCatch to ensure cluster is stopped and errors are
+    # informative
     res = tryCatch({
       parallel::parLapply(cl, X, FUN)
     }, error = function(e) {
-      stop("Error while running parLapply on PSOCK cluster: ", conditionMessage(e))
+      stop(
+        "Error while running parLapply on PSOCK cluster: ",
+        conditionMessage(e)
+      )
     })
     return(res)
   }
@@ -158,7 +168,10 @@ safe_parallel_lapply = function(X, FUN, ncores = (parallel::detectCores(logical 
       return(run_psock())
     }
     if (!is.null(seed)) set.seed(seed)
-    res = parallel::mclapply(X, FUN, mc.cores = ncores, mc.preschedule = TRUE, mc.set.seed = TRUE)
+    res = parallel::mclapply(
+      X, FUN, mc.cores = ncores, mc.preschedule = TRUE,
+      mc.set.seed = TRUE
+    )
     return(res)
   }
 
@@ -171,7 +184,10 @@ safe_parallel_lapply = function(X, FUN, ncores = (parallel::detectCores(logical 
     # try mclapply but fallback to PSOCK on error
     try_res = try({
       if (!is.null(seed)) set.seed(seed)
-      parallel::mclapply(X, FUN, mc.cores = ncores, mc.preschedule = TRUE, mc.set.seed = TRUE)
+      parallel::mclapply(
+        X, FUN, mc.cores = ncores, mc.preschedule = TRUE,
+        mc.set.seed = TRUE
+      )
     }, silent = TRUE)
     if (!inherits(try_res, "try-error")) return(try_res)
     # fallback

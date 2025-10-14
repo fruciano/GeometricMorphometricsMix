@@ -7,7 +7,8 @@
 \method{print}{parallel_Kmult}(x, ...)
 }
 \arguments{
-\item{x}{An object of class 'parallel_Kmult' produced by \code{\link{Kmultparallel}}}
+\item{x}{An object of class 'parallel_Kmult' produced by
+\code{\link{Kmultparallel}}}
 
 \item{...}{Additional arguments (currently not used)}
 }
@@ -15,8 +16,8 @@
 Invisibly returns the input object
 }
 \description{
-Provides a summary of Kmult analysis results showing the range of Kmult values
-for each combination of dataset and treeset.
+Provides a summary of Kmult analysis results showing the range of
+Kmult values for each combination of dataset and treeset.
 }
 \examples{
 \dontrun{

@@ -7,22 +7,27 @@
 rescale_by_landmark_distance(Data, lm1, lm2, lengths)
 }
 \arguments{
-\item{Data}{array k x p x n of k landmarks and p dimensions for n observations (specimens)}
+\item{Data}{array k x p x n of k landmarks and p dimensions for n
+observations (specimens)}
 
-\item{lm1, lm2}{index of the two landmarks whose inter-landmark distance is known}
+\item{lm1, lm2}{index of the two landmarks whose inter-landmark
+distance is known}
 
-\item{lengths}{vector of n lengths (distances between lm1 and lm2 in the appropriate scale)}
+\item{lengths}{vector of n lengths (distances between lm1 and lm2
+in the appropriate scale)}
 }
 \value{
-The function outputs an array k x p x n of rescaled landmark coordinates
+The function outputs an array k x p x n of rescaled
+  landmark coordinates
 }
 \description{
 Convenience function which rescales a dataset of landmarks
 based on a vector of distances between two landmarks
 }
 \details{
-This function can be useful when one has the distance between two landmarks
-(e.g., obtained with a caliper), but a scale has not been set
-when acquiring the data (for instance, a scale bar was missing on photos,
-so configuration of landmarks are scaled in pixels).
+This function can be useful when one has the distance between
+two landmarks (e.g., obtained with a caliper), but a scale has
+not been set when acquiring the data (for instance, a scale bar
+was missing on photos, so configuration of landmarks are scaled
+in pixels).
 }

@@ -57,7 +57,7 @@ LM_relativepos_check=function(Dataset, LM_to_check,
 
 
   if (only_by_landmark_order==TRUE) {
-    LM_combinations=cbind(LM_to_check[seq(length(LM_to_check)-1)],
+    LM_combinations=cbind(LM_to_check[seq_len(length(LM_to_check)-1)],
                           LM_to_check[2:length(LM_to_check)])
   } else {
     LM_combinations=t(combn(LM_to_check, 2))
@@ -85,11 +85,13 @@ LM_relativepos_check=function(Dataset, LM_to_check,
                 function(X) {
                   if (length(LM_to_check)==2) {
                   T1=c(LM_to_check, X)
-                  names(T1)=c("LM1", "LM2", paste0("Coord", seq(dim(Dataset)[2])))
+                  names(T1)=c("LM1", "LM2",
+                              paste0("Coord", seq_len(dim(Dataset)[2])))
                   } else {
-      T1=cbind(rbind(LM_combinations[apply(X, 1, function(rw) any(rw==FALSE)),]),
+      T1=cbind(rbind(LM_combinations[apply(X, 1, function(rw)
+                                            any(rw==FALSE)),]),
             rbind(X[apply(X, 1, function(rw) any(rw==FALSE)),]))
-      colnames(T1)[3:ncol(T1)]=paste0("Coord", seq(ncol(T1)-2))
+      colnames(T1)[3:ncol(T1)]=paste0("Coord", seq_len(ncol(T1)-2))
                   }
       return(T1)
                 }
@@ -107,7 +109,7 @@ LM_relativepos_check=function(Dataset, LM_to_check,
 
 combinations_higher=function(comb, specimen) {
   out=matrix(NA, nrow(comb), dim(specimen)[2])
-  for (i in seq(nrow(comb))) {
+  for (i in seq_len(nrow(comb))) {
     out[i,]=specimen[comb[i,1],]> specimen[comb[i,2],]
   }
   return(out)
