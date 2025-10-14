@@ -7,31 +7,45 @@
 adjRand_test(A, B, perm = 999)
 }
 \arguments{
-\item{A, B}{numerical or character vectors reflecting the assignment of individual observations to groups}
+\item{A, B}{numerical or character vectors reflecting
+the assignment of individual observations to groups}
 
 \item{perm}{number of permutations}
 }
 \value{
-The function outputs a vector with the adjusted Rand index and the p value obtained from the permutation test
+The function outputs a vector with the adjusted Rand index
+and the p value obtained from the permutation test
 }
 \description{
-Permutation test of the adjusted Rand index, which quantifies the level of agreement
-between two partitions (e.g., two schemes of classification of the same individuals obtained with two methods)
+Permutation test of the adjusted Rand index,
+which quantifies the level of agreement
+between two partitions (e.g., two schemes of classification
+of the same individuals obtained with two methods)
 }
 \details{
-The adjusted Rand index (Hubert and Arabie 1985), is an adjusted for chance version of the Rand index (Rand 1971).
-The adjusted Rand index has an expected value of zero in the case of random partitions,
-and values approaching one as the two partitions become more similar to each other
+The adjusted Rand index (Hubert and Arabie 1985),
+is an adjusted for chance version of the Rand index
+(Rand 1971).
+The adjusted Rand index has an expected value of zero
+in the case of random partitions,
+and values approaching one as the two partitions
+become more similar to each other
 (with one being perfect match of the classification).
- This function implements the permutation test proposed by Qannari et al. (2014)
-to obtain a p value against the null hypothesis of independence of the two partitions.
+ This function implements the permutation test
+ proposed by Qannari et al. (2014)
+to obtain a p value against the null hypothesis of
+independence of the two partitions.
 
 
-This function is useful in various contexts, such as in integrative taxonomy
-when comparing the classification of individual specimens obtained using different data
+This function is useful in various contexts,
+such as in integrative taxonomy
+when comparing the classification of individual specimens
+obtained using different data
 (e.g., sequence data and morphometric data).
-For an example of the application of this technique with the classification obtained with genetic data and
-morphometric data for multiple traits, see Fruciano et al. 2016.
+For an example of the application of this technique
+with the classification obtained with genetic data and
+morphometric data for multiple traits,
+see Fruciano et al. 2016.
 }
 \section{Notice}{
 
@@ -40,9 +54,11 @@ The function requires internally the package mclust.
 
 \section{Citation}{
 
-If you use this function in the context of integrative taxonomy or similar
-(comparison of classification/unsupervised clustering with biological data), please cite all the papers in the references
-(otherwise, please use the relevant citations for the context).
+If you use this function in the context of integrative
+taxonomy or similar (comparison of classification/unsupervised
+clustering with biological data), please cite all the papers
+in the references (otherwise, please use the relevant citations
+for the context).
 }
 
 \examples{
@@ -57,27 +73,41 @@ original_classification = iris[,5]
 
 adjustedRandIndex(mclustBIC_classification, original_classification)
 # The mclust package allows computing the adjusted Rand index
-# which quantifies the agreement between the original (correct) classification
-# and the one obtained with the algorithm.
-# However, it is not clear whether the adjusted Rand index is "large enough"
-# compared to the null hypothesis of independence between the two classification schemes
+# which quantifies the agreement between the original (correct)
+# classification and the one obtained with the algorithm.
+# However, it is not clear whether the adjusted Rand index is
+# "large enough" compared to the null hypothesis of independence
+# between the two classification schemes
 
-adjRand_test(mclustBIC_classification, original_classification, perm = 999)
-# For that, we use the function adjRand_test, which performs the permutation test
-# of Qannari et al. 2014 (in this case p<0.001, as 1000 permutations have been used).
+adjRand_test(mclustBIC_classification, original_classification,
+             perm = 999)
+# For that, we use the function adjRand_test, which performs
+# the permutation test of Qannari et al. 2014 (in this case
+# p<0.001, as 1000 permutations have been used).
 
-adjRand_test(original_classification, original_classification, perm = 999)
+adjRand_test(original_classification, original_classification,
+             perm = 999)
 # As it can be seen, in the ideal case of the exact same grouping,
-# the adjusted Rand index takes a value of 1 (which is obviously significant)
+# the adjusted Rand index takes a value of 1 (which is obviously
+# significant)
 
 
 }
 \references{
-Fruciano C, Franchini P, Raffini F, Fan S, Meyer A. 2016. Are sympatrically speciating Midas cichlid fish special? Patterns of morphological and genetic variation in the closely related species Archocentrus centrarchus. Ecology and Evolution 6:4102-4114.
+Fruciano C, Franchini P, Raffini F, Fan S, Meyer A.
+  2016. Are sympatrically speciating Midas cichlid fish special?
+  Patterns of morphological and genetic variation in the closely
+  related species Archocentrus centrarchus. Ecology and Evolution
+  6:4102-4114.
 
-Hubert L, Arabie P. 1985. Comparing partitions. Journal of Classification 2:193-218.
+Hubert L, Arabie P. 1985. Comparing partitions.
+  Journal of Classification 2:193-218.
 
-Qannari EM, Courcoux P, Faye P. 2014. Significance test of the adjusted Rand index. Application to the free sorting task. Food Quality and Preference 32, Part A:93-97.
+Qannari EM, Courcoux P, Faye P. 2014. Significance
+  test of the adjusted Rand index. Application to the free
+  sorting task. Food Quality and Preference 32, Part A:93-97.
 
-Rand WM. 1971. Objective Criteria for the Evaluation of Clustering Methods. Journal of the American Statistical Association 66:846-850.
+Rand WM. 1971. Objective Criteria for the Evaluation
+  of Clustering Methods. Journal of the American Statistical
+  Association 66:846-850.
 }

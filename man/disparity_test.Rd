@@ -70,5 +70,5 @@ Fruciano C, Franchini P, Raffini F, Fan S, Meyer A. 2016. Are sympatrically spec
 Fruciano C, Pappalardo AM, Tigano C, Ferrito V. 2014. Phylogeographical relationships of Sicilian brown trout and the effects of genetic introgression on morphospace occupation. Biological Journal of the Linnean Society 112:387-398.
 }
 \seealso{
-\code{\link{rarefied_convex_hull}}, \code{\link{rarefied_disparity}}, \code{\link{BTailTest}}
+\code{\link{disparity_resample}}, \code{\link{BTailTest}}
 }

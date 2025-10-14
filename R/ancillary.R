@@ -129,13 +129,15 @@ safe_parallel_lapply = function(X, FUN, ncores = (parallel::detectCores(logical 
     # ensure cluster is stopped on exit of this function
     on.exit(parallel::stopCluster(cl), add = TRUE)
 
-    if (!is.null(export)) parallel::clusterExport(cl, export, envir = parent.frame())
+    if (!is.null(export)) parallel::clusterExport(cl, export,
+                                                   envir = parent.frame())
     if (!is.null(packages)) {
       # export the packages vector so workers can access it
-      parallel::clusterExport(cl, varlist = "packages", envir = parent.frame())
+      parallel::clusterExport(cl, varlist = "packages",
+                              envir = parent.frame())
       parallel::clusterEvalQ(cl, {
         for (pk in packages) {
-          try(require(pk, character.only = TRUE), silent = TRUE)
+          try(loadNamespace(pk), silent = TRUE)
         }
         NULL
       })

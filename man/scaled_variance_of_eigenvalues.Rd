@@ -12,87 +12,125 @@ scaled_variance_of_eigenvalues(
 )
 }
 \arguments{
-\item{data_matrix}{Matrix or data frame containing the original data
-(observations in rows, variables in columns).}
+\item{data_matrix}{Matrix or data frame containing the original
+data (observations in rows, variables in columns).}
 
 \item{boot}{number of bootstrap resamples (no bootstrap if 0)}
 
-\item{rarefy}{either a logical to determine whether rarefaction will be performed
-or a number indicating the sample size at which the samples will be rarefied}
+\item{rarefy}{either a logical to determine whether rarefaction
+will be performed or a number indicating the sample size at
+which the samples will be rarefied}
 
-\item{shrinkage}{logical on whether the analysis should be based on a covariance matrix obtained through linear shrinkage}
+\item{shrinkage}{logical on whether the analysis should be based
+on a covariance matrix obtained through linear shrinkage}
 }
 \value{
 If boot=0 the function outputs a vector containing
 the scaled variance of eigenvalues
 and the number of dimensions used in the computations.
-If, instead, boot>0 (recommended) the function outputs a list containing
+If, instead, boot>0 (recommended) the function outputs a list
+containing
 \itemize{
-  \item the mean scaled variance of eigenvalues across all bootstrap samples
-  \item the median number of dimensions used across all bootstrap samples
-  \item the 95% confidence intervals for scaled variance of eigenvalues and dimensions
-  \item the scaled variance of eigenvalues and dimensions used for each of the bootstrap replicates
+  \item the mean scaled variance of eigenvalues across all
+  bootstrap samples
+  \item the median number of dimensions used across all bootstrap
+  samples
+  \item the 95% confidence intervals for scaled variance of
+  eigenvalues and dimensions
+  \item the scaled variance of eigenvalues and dimensions used
+  for each of the bootstrap replicates
 }
 }
 \description{
-Compute estimates of the scaled variance of eigenvalues using only the positive eigenvalues
+Compute estimates of the scaled variance of eigenvalues using
+only the positive eigenvalues
 }
 \details{
-The function allows computing the scaled variance of eigenvalues (Pavlicev et al. 2009)
-under a variety of settings.
-The scaled variance of eigenvalues is a commonly used index of morphological integration.
-Its value is comprised between 0 and 1, with larger values suggesting stronger integration.
+The function allows computing the scaled variance of eigenvalues
+(Pavlicev et al. 2009) under a variety of settings.
+The scaled variance of eigenvalues is a commonly used index of
+morphological integration.
+Its value is comprised between 0 and 1, with larger values
+suggesting stronger integration.
 
-Only positive eigenvalues are used in the computations used in this function.
+Only positive eigenvalues are used in the computations used in
+this function.
 
 
-The function employes two possible strategies to obtain eigenvalues:
+The function employes two possible strategies to obtain
+eigenvalues:
 
 \itemize{
-  \item a singular value decomposition of the data matrix (default)
-  \item an eigenvalue decomposition of the covariance matrix estimated using linear shrinkage (option shrinkage=TRUE; Ledoit & Wolf 2004)
+  \item a singular value decomposition of the data matrix
+  (default)
+  \item an eigenvalue decomposition of the covariance matrix
+  estimated using linear shrinkage (option shrinkage=TRUE;
+  Ledoit & Wolf 2004)
 }
 
 Further, the function allows obtaining bootstrapped estimates by
-setting boot to the number of bootstrap replicates (resampling with replacement)
+setting boot to the number of bootstrap replicates (resampling
+with replacement)
 
-It is also possible to obtain rarefied estimates by setting rarefy to the desired sample size.
-This is useful when comparing the scaled variance of eigenvalues across multiple groups with different sample sizes.
-In this case, the suggestion is to use either the smallest sample size or less
+It is also possible to obtain rarefied estimates by setting
+rarefy to the desired sample size.
+This is useful when comparing the scaled variance of eigenvalues
+across multiple groups with different sample sizes.
+In this case, the suggestion is to use either the smallest sample
+size or less
 
-Using a bootstrap estimate with the singular value decomposition approach
-represents a good compromise between computation time and accuracy.
-This should be complemented by rarefaction to the smallest sample size (or lower)
-in case one wants to compare the value obtained across different groups.
+Using a bootstrap estimate with the singular value decomposition
+approach represents a good compromise between computation time
+and accuracy.
+This should be complemented by rarefaction to the smallest sample
+size (or lower) in case one wants to compare the value obtained
+across different groups.
 }
 \section{Notice}{
 
-When boot>0 the rarefied estimates are based on sampling with replacement (bootstrap).
-However, if boot=0, then a \strong{single} rarefied estimate is obtained by sampling without replacement.
-In this case, the user should repeat the same operation multiple times (e.g., 100)
-and take the average of the scaled variance of eigenvalues obtained.
+When boot>0 the rarefied estimates are based on sampling with
+replacement (bootstrap).
+However, if boot=0, then a \strong{single} rarefied estimate is
+obtained by sampling without replacement.
+In this case, the user should repeat the same operation multiple
+times (e.g., 100) and take the average of the scaled variance of
+eigenvalues obtained.
 
-Also notice that using the shrinkage-based estimation of the covariance matrix requires longer computational time and memory.
+Also notice that using the shrinkage-based estimation of the
+covariance matrix requires longer computational time and memory.
 This option requires the package \emph{nlshrink}
 }
 
 \section{Computational details}{
 
-For the computation, this function uses only positive eigenvalues (which are also used to identify data dimensionality).
-The eigenvalues are first scaled by dividing them by their sum (Young 2006),
-then their variance is computed as population variance (rather than sample variance; see Haber 2011).
-Finally, this value is standardized to a scale between 0 and 1 by dividing it by its maximum theoretical value
-of (p-1)/p^2 (where p is the number of dimensions) - this is the same scaling used in the software MorphoJ (Klingenberg 2011).
+For the computation, this function uses only positive eigenvalues
+(which are also used to identify data dimensionality).
+The eigenvalues are first scaled by dividing them by their sum
+(Young 2006), then their variance is computed as population
+variance (rather than sample variance; see Haber 2011).
+Finally, this value is standardized to a scale between 0 and 1 by
+dividing it by its maximum theoretical value of (p-1)/p^2 (where
+p is the number of dimensions) - this is the same scaling used in
+the software MorphoJ (Klingenberg 2011).
 }
 
 \references{
-Ledoit O, Wolf M. 2004. A well-conditioned estimator for large-dimensional covariance matrices. Journal of Multivariate Analysis 88:365-411.
+Ledoit O, Wolf M. 2004. A well-conditioned estimator
+  for large-dimensional covariance matrices. Journal of
+  Multivariate Analysis 88:365-411.
 
-Young NM. 2006. Function, ontogeny and canalization of shape variance in the primate scapula. Journal of Anatomy 209:623-636.
+Young NM. 2006. Function, ontogeny and canalization
+  of shape variance in the primate scapula. Journal of Anatomy
+  209:623-636.
 
-Pavlicev M, Cheverud JM, Wagner GP. Measuring Morphological Integration Using Eigenvalue Variance. Evolutionary Biology 36(1):157–170.
+Pavlicev M, Cheverud JM, Wagner GP. Measuring
+  Morphological Integration Using Eigenvalue Variance.
+  Evolutionary Biology 36(1):157–170.
 
-Haber A. 2011. A Comparative Analysis of Integration Indices. Evolutionary Biology 38:476-488.
+Haber A. 2011. A Comparative Analysis of Integration
+  Indices. Evolutionary Biology 38:476-488.
 
-Klingenberg CP. 2011. MorphoJ: an integrated software package for geometric morphometrics. Molecolar Ecology Resources 11:353-357.
+Klingenberg CP. 2011. MorphoJ: an integrated software
+  package for geometric morphometrics. Molecolar Ecology
+  Resources 11:353-357.
 }

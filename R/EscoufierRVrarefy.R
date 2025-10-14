@@ -353,10 +353,13 @@ print.EscoufierRVrarefy = function(x, ...) {
   
   # Report NA counts per group if present in AllRarefiedSamples
   if (!is.null(x$AllRarefiedSamples)) {
-    na_counts = sapply(x$AllRarefiedSamples, function(v) sum(is.na(v)))
+    na_counts = vapply(x$AllRarefiedSamples, function(v) sum(is.na(v)),
+                       FUN.VALUE = integer(1))
     if (any(na_counts > 0)) {
       cat('\nNumber of NA rarefied RV values per group:\n')
-      print(data.frame(group = names(na_counts), NA_count = as.integer(na_counts)), row.names = FALSE)
+      print(data.frame(group = names(na_counts),
+                       NA_count = as.integer(na_counts)),
+            row.names = FALSE)
     }
   }
   

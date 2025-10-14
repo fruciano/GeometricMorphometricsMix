@@ -21,7 +21,7 @@
 #' @param X1,X2 Matrices or data frames containing data for each group
 #' (observations in rows, variables in columns).
 #' @param perm number of permutations
-#' @seealso \code{\link{rarefied_convex_hull}}, \code{\link{rarefied_disparity}}, \code{\link{BTailTest}}
+#' @seealso \code{\link{disparity_resample}}, \code{\link{BTailTest}}
 #'
 #' @return The function outputs a dataframe containing:
 #'   the observed values of the tests statistics for each group,

@@ -62,7 +62,7 @@ rotate_landmarks=function(LMdata, rotation, radians=TRUE, center=TRUE) {
 	# Error handling in case landmark data and/or rotation vector do not match
 
 	if (radians==FALSE) {
-	rotation=sapply(rotation, deg2rad)
+	rotation=vapply(rotation, deg2rad, FUN.VALUE = numeric(1))
 	}
 
   if (center==TRUE) {

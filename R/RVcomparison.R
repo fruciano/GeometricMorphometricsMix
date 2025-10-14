@@ -212,10 +212,10 @@ validate_RVcomparison_inputs = function(Block1, Block2, group, perm) {
   }
   
   # Check that blocks contain only numeric data
-  if (!all(sapply(Block1, is.numeric))) {
+  if (!all(vapply(Block1, is.numeric, FUN.VALUE = logical(1)))) {
     stop("Block1 must contain only numeric variables")
   }
-  if (!all(sapply(Block2, is.numeric))) {
+  if (!all(vapply(Block2, is.numeric, FUN.VALUE = logical(1)))) {
     stop("Block2 must contain only numeric variables")
   }
   

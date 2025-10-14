@@ -194,9 +194,11 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
         trees = list(treeset1 = trees)
         tree_names = "1"
     } else if (is.list(trees)) {
-        tree_names = if (is.null(names(trees))) as.character(seq_along(trees)) else names(trees)
+        tree_names = if (is.null(names(trees)))
+          as.character(seq_along(trees)) else names(trees)
         # Check that all elements are multiPhylo
-        if (!all(sapply(trees, function(x) inherits(x, "multiPhylo")))) {
+        if (!all(vapply(trees, function(x) inherits(x, "multiPhylo"),
+                        FUN.VALUE = logical(1)))) {
             stop("All elements in trees list must be multiPhylo objects")
         }
     } else {
@@ -218,15 +220,19 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
     )
     
     # Report progress information
-    total_trees = sum(sapply(trees_processed, length))
+    total_trees = sum(vapply(trees_processed, length,
+                             FUN.VALUE = integer(1)))
     total_combinations = nrow(combinations)
     if (verbose) {
         cat(sprintf("Starting Kmultparallel analysis:\n"))
-        cat(sprintf("- %d dataset(s) x %d treeset(s) = %d combination(s)\n", 
-                    length(data), length(trees_processed), total_combinations))
+        cat(sprintf("- %d dataset(s) x %d treeset(s) = %d combination(s)\n",
+                    length(data), length(trees_processed),
+                    total_combinations))
         cat(sprintf("- Total trees to process: %d\n", total_trees))
         if (iter > 0) {
-            cat(sprintf("- Warning: %d iterations requested. This may take considerable time.\n", iter))
+            cat(sprintf(paste("- Warning: %d iterations requested.",
+                              "This may take considerable time.\n"),
+                        iter))
         }
         cat("\n")
     }
@@ -271,13 +277,15 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
         
         # Check if all trees in the treeset have the same tips
         # Extract tip labels from all trees
-        all_tip_labels = lapply(current_trees, function(tree) tree$tip.label)
+        all_tip_labels = lapply(current_trees,
+                                function(tree) tree$tip.label)
         
         # Check if all tip sets are identical
         first_tips = all_tip_labels[[1]]
-        all_same_tips = all(sapply(all_tip_labels, function(tips) {
-            length(tips) == length(first_tips) && all(sort(tips) == sort(first_tips))
-        }))
+        all_same_tips = all(vapply(all_tip_labels, function(tips) {
+            length(tips) == length(first_tips) &&
+              all(sort(tips) == sort(first_tips))
+        }, FUN.VALUE = logical(1)))
         
         # Robust pruning: for each tree compute the intersection of tree tip labels and data rownames
         # and prune only the tips not present in the data. This avoids assumptions about identical tip
@@ -310,14 +318,21 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
         }, future.packages = "ape")
 
         # Extract pruned trees and reordered data
-        pruned_trees = lapply(tree_processing_results, function(x) x$pruned_tree)
+        pruned_trees = lapply(tree_processing_results,
+                              function(x) x$pruned_tree)
         class(pruned_trees) = "multiPhylo"
-        data_reordered = lapply(tree_processing_results, function(x) x$data_reordered)
+        data_reordered = lapply(tree_processing_results,
+                                function(x) x$data_reordered)
 
-        # Check that we have trees with enough tips after pruning (redundant but defensive)
-        tree_sizes = sapply(pruned_trees, function(tree) length(tree$tip.label))
+        # Check that we have trees with enough tips after pruning
+        # (redundant but defensive)
+        tree_sizes = vapply(pruned_trees,
+                            function(tree) length(tree$tip.label),
+                            FUN.VALUE = integer(1))
         if (any(tree_sizes < 3)) {
-            stop("After pruning, some trees have fewer than 3 tips, which is insufficient for Kmult calculation")
+            stop(paste("After pruning, some trees have fewer than 3",
+                       "tips, which is insufficient for Kmult",
+                       "calculation"))
         }
         
         
@@ -345,16 +360,22 @@ Kmultparallel = function(data, trees, burninpercent = 0, iter = 0, verbose = TRU
     flattened_results = do.call(c, all_results)
     
     result_df = data.frame(
-        Kmult = sapply(flattened_results, function(x) x$kmult),
-        treeset = sapply(flattened_results, function(x) x$treeset),
-        dataset = sapply(flattened_results, function(x) x$dataset),
-        tree_index = sapply(flattened_results, function(x) x$tree_index),
+        Kmult = vapply(flattened_results, function(x) x$kmult,
+                       FUN.VALUE = numeric(1)),
+        treeset = vapply(flattened_results, function(x) x$treeset,
+                         FUN.VALUE = character(1)),
+        dataset = vapply(flattened_results, function(x) x$dataset,
+                         FUN.VALUE = character(1)),
+        tree_index = vapply(flattened_results, function(x) x$tree_index,
+                            FUN.VALUE = integer(1)),
         stringsAsFactors = FALSE
     )
     
     # Add p-value column only if iter > 0
     if (iter > 0) {
-        result_df$"p value" = sapply(flattened_results, function(x) x$pvalue)
+        result_df$"p value" = vapply(flattened_results,
+                                      function(x) x$pvalue,
+                                      FUN.VALUE = numeric(1))
     }
     
     # Add classes to the result

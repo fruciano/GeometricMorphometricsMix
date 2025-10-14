@@ -167,15 +167,17 @@ print.pls_fit = function (x, ...) {
     cat("\n")
   } else {
     if ("percentage_squared_covariance" %in% names (x)) {
-      Res=data.frame(Axis=seq(length(x$D)),
-                     percentage_squared_covariance=x$percentage_squared_covariance,
+      Res=data.frame(Axis=seq_along(x$D),
+                     percentage_squared_covariance=
+                       x$percentage_squared_covariance,
                      singular_value=x$D,
                      correlation_between_scores=x$CorrXScoresYScores)
 
     } else {
 
-    Res=data.frame(Axis=seq(length(x$D)),
-                   percentage_squared_covariance=x$singular_axis_significance$percentage_squared_covariance,
+    Res=data.frame(Axis=seq_along(x$D),
+                   percentage_squared_covariance=
+                     x$singular_axis_significance$percentage_squared_covariance,
                    singular_value=x$D,
                    correlation_between_scores=x$CorrXScoresYScores)
     }
@@ -581,7 +583,7 @@ pls_major_axis=function(pls_object, new_data_x=NULL, new_data_y=NULL, axes_to_us
       Scores=cbind(X$original_data_PLS_projection)
       Eigenvectors=cbind(X$major_axis_rotation)
     ZEt = Scores %*% t(Eigenvectors)
-    for (i in seq(ncol(ZEt))) {
+    for (i in seq_len(ncol(ZEt))) {
       ZEt[,i]=ZEt[,i]*X$pls_scale[i]
     }
     rows = nrow(Scores)

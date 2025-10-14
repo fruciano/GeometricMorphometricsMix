@@ -115,7 +115,7 @@ pa_perm_scheme=function(X, perm=999) {
   nobs=nrow(X)
   PA_PermX=lapply(seq(perm), function(rp) {
     Xp=X
-    for (cl in seq(ncol(X))) {
+    for (cl in seq_len(ncol(X))) {
       Xp[,cl]=X[sample(seq(nobs), size = nobs), cl]
     }
     return(Xp)
@@ -154,7 +154,7 @@ pa_PCA=function(X, perm=99, method="prcomp") {
   # Get observed PCA and eigenvalues for the permuted samples
   # using one of three different methods
 
-  P_values=unlist(lapply(seq(length(obs_eival)), function(eiv) {
+  P_values=unlist(lapply(seq_along(obs_eival), function(eiv) {
     (length(which(PA_perm_eigval[eiv,]>=obs_eival[eiv]))+1)/(perm+1)
   }
   ))
