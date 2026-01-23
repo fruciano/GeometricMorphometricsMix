@@ -20,8 +20,15 @@ Provides a summary of Kmult analysis results showing the range of
 Kmult values for each combination of dataset and treeset.
 }
 \examples{
-\dontrun{
-# Assuming you have data and trees
+\donttest{
+# Create simple example data
+library(phytools)
+trees = replicate(3, pbtree(n = 20), simplify = FALSE)
+class(trees) = "multiPhylo"
+data = matrix(rnorm(20 * 4), nrow = 20, ncol = 4)
+rownames(data) = trees[[1]]$tip.label
+
+# Run analysis and print results
 result = Kmultparallel(data, trees)
 print(result)  # or simply: result
 }

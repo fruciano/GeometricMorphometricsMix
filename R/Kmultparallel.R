@@ -94,7 +94,7 @@
 #' }
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Load required packages for data simulation
 #' library(phytools)
 #' library(MASS)
@@ -127,8 +127,8 @@
 #' tree_temp = treeset1[[1]]
 #' # Get only the first 40 tips to match our data size
 #' tips_to_keep = tree_temp$tip.label[1:40]
-# tree_pruned = ape::drop.tip(tree_temp,
-#                             setdiff(tree_temp$tip.label, tips_to_keep))
+#' tree_pruned = ape::drop.tip(tree_temp,
+#'                             setdiff(tree_temp$tip.label, tips_to_keep))
 #' 
 #' # Simulate data under Brownian motion
 #' sim_data = mvSIM(tree = tree_pruned, nsim = 1, model = "BM1", 
@@ -139,7 +139,7 @@
 #' rownames(dataset_bm) = tree_pruned$tip.label
 #' # Generate 1 dataset evolving under Brownian motion
 #' # This dataset should display strong phylogenetic signal when combined
-# with treeset1
+#' # with treeset1
 #' 
 #' # Example 1: Single dataset and single treeset analysis (sequential
 #' # processing)
@@ -198,6 +198,9 @@
 #' future::plan(future::multisession, workers = 4)
 #' result_parallel = Kmultparallel(dataset_bm, treeset1)
 #' # Use 4 worker processes for parallel processing
+#' 
+#' # Clean up: Reset to sequential processing to close parallel workers
+#' future::plan(future::sequential)
 #' }
 #'
 #' @references Adams DC. 2014. A Generalized K Statistic for Estimating
@@ -529,8 +532,15 @@ Test_Kmult <- function(x, phy, iter = 999) {
 #' @return Invisibly returns the input object
 #'
 #' @examples
-#' \dontrun{
-#' # Assuming you have data and trees
+#' \donttest{
+#' # Create simple example data
+#' library(phytools)
+#' trees = replicate(3, pbtree(n = 20), simplify = FALSE)
+#' class(trees) = "multiPhylo"
+#' data = matrix(rnorm(20 * 4), nrow = 20, ncol = 4)
+#' rownames(data) = trees[[1]]$tip.label
+#' 
+#' # Run analysis and print results
 #' result = Kmultparallel(data, trees)
 #' print(result)  # or simply: result
 #' }
@@ -590,8 +600,15 @@ print.parallel_Kmult = function(x, ...) {
 #' @return A ggplot object
 #'
 #' @examples
-#' \dontrun{
-#' # Assuming you have data and trees
+#' \donttest{
+#' # Create simple example data
+#' library(phytools)
+#' trees = replicate(5, pbtree(n = 20), simplify = FALSE)
+#' class(trees) = "multiPhylo"
+#' data = matrix(rnorm(20 * 4), nrow = 20, ncol = 4)
+#' rownames(data) = trees[[1]]$tip.label
+#' 
+#' # Run analysis and plot results
 #' result = Kmultparallel(data, trees)
 #' plot(result)
 #' 
@@ -663,8 +680,15 @@ plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL,
 #' @return Invisibly returns the input object
 #'
 #' @examples
-#' \dontrun{
-#' # Assuming you have data and trees
+#' \donttest{
+#' # Create simple example data
+#' library(phytools)
+#' trees = replicate(3, pbtree(n = 20), simplify = FALSE)
+#' class(trees) = "multiPhylo"
+#' data = matrix(rnorm(20 * 4), nrow = 20, ncol = 4)
+#' rownames(data) = trees[[1]]$tip.label
+#' 
+#' # Run analysis and get summary
 #' result = Kmultparallel(data, trees)
 #' summary(result)
 #' }

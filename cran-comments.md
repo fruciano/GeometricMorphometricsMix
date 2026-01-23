@@ -9,7 +9,14 @@
 0 errors | 0 warnings | 1 note
 
 ## Notes
-* This is a new submission.
+* This is a resubmission. Changes made in response to reviewer feedback:
+  - Expanded the Description field to provide more detail about package functionality and implemented methods.
+  - Added foundational references for the main methodological approaches in the Description field.
+  - Replaced `\dontrun{}` with `\donttest{}` in examples for functions where examples are executable but take >5 seconds or require Suggests packages:
+    - `Kmultparallel()` in R/Kmultparallel.R (requires phytools, MASS, mvMORPH, future; runs simulations)
+    - `print.parallel_Kmult()` in R/Kmultparallel.R (depends on Kmultparallel output)
+    - `plot.parallel_Kmult()` in R/Kmultparallel.R (depends on Kmultparallel output)
+    - `summary.parallel_Kmult()` in R/Kmultparallel.R (depends on Kmultparallel output)
 
 ### Additional information
 During local checks with vignette building enabled (Quarto + Pandoc installed), a cosmetic message appears once:

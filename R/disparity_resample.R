@@ -799,11 +799,12 @@ resolve_bootstrap_sample_size = function(sample_size, group_sizes) {
 #'   number of groups, colors are assigned per group. (default "darkblue")
 #' @param errorbar_color A single color or a vector of colors for error bars.
 #'   Follows the same recycling rules as `point_color`. (default "darkred")
-#' @param ... Additional arguments passed to the underlying plotting function
+#' @param title Optional character string for plot title (default NULL)
+#' @param ... Additional arguments (currently unused)
 #'
 #' @return A ggplot object
 #' @export
-plot.disparity_resample=function(x, point_color = "darkblue", errorbar_color = "darkred", ...) {
+plot.disparity_resample=function(x, point_color = "darkblue", errorbar_color = "darkred", title = NULL, ...) {
   # Check if results contain groups or single analysis
   if (any(x$results$group == "All") && nrow(x$results) == 1) {
     # Single group case - already labeled as "All"
@@ -819,7 +820,8 @@ plot.disparity_resample=function(x, point_color = "darkblue", errorbar_color = "
   p=CI_plot(data=plot_data, x_var="group", y_var="average",
             ymin_var="CI_min", ymax_var="CI_max",
             x_lab=x_lab, y_lab=x$chosen_statistic, 
-            point_color = point_color, errorbar_color = errorbar_color, ...)
+            point_color = point_color, errorbar_color = errorbar_color,
+            title = title, ...)
   
 return(p)
 }

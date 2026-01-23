@@ -19,8 +19,15 @@ Invisibly returns the input object
 Provides detailed summary statistics for Kmult analysis results.
 }
 \examples{
-\dontrun{
-# Assuming you have data and trees
+\donttest{
+# Create simple example data
+library(phytools)
+trees = replicate(3, pbtree(n = 20), simplify = FALSE)
+class(trees) = "multiPhylo"
+data = matrix(rnorm(20 * 4), nrow = 20, ncol = 4)
+rownames(data) = trees[[1]]$tip.label
+
+# Run analysis and get summary
 result = Kmultparallel(data, trees)
 summary(result)
 }

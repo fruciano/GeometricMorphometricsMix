@@ -29,8 +29,15 @@ each combination of dataset and treeset (if multiple combinations are
 present).
 }
 \examples{
-\dontrun{
-# Assuming you have data and trees
+\donttest{
+# Create simple example data
+library(phytools)
+trees = replicate(5, pbtree(n = 20), simplify = FALSE)
+class(trees) = "multiPhylo"
+data = matrix(rnorm(20 * 4), nrow = 20, ncol = 4)
+rownames(data) = trees[[1]]$tip.label
+
+# Run analysis and plot results
 result = Kmultparallel(data, trees)
 plot(result)
 

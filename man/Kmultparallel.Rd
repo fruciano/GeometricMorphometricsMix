@@ -114,7 +114,7 @@ The returned object has specialized S3 methods:
 }
 
 \examples{
-\dontrun{
+\donttest{
 # Load required packages for data simulation
 library(phytools)
 library(MASS)
@@ -147,6 +147,8 @@ rownames(dataset_random) = tip_names
 tree_temp = treeset1[[1]]
 # Get only the first 40 tips to match our data size
 tips_to_keep = tree_temp$tip.label[1:40]
+tree_pruned = ape::drop.tip(tree_temp,
+                            setdiff(tree_temp$tip.label, tips_to_keep))
 
 # Simulate data under Brownian motion
 sim_data = mvSIM(tree = tree_pruned, nsim = 1, model = "BM1", 
@@ -157,6 +159,7 @@ dataset_bm = as.matrix(sim_data)
 rownames(dataset_bm) = tree_pruned$tip.label
 # Generate 1 dataset evolving under Brownian motion
 # This dataset should display strong phylogenetic signal when combined
+# with treeset1
 
 # Example 1: Single dataset and single treeset analysis (sequential
 # processing)
@@ -215,6 +218,9 @@ plot(result_multiple, alpha = 0.5,
 future::plan(future::multisession, workers = 4)
 result_parallel = Kmultparallel(dataset_bm, treeset1)
 # Use 4 worker processes for parallel processing
+
+# Clean up: Reset to sequential processing to close parallel workers
+future::plan(future::sequential)
 }
 
 }

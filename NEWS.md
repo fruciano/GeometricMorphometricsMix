@@ -1,3 +1,10 @@
+# GeometricMorphometricsMix 0.6.0.1
+
+* Updated DESCRIPTION to contain more information and relevant references
+* Replaced `\dontrun{}` with `\donttest{}` in examples for functions where examples are executable but take >5 seconds or require Suggests packages
+* Both changes above made following the kind input by CRAN reviewers
+* Modified some examples of print, summary, and plot methods
+
 # GeometricMorphometricsMix 0.6.0.0
 
 * Cleaned up code (e.g., line length)
