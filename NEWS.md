@@ -1,3 +1,7 @@
+# GeometricMorphometricsMix 0.6.1.0
+
+* Deprecated `Kmultparallel()` and its S3 methods (`print.parallel_Kmult()`, `plot.parallel_Kmult()`, `summary.parallel_Kmult()`). These functions will be removed in a future version. Users should migrate to `geomorph::physignal()` for computing phylogenetic signal.
+
 # GeometricMorphometricsMix 0.6.0.1
 
 * Updated DESCRIPTION to contain more information and relevant references

@@ -1,6 +1,10 @@
 #' Parallel implementation of Adams' Kmult with additional support for
 #' multiple datasets and tree sets
 #'
+#' @description
+#' **Deprecated**: This function is deprecated and will be removed in a
+#' future version. 
+#'
 #' Parallel implementation of Kmult, a measure of phylogenetic signal
 #' which is a multivariate equivalent of Blomberg's K. This version
 #' supports multiple datasets and tree sets, computing Kmult for all
@@ -214,9 +218,13 @@
 #'
 #' @import stats
 #' @importFrom ape drop.tip vcv.phylo
+#' @keywords internal
 #' @export
 Kmultparallel = function(data, trees, burninpercent = 0, iter = 0,
                          verbose = TRUE) {
+
+    .Deprecated(msg = 
+      "Kmultparallel() is deprecated and will be removed in a future version.")
 
     # Check if future framework is available
     if (!requireNamespace("future", quietly = TRUE) ||
@@ -522,6 +530,10 @@ Test_Kmult <- function(x, phy, iter = 999) {
 
 #' Print method for parallel_Kmult objects
 #'
+#' @description
+#' **Deprecated**: This function is deprecated and will be removed in a
+#' future version along with `Kmultparallel()`.
+#'
 #' Provides a summary of Kmult analysis results showing the range of
 #' Kmult values for each combination of dataset and treeset.
 #'
@@ -545,8 +557,13 @@ Test_Kmult <- function(x, phy, iter = 999) {
 #' print(result)  # or simply: result
 #' }
 #'
+#' @keywords internal
 #' @export
 print.parallel_Kmult = function(x, ...) {
+    .Deprecated(msg = paste(
+      "print.parallel_Kmult() is deprecated and will be removed",
+      "in a future version along with Kmultparallel()."
+    ))
     cat("Parallel Kmult Analysis Results\n")
     cat("===============================\n\n")
     
@@ -584,6 +601,10 @@ print.parallel_Kmult = function(x, ...) {
 
 #' Plot method for parallel_Kmult objects
 #'
+#' @description
+#' **Deprecated**: This function is deprecated and will be removed in a
+#' future version along with `Kmultparallel()`.
+#'
 #' Creates density plots of Kmult values, with separate densities for
 #' each combination of dataset and treeset (if multiple combinations are
 #' present).
@@ -616,10 +637,16 @@ print.parallel_Kmult = function(x, ...) {
 #' plot(result, alpha = 0.5, title = "Kmult Distribution")
 #' }
 #'
+#' @keywords internal
 #' @export
 plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL,
                                x_lab = "Kmult", ...) {
     
+    .Deprecated(msg = paste(
+      "plot.parallel_Kmult() is deprecated and will be removed",
+      "in a future version along with Kmultparallel()."
+    ))
+
     # Create combination identifier for grouping
     x$combination = paste0("Dataset:", x$dataset, " - Treeset:",
                            x$treeset)
@@ -671,6 +698,10 @@ plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL,
 
 #' Summary method for parallel_Kmult objects
 #'
+#' @description
+#' **Deprecated**: This function is deprecated and will be removed in a
+#' future version along with `Kmultparallel()`.
+#'
 #' Provides detailed summary statistics for Kmult analysis results.
 #'
 #' @param object An object of class 'parallel_Kmult' produced by
@@ -693,8 +724,13 @@ plot.parallel_Kmult = function(x, alpha = 0.25, title = NULL,
 #' summary(result)
 #' }
 #'
+#' @keywords internal
 #' @export
 summary.parallel_Kmult = function(object, ...) {
+    .Deprecated(msg = paste(
+      "summary.parallel_Kmult() is deprecated and will be removed",
+      "in a future version along with Kmultparallel()."
+    ))
     cat("Parallel Kmult Analysis - Detailed Summary\n")
     cat("=========================================\n\n")
     

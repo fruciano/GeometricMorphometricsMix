@@ -16,6 +16,9 @@
 Invisibly returns the input object
 }
 \description{
+**Deprecated**: This function is deprecated and will be removed in a
+future version along with `Kmultparallel()`.
+
 Provides detailed summary statistics for Kmult analysis results.
 }
 \examples{
@@ -33,3 +36,4 @@ summary(result)
 }
 
 }
+\keyword{internal}

@@ -43,12 +43,14 @@ The function outputs a data.frame with classes
 }
 }
 \description{
+**Deprecated**: This function is deprecated and will be removed in a
+future version. 
+
 Parallel implementation of Kmult, a measure of phylogenetic signal
 which is a multivariate equivalent of Blomberg's K. This version
 supports multiple datasets and tree sets, computing Kmult for all
 combinations.
-}
-\details{
+
 This is an updated and improved version of the function included in
 Fruciano et al. 2017.
 It performs the computation of Adams' Kmult (Adams 2014) in parallel
@@ -59,8 +61,8 @@ Windows, Mac, and Linux systems.
 If one wanted to perform a computation of Kmult on a single tree,
 he/she would be advised to use the version implemented in the
 package geomorph, which receives regular updates.
-
-
+}
+\details{
 This function uses the future framework for parallel processing.
 Users should set up their preferred parallelization strategy using
 \code{future::plan()} before calling this function.
@@ -234,3 +236,4 @@ Phillips MJ. 2017. Sharing is caring? Measurement error and the
 issues arising from combining 3D morphometric datasets. Ecology and
 Evolution 7:7034-7046.
 }
+\keyword{internal}

@@ -16,6 +16,9 @@
 Invisibly returns the input object
 }
 \description{
+**Deprecated**: This function is deprecated and will be removed in a
+future version along with `Kmultparallel()`.
+
 Provides a summary of Kmult analysis results showing the range of
 Kmult values for each combination of dataset and treeset.
 }
@@ -34,3 +37,4 @@ print(result)  # or simply: result
 }
 
 }
+\keyword{internal}

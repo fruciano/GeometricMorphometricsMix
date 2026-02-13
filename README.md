@@ -32,7 +32,7 @@ Each function in the package is documented with usage examples and references.
 - **disparity_test** : Comparison of disparity between two groups
 - **dist_mean_boot** : Bootstrap estimates of the distance between group means
 - **EscoufierRV** : Computation of Escoufier RV, which quantifies levels of association between blocks of variables (Escoufier 1973 - Biometrics)
-- **Kmultparallel** : Parallelised computation of Adams' Kmult (useful for distributions of trees, see Fruciano et al. 2017 - Ecology and Evolution)
+- **Kmultparallel** : Parallelised computation of Adams' Kmult (useful for distributions of trees, see Fruciano et al. 2017 - Ecology and Evolution) - deprecated
 - **LM_relativepos_check** : Check relative position of landmarks, comparing it to a reference specimen (useful to identify switched landmarks and similar in raw data)
 - **parallel_analysis** : Perform parallel analysis (useful to choose a number of principal components for dimensionality reduction)
 - **pls** : Perform partial least squares (PLS) analysis
@@ -41,8 +41,6 @@ Each function in the package is documented with usage examples and references.
 - **rescale_by_landmark_distance** : Convenience function to rescale configurations of landmarks based on a vector of inter-landmark distances
 - **reversePCA** : Simple function to obtain the original variables (e.g., shape) from PC scores (and mean)
 - **rotate_landmarks**: Apply a user-defined rotation of a landmark configuration about the origin
-- **rarefied_convex_hull** : Computation of rarefied estimates of n-dimensional convex hull volume (a measure of disparity/morphospace occupation) - deprecated
-- **rarefied_disparity** : Rarefied estimates of some measures of disparity/morphospace occupation - deprecated
 - **repeated_measures_test** : Test of difference between two repeated measures
 - **RVrarefied** : Computation of rarefied estimates of Escoufier RV (see Fruciano et al. 2013 - Plos One)
 - **RVcomparison** : Permutation test for the difference in Escoufier RV (see Fruciano et al. 2013 - Plos One)
@@ -56,8 +54,6 @@ Each function in the package is documented with usage examples and references.
 | **Analysis of Disparity** | `BTailTest` | Traditional comparison of disparity between two groups |
 | | `disparity_resample` | Resampling estimates of disparity |
 | | `disparity_test` | Comparison of disparity between two groups |
-| | `rarefied_convex_hull` | Computation of rarefied estimates of n-dimensional convex hull volume (measure of disparity/morphospace occupation) - deprecated |
-| | `rarefied_disparity` | Rarefied estimates of various measures of disparity/morphospace occupation - deprecated |
 | **Integration/Association/Modularity** | `EscoufierRV` | Computation of Escoufier RV coefficient, quantifying association between blocks of variables |
 | | `RVrarefied` | Computation of rarefied estimates of Escoufier RV to account for sample size |
 | | `RVcomparison` | Permutation test for the difference in Escoufier RV between datasets |
@@ -73,7 +69,7 @@ Each function in the package is documented with usage examples and references.
 | | `rescale_by_landmark_distance` | Rescale configurations of landmarks based on inter-landmark distances |
 | | `reversePCA` | Obtain original variables from PC scores and mean |
 | | `rotate_landmarks` | Apply a user-defined rotation of a landmark configuration |
-| **Phylogenetic Comparative Analysis** | `Kmultparallel` | Parallelised computation of Adams' Kmult (for distributions of trees) |
+| **Phylogenetic Comparative Analysis** | `Kmultparallel` | Parallelised computation of Adams' Kmult (for distributions of trees) - deprecated |
 | **Quality Control and Diagnostics** | `LM_relativepos_check` | Check relative position of landmarks against a reference specimen |
 | **Dimensionality Reduction** | `parallel_analysis` | Perform parallel analysis to determine number of principal components to retain |
 

@@ -24,6 +24,9 @@ automatic title)}
 A ggplot object
 }
 \description{
+**Deprecated**: This function is deprecated and will be removed in a
+future version along with `Kmultparallel()`.
+
 Creates density plots of Kmult values, with separate densities for
 each combination of dataset and treeset (if multiple combinations are
 present).
@@ -46,3 +49,4 @@ plot(result, alpha = 0.5, title = "Kmult Distribution")
 }
 
 }
+\keyword{internal}
