@@ -7,17 +7,4 @@
 These functions are deprecated and will be removed in a future version
 of the package. Please migrate to the suggested alternatives.
 }
-\section{Deprecated functions}{
-
-\describe{
-  \item{\code{Kmultparallel()}}{Deprecated.}
-  \item{\code{print.parallel_Kmult()}}{Deprecated along with
-    \code{Kmultparallel()}.}
-  \item{\code{plot.parallel_Kmult()}}{Deprecated along with
-    \code{Kmultparallel()}.}
-  \item{\code{summary.parallel_Kmult()}}{Deprecated along with
-    \code{Kmultparallel()}.}
-}
-}
-
 \keyword{internal}

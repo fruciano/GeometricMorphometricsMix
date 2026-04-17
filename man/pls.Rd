@@ -69,6 +69,10 @@ information on the results.
 In particular, print() returns a more basic set of results on the
 global association, whereas summary() returns (only if permutation
 tests are used) results for each pair of singular axes.
+
+Optionally, analysis using multiple cores to speedup permutation testin
+can be performed using the future framework (requires package future.apply
+and setting a plan with multiple workers)
 }
 \section{Notice}{
 

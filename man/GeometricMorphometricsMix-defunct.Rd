@@ -5,6 +5,18 @@
 \title{Defunct functions in GeometricMorphometricsMix}
 \description{
 These functions are defunct and have been removed from the package.
-Please use the modern alternatives as indicated below.
 }
+\section{Defunct functions}{
+
+\describe{
+  \item{\code{Kmultparallel()}}{Defunct.}
+  \item{\code{print.parallel_Kmult()}}{Defunct along with
+    \code{Kmultparallel()}.}
+  \item{\code{plot.parallel_Kmult()}}{Defunct along with
+    \code{Kmultparallel()}.}
+  \item{\code{summary.parallel_Kmult()}}{Defunct along with
+    \code{Kmultparallel()}.}
+}
+}
+
 \keyword{internal}

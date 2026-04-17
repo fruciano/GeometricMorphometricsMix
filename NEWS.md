@@ -1,3 +1,10 @@
+# GeometricMorphometricsMix 0.6.1.1
+
+* Improved permutation loop in `pls()`, which now reduces the memory footprint of permutation testing
+* Added optional parallelism to `pls()` via the `future`/`future.apply` framework. Permutation tests can now exploit multiple workers when a `future::plan()` with more than one worker is active.
+* Made `Kmultparallel()` and its S3 methods (`print.parallel_Kmult()`, `plot.parallel_Kmult()`, `summary.parallel_Kmult()`) defunct. All implementation code and examples have been removed; calling these functions now signals an informative error. Users should migrate to `geomorph::physignal()` for computing phylogenetic signal (parallel implementation is nowadays trivial).
+* Moved `ape` from `Depends` to `Suggests` since no remaining exported function uses `ape` directly.
+
 # GeometricMorphometricsMix 0.6.1.0
 
 * Deprecated `Kmultparallel()` and its S3 methods (`print.parallel_Kmult()`, `plot.parallel_Kmult()`, `summary.parallel_Kmult()`). These functions will be removed in a future version. Users should migrate to `geomorph::physignal()` for computing phylogenetic signal.

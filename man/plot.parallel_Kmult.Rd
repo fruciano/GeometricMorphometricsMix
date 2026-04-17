@@ -2,51 +2,26 @@
 % Please edit documentation in R/Kmultparallel.R
 \name{plot.parallel_Kmult}
 \alias{plot.parallel_Kmult}
-\title{Plot method for parallel_Kmult objects}
+\title{Plot method for parallel_Kmult objects (defunct)}
 \usage{
 \method{plot}{parallel_Kmult}(x, alpha = 0.25, title = NULL, x_lab = "Kmult", ...)
 }
 \arguments{
-\item{x}{An object of class 'parallel_Kmult' produced by
-\code{\link{Kmultparallel}}}
+\item{x}{Ignored (function is defunct).}
 
-\item{alpha}{Transparency level for density plots (0-1,
-default = 0.25)}
+\item{alpha}{Ignored (function is defunct).}
 
-\item{title}{Character string for plot title (default NULL for
-automatic title)}
+\item{title}{Ignored (function is defunct).}
 
-\item{x_lab}{Character string for x-axis label (default "Kmult")}
+\item{x_lab}{Ignored (function is defunct).}
 
-\item{...}{Additional arguments passed to the plotting function}
+\item{...}{Ignored (function is defunct).}
 }
 \value{
-A ggplot object
+Does not return; always signals a defunct error.
 }
 \description{
-**Deprecated**: This function is deprecated and will be removed in a
-future version along with `Kmultparallel()`.
-
-Creates density plots of Kmult values, with separate densities for
-each combination of dataset and treeset (if multiple combinations are
-present).
-}
-\examples{
-\donttest{
-# Create simple example data
-library(phytools)
-trees = replicate(5, pbtree(n = 20), simplify = FALSE)
-class(trees) = "multiPhylo"
-data = matrix(rnorm(20 * 4), nrow = 20, ncol = 4)
-rownames(data) = trees[[1]]$tip.label
-
-# Run analysis and plot results
-result = Kmultparallel(data, trees)
-plot(result)
-
-# With custom settings
-plot(result, alpha = 0.5, title = "Kmult Distribution")
-}
-
+**Defunct**: Removed from the package along with
+\code{Kmultparallel()}.
 }
 \keyword{internal}

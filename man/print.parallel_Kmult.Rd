@@ -2,39 +2,20 @@
 % Please edit documentation in R/Kmultparallel.R
 \name{print.parallel_Kmult}
 \alias{print.parallel_Kmult}
-\title{Print method for parallel_Kmult objects}
+\title{Print method for parallel_Kmult objects (defunct)}
 \usage{
 \method{print}{parallel_Kmult}(x, ...)
 }
 \arguments{
-\item{x}{An object of class 'parallel_Kmult' produced by
-\code{\link{Kmultparallel}}}
+\item{x}{Ignored (function is defunct).}
 
-\item{...}{Additional arguments (currently not used)}
+\item{...}{Ignored (function is defunct).}
 }
 \value{
-Invisibly returns the input object
+Does not return; always signals a defunct error.
 }
 \description{
-**Deprecated**: This function is deprecated and will be removed in a
-future version along with `Kmultparallel()`.
-
-Provides a summary of Kmult analysis results showing the range of
-Kmult values for each combination of dataset and treeset.
-}
-\examples{
-\donttest{
-# Create simple example data
-library(phytools)
-trees = replicate(3, pbtree(n = 20), simplify = FALSE)
-class(trees) = "multiPhylo"
-data = matrix(rnorm(20 * 4), nrow = 20, ncol = 4)
-rownames(data) = trees[[1]]$tip.label
-
-# Run analysis and print results
-result = Kmultparallel(data, trees)
-print(result)  # or simply: result
-}
-
+**Defunct**: Removed from the package along with
+\code{Kmultparallel()}.
 }
 \keyword{internal}

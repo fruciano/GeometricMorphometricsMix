@@ -2,38 +2,20 @@
 % Please edit documentation in R/Kmultparallel.R
 \name{summary.parallel_Kmult}
 \alias{summary.parallel_Kmult}
-\title{Summary method for parallel_Kmult objects}
+\title{Summary method for parallel_Kmult objects (defunct)}
 \usage{
 \method{summary}{parallel_Kmult}(object, ...)
 }
 \arguments{
-\item{object}{An object of class 'parallel_Kmult' produced by
-\code{\link{Kmultparallel}}}
+\item{object}{Ignored (function is defunct).}
 
-\item{...}{Additional arguments (currently not used)}
+\item{...}{Ignored (function is defunct).}
 }
 \value{
-Invisibly returns the input object
+Does not return; always signals a defunct error.
 }
 \description{
-**Deprecated**: This function is deprecated and will be removed in a
-future version along with `Kmultparallel()`.
-
-Provides detailed summary statistics for Kmult analysis results.
-}
-\examples{
-\donttest{
-# Create simple example data
-library(phytools)
-trees = replicate(3, pbtree(n = 20), simplify = FALSE)
-class(trees) = "multiPhylo"
-data = matrix(rnorm(20 * 4), nrow = 20, ncol = 4)
-rownames(data) = trees[[1]]$tip.label
-
-# Run analysis and get summary
-result = Kmultparallel(data, trees)
-summary(result)
-}
-
+**Defunct**: Removed from the package along with
+\code{Kmultparallel()}.
 }
 \keyword{internal}

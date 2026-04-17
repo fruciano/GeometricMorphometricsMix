@@ -1,6 +1,6 @@
 Package: GeometricMorphometricsMix
 Title: Heterogeneous Methods for Shape and Other Multidimensional Data
-Version: 0.6.1.0
+Version: 0.6.1.1
 Authors@R: person("Carmelo", "Fruciano", email = "carmelo.fruciano@unict.it", role = c("aut", "cre"))
 Description: Tools for geometric morphometric analyses and multidimensional
     data. Implements methods for morphological disparity analysis using
@@ -17,13 +17,13 @@ Description: Tools for geometric morphometric analyses and multidimensional
     and parallel analysis for dimensionality reduction (Buja and Eyuboglu (1992)
     <doi:10.1207/s15327906mbr2704_2>).
 Depends: R (>= 3.5.0),
-  ape,
   stats,
   corpcor
 Imports:
   methods,
   mclust
 Suggests: 
+  ape,
   Morpho,
   utils,
   geometry,
