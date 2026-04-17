@@ -27,6 +27,10 @@
 #' global association, whereas summary() returns (only if permutation
 #' tests are used) results for each pair of singular axes.
 #'
+#' Optionally, analysis using multiple cores to speedup permutation testin
+#' can be performed using the future framework (requires package future.apply
+#' and setting a plan with multiple workers)
+#'
 #'
 #' @section Notice:
 #' \itemize{
@@ -350,23 +354,27 @@ pls_perm = function (x, y, perm=999, global_RV_test=TRUE) {
   nvarY=ncol(y)
   # Number of observations and singular values
 
-  Yperm = lapply(seq_len(perm), function(k)
-    as.matrix(y)[sample(seq_len(nobs),nobs),, drop=FALSE])
-  # Generate permuted samples for one of the two blocks
-  # (the second)
+  xmat=as.matrix(x)
+  ymat=as.matrix(y)
 
-  PLSpermD=matrix(rep(NA,nsingval*perm),nsingval,perm)
-  PLSpermCorr=matrix(rep(NA,nsingval*perm),nsingval,perm)
+  perm_results=future.apply::future_lapply(seq_len(perm), function(k) {
+    Yperm_k=ymat[sample(seq_len(nobs), nobs), , drop=FALSE]
+    Temp=pls_base(xmat, Yperm_k)
+    res=list(D=Temp$D, Corr=Temp$CorrXScoresYScores)
+    if (global_RV_test==TRUE) {
+      res$RV=EscoufierRV(xmat, Yperm_k)
+    }
+    res
+  }, future.seed=TRUE)
+  # For each permutation: generate a permuted Y, compute PLS, extract
+  # singular values and score correlations; optionally compute RV.
+  # Permuted Y matrices are never stored simultaneously — each is
+  # created, used, and discarded within its iteration.
 
-  for (i in seq_len(perm)) {
-    Temp=pls_base(x,Yperm[[i]])
-    PLSpermD[,i]=Temp$D
-    PLSpermCorr[,i]=Temp$CorrXScoresYScores
-  }
-  # Compute PLS on each of the permuted datasets and retain the singular values
-  # Combine all permuted sets of singular values in columns
-  # (so that each column is a different permutation,
-  # each row a different singular value)
+  PLSpermD    = do.call(cbind, lapply(perm_results, `[[`, "D"))
+  PLSpermCorr = do.call(cbind, lapply(perm_results, `[[`, "Corr"))
+  # Reassemble per-permutation results into matrices
+  # (singular values / correlations in columns, axes in rows)
 
   D_p.values=rep(NA,nsingval)
   for (i in seq_len(nsingval)) {
@@ -386,9 +394,7 @@ pls_perm = function (x, y, perm=999, global_RV_test=TRUE) {
 
   if (global_RV_test==TRUE) {
   ObsRV=EscoufierRV(x, y)
-  permRV=unlist(lapply(
-    Yperm, function(Y) EscoufierRV(cbind(x),cbind(Y))
-  ))
+  permRV=unlist(lapply(perm_results, `[[`, "RV"))
   RV_p_value=(length(which(permRV>=ObsRV))+1)/(perm+1)
   # Overall significance using Escoufier RV
 

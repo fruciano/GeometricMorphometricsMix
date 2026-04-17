@@ -2,28 +2,20 @@
 % Please edit documentation in R/Kmultparallel.R
 \name{print.parallel_Kmult}
 \alias{print.parallel_Kmult}
-\title{Print method for parallel_Kmult objects}
+\title{Print method for parallel_Kmult objects (defunct)}
 \usage{
 \method{print}{parallel_Kmult}(x, ...)
 }
 \arguments{
-\item{x}{An object of class 'parallel_Kmult' produced by
-\code{\link{Kmultparallel}}}
+\item{x}{Ignored (function is defunct).}
 
-\item{...}{Additional arguments (currently not used)}
+\item{...}{Ignored (function is defunct).}
 }
 \value{
-Invisibly returns the input object
+Does not return; always signals a defunct error.
 }
 \description{
-Provides a summary of Kmult analysis results showing the range of
-Kmult values for each combination of dataset and treeset.
+**Defunct**: Removed from the package along with
+\code{Kmultparallel()}.
 }
-\examples{
-\dontrun{
-# Assuming you have data and trees
-result = Kmultparallel(data, trees)
-print(result)  # or simply: result
-}
-
-}
+\keyword{internal}

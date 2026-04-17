@@ -29,7 +29,8 @@ utils::globalVariables(c("CI_point_color", "CI_errorbar_color", ".data"))
 #' @param errorbar_color A single color or a vector of colors for
 #'   error bars. Follows the same recycling / matching rules as
 #'   `point_color`. (default "darkred")
-#' @param ... Additional arguments passed to ggplot
+#' @param title Optional character string for plot title (default NULL)
+#' @param ... Additional arguments (currently unused)
 #'
 #' @return A ggplot object
 #'
@@ -37,7 +38,8 @@ utils::globalVariables(c("CI_point_color", "CI_errorbar_color", ".data"))
 CI_plot=function(data, x_var="group", y_var="average", 
                  ymin_var="CI_min", ymax_var="CI_max",
                  x_lab="Group", y_lab="Average", 
-                 point_color="darkblue", errorbar_color="darkred", ...) {
+                 point_color="darkblue", errorbar_color="darkred",
+                 title=NULL, ...) {
   
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Package 'ggplot2' is required for CI_plot")
@@ -75,10 +77,9 @@ CI_plot=function(data, x_var="group", y_var="average",
   data$CI_point_color = point_cols_row
   data$CI_errorbar_color = errorbar_cols_row
 
-  # Build plot (no need for group=1)
+  # Build plot
   p = ggplot2::ggplot(
-    data, ggplot2::aes(x = .data[[x_var]], y = .data[[y_var]]),
-    ...
+    data, ggplot2::aes(x = .data[[x_var]], y = .data[[y_var]])
   ) +
     ggplot2::geom_point(
       ggplot2::aes(color = CI_point_color), alpha = 0.8, size = 3,
@@ -87,7 +88,7 @@ CI_plot=function(data, x_var="group", y_var="average",
     ggplot2::geom_errorbar(ggplot2::aes(ymin = .data[[ymin_var]], ymax = .data[[ymax_var]], color = CI_errorbar_color), width = 0.1, show.legend = FALSE) +
     ggplot2::scale_color_identity() +
     ggplot2::theme_classic() +
-    ggplot2::labs(x = x_lab, y = y_lab) +
+    ggplot2::labs(x = x_lab, y = y_lab, title = title) +
     ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
   
   return(p)

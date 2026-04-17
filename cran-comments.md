@@ -1,30 +1,43 @@
 ## Test environments
 * Local: R 4.5.1 on Windows 11 Pro
 * GitHub Actions: ubuntu-latest (release, devel, oldrel), macOS-latest, windows-latest
-* R-hub: R-devel/Fedora Linux 38, R-devel/Ubuntu 22.04.5 LTS
 
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
+0 errors | 0 warnings | 2 notes
+
+
+## Changes since the CRAN version (0.6.0.1)
+
+This is an update to an existing CRAN package. Key changes:
+
+* Made `Kmultparallel()` and its S3 methods (`print.parallel_Kmult()`, `plot.parallel_Kmult()`, `summary.parallel_Kmult()`) defunct. These were deprecated in the previous development version (0.6.1.0). All implementation code and examples have been removed; calling these functions now signals an informative error directing users to `geomorph::physignal()`.
+* Improved the permutation loop in `pls()` to reduce its memory footprint.
+* Added optional parallelism to `pls()` via the `future`/`future.apply` framework.
+* Moved `ape` from `Depends` to `Suggests` since no remaining exported function uses `ape` directly.
+
 
 ## Notes
-* This is a new submission.
 
-### Additional information
-During local checks with vignette building enabled (Quarto + Pandoc installed), a cosmetic message appears once:
+### NOTE 1: CRAN incoming feasibility — URL returning 403
 
 ```
-ERROR: Unknown command "TMPDIR=...". Did you mean command "create"?
+Found the following (possibly) invalid URLs:
+  URL: https://www.physalia-courses.org/courses-workshops/course22/
+    From: README.md
+    Status: 403
+    Message: Forbidden
 ```
 
-This originates from an internal `system2()` call (in upstream tooling, not in this package) that invokes `quarto -V` while passing the temporary directory via the `env` argument on Windows, which Quarto interprets as a positional argument. The vignette build proceeds successfully (Pandoc 3.6.3; Quarto 1.8.25) and the message has no impact on the rendered vignettes. Setting `TMPDIR` in the environment prior to running the check suppresses it. No action required for CRAN.
+This URL in README.md is valid and accessible in a browser. The Physalia Courses server blocks automated/bot HTTP requests, producing a 403 status for `R CMD check`. The link is correct and intentional.
 
-The single NOTE reported is:
+
+### NOTE 2: Future file timestamps
 
 ```
 checking for future file timestamps ... NOTE
-	unable to verify current time
+  unable to verify current time
 ```
 
-This is an occasional Windows timing artifact (system clock / filesystem resolution); continuous integration does not reproduce additional issues, and there are no generated files with future timestamps. All other checks pass cleanly.
+This is an occasional network/system artifact on Windows when the check cannot reach a time server. There are no files with future timestamps in the package. Continuous integration on other platforms does not reproduce this NOTE.

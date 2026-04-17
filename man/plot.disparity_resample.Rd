@@ -4,7 +4,13 @@
 \alias{plot.disparity_resample}
 \title{Plot method for disparity_resample objects}
 \usage{
-\method{plot}{disparity_resample}(x, point_color = "darkblue", errorbar_color = "darkred", ...)
+\method{plot}{disparity_resample}(
+  x,
+  point_color = "darkblue",
+  errorbar_color = "darkred",
+  title = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{An object of class "disparity_resample"}
@@ -16,7 +22,9 @@ number of groups, colors are assigned per group. (default "darkblue")}
 \item{errorbar_color}{A single color or a vector of colors for error bars.
 Follows the same recycling rules as `point_color`. (default "darkred")}
 
-\item{...}{Additional arguments passed to the underlying plotting function}
+\item{title}{Optional character string for plot title (default NULL)}
+
+\item{...}{Additional arguments (currently unused)}
 }
 \value{
 A ggplot object
