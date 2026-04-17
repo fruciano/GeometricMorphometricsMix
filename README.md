@@ -32,7 +32,6 @@ Each function in the package is documented with usage examples and references.
 - **disparity_test** : Comparison of disparity between two groups
 - **dist_mean_boot** : Bootstrap estimates of the distance between group means
 - **EscoufierRV** : Computation of Escoufier RV, which quantifies levels of association between blocks of variables (Escoufier 1973 - Biometrics)
-- **Kmultparallel** : Parallelised computation of Adams' Kmult (useful for distributions of trees, see Fruciano et al. 2017 - Ecology and Evolution) - deprecated
 - **LM_relativepos_check** : Check relative position of landmarks, comparing it to a reference specimen (useful to identify switched landmarks and similar in raw data)
 - **parallel_analysis** : Perform parallel analysis (useful to choose a number of principal components for dimensionality reduction)
 - **pls** : Perform partial least squares (PLS) analysis
@@ -69,7 +68,6 @@ Each function in the package is documented with usage examples and references.
 | | `rescale_by_landmark_distance` | Rescale configurations of landmarks based on inter-landmark distances |
 | | `reversePCA` | Obtain original variables from PC scores and mean |
 | | `rotate_landmarks` | Apply a user-defined rotation of a landmark configuration |
-| **Phylogenetic Comparative Analysis** | `Kmultparallel` | Parallelised computation of Adams' Kmult (for distributions of trees) - deprecated |
 | **Quality Control and Diagnostics** | `LM_relativepos_check` | Check relative position of landmarks against a reference specimen |
 | **Dimensionality Reduction** | `parallel_analysis` | Perform parallel analysis to determine number of principal components to retain |
 
