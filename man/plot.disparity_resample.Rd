@@ -30,5 +30,8 @@ Follows the same recycling rules as `point_color`. (default "darkred")}
 A ggplot object
 }
 \description{
-Creates a confidence interval plot for disparity resample results
+Creates a confidence interval plot for disparity resample results.
+The plotted point represents the median (not the mean) of the
+resampled values for each group, so that it is always contained
+within the plotted confidence interval.
 }

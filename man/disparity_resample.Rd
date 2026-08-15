@@ -57,7 +57,7 @@ A list containing:
    \item{chosen_statistic}{Character vector of length 1 with the
    human-readable name of the statistic used.}
    \item{results}{A data frame with columns `group`, `average`,
-   `CI_min`, `CI_max`. One row per group.
+   `median`, `CI_min`, `CI_max`. One row per group.
      When CI=1, `CI_min` and `CI_max` represent the minimum and
      maximum of resampled values rather than confidence intervals.}
    \item{resampled_values}{If a single group: numeric vector of
@@ -187,6 +187,12 @@ make groups comparable at a common (smaller) sample size, the
 average estimate reported is the mean of the rarefied resampled
 values for that group (i.e., the mean across all rarefaction
 replicates).
+The median of the resampled values is also reported (see `median`
+column in `results`, below). \code{\link{plot.disparity_resample}}
+uses the median, rather than the mean, for the plotted point
+estimate, because the median is always contained within a
+percentile-based confidence interval, whereas the mean can fall
+outside it for skewed resampling distributions.
 }
 
 \section{Input data types}{

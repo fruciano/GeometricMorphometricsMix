@@ -63,6 +63,12 @@
 #' average estimate reported is the mean of the rarefied resampled
 #' values for that group (i.e., the mean across all rarefaction
 #' replicates).
+#' The median of the resampled values is also reported (see `median`
+#' column in `results`, below). \code{\link{plot.disparity_resample}}
+#' uses the median, rather than the mean, for the plotted point
+#' estimate, because the median is always contained within a
+#' percentile-based confidence interval, whereas the mean can fall
+#' outside it for skewed resampling distributions.
 #'
 #' @section Input data types:
 #' `Data` can be a data frame, a matrix, a vector, or a 3D array of
@@ -146,7 +152,7 @@
 #'    \item{chosen_statistic}{Character vector of length 1 with the
 #'    human-readable name of the statistic used.}
 #'    \item{results}{A data frame with columns `group`, `average`,
-#'    `CI_min`, `CI_max`. One row per group.
+#'    `median`, `CI_min`, `CI_max`. One row per group.
 #'      When CI=1, `CI_min` and `CI_max` represent the minimum and
 #'      maximum of resampled values rather than confidence intervals.}
 #'    \item{resampled_values}{If a single group: numeric vector of
@@ -369,6 +375,7 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
         }))
       }
       average_stat=mean(res_vals)
+      median_stat=median(res_vals)
     } else if (bootstrap_rarefaction=="bootstrap") {
       if (!is.null(sample_size)) {
         # Bootstrap with custom sample size
@@ -399,6 +406,7 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
         }
         # Average of resampled estimates for consistency
         average_stat=mean(res_vals)
+        median_stat=median(res_vals)
       } else {
         # Standard bootstrap (original sample size)
         if (use_future) {
@@ -423,6 +431,7 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
           }))
         }
         average_stat=mean(res_vals)  # Average of resampled estimates
+        median_stat=median(res_vals)
       }
     } else {
       stop(
@@ -444,6 +453,7 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
 
     resampled_values_list[[g]]=res_vals
     results_rows[[g]]=data.frame(group=g, average=average_stat,
+                                 median=median_stat,
                                  CI_min=CI_min, CI_max=CI_max,
                                  row.names=NULL)
   }
@@ -791,7 +801,10 @@ resolve_bootstrap_sample_size = function(sample_size, group_sizes) {
 
 #' Plot method for disparity_resample objects
 #'
-#' Creates a confidence interval plot for disparity resample results
+#' Creates a confidence interval plot for disparity resample results.
+#' The plotted point represents the median (not the mean) of the
+#' resampled values for each group, so that it is always contained
+#' within the plotted confidence interval.
 #'
 #' @param x An object of class "disparity_resample"
 #' @param point_color A single color or a vector of colors for point estimates.
@@ -817,7 +830,7 @@ plot.disparity_resample=function(x, point_color = "darkblue", errorbar_color = "
   }
   
   # Create plot using internal CI_plot function
-  p=CI_plot(data=plot_data, x_var="group", y_var="average",
+  p=CI_plot(data=plot_data, x_var="group", y_var="median",
             ymin_var="CI_min", ymax_var="CI_max",
             x_lab=x_lab, y_lab=x$chosen_statistic, 
             point_color = point_color, errorbar_color = errorbar_color,
