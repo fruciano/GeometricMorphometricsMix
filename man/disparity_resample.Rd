@@ -188,7 +188,8 @@ average estimate reported is the mean of the rarefied resampled
 values for that group (i.e., the mean across all rarefaction
 replicates).
 The median of the resampled values is also reported (see `median`
-column in `results`, below). \code{\link{plot.disparity_resample}}
+column in `results`, below). By default,
+\code{\link{plot.disparity_resample}}
 uses the median, rather than the mean, for the plotted point
 estimate, because the median is always contained within a
 percentile-based confidence interval, whereas the mean can fall
