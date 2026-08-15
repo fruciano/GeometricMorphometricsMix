@@ -49,8 +49,9 @@ test_that("disparity_resample returns correct structure", {
   
   # Check results data frame structure
   expect_s3_class(result$results, "data.frame")
-  expect_named(result$results, c("group", "average", "CI_min", "CI_max"))
+  expect_named(result$results, c("group", "average", "median", "CI_min", "CI_max"))
   expect_equal(nrow(result$results), 2)  # Two groups
+  expect_type(result$results$median, "double")
   
   # Check resampled values structure for multiple groups
   expect_type(result$resampled_values, "list")

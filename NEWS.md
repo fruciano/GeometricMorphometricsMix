@@ -1,3 +1,8 @@
+# GeometricMorphometricsMix 0.6.1.2
+
+* Added median in the output of `disparity_resample()` and made the associated S3 method for plotting use the median for plotting the dot as default
+
+
 # GeometricMorphometricsMix 0.6.1.1
 
 * Improved permutation loop in `pls()`, which now reduces the memory footprint of permutation testing

@@ -6,6 +6,7 @@
 \usage{
 \method{plot}{disparity_resample}(
   x,
+  point_stat = "median",
   point_color = "darkblue",
   errorbar_color = "darkred",
   title = NULL,
@@ -14,6 +15,10 @@
 }
 \arguments{
 \item{x}{An object of class "disparity_resample"}
+
+\item{point_stat}{Character string identifying the statistic used for
+the plotted point. Either "median" (default) or "average". The error
+bars always represent the confidence interval and are unaffected.}
 
 \item{point_color}{A single color or a vector of colors for point estimates.
 If length 1, the same color is used for all points. If length equals the
@@ -30,5 +35,9 @@ Follows the same recycling rules as `point_color`. (default "darkred")}
 A ggplot object
 }
 \description{
-Creates a confidence interval plot for disparity resample results
+Creates a confidence interval plot for disparity resample results.
+By default, the plotted point represents the median (not the mean) of
+the resampled values for each group, so that it is always contained
+within the plotted confidence interval. The statistic used for the
+point can be changed via \code{point_stat}.
 }

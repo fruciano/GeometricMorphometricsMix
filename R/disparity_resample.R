@@ -63,6 +63,13 @@
 #' average estimate reported is the mean of the rarefied resampled
 #' values for that group (i.e., the mean across all rarefaction
 #' replicates).
+#' The median of the resampled values is also reported (see `median`
+#' column in `results`, below). By default,
+#' \code{\link{plot.disparity_resample}}
+#' uses the median, rather than the mean, for the plotted point
+#' estimate, because the median is always contained within a
+#' percentile-based confidence interval, whereas the mean can fall
+#' outside it for skewed resampling distributions.
 #'
 #' @section Input data types:
 #' `Data` can be a data frame, a matrix, a vector, or a 3D array of
@@ -146,7 +153,7 @@
 #'    \item{chosen_statistic}{Character vector of length 1 with the
 #'    human-readable name of the statistic used.}
 #'    \item{results}{A data frame with columns `group`, `average`,
-#'    `CI_min`, `CI_max`. One row per group.
+#'    `median`, `CI_min`, `CI_max`. One row per group.
 #'      When CI=1, `CI_min` and `CI_max` represent the minimum and
 #'      maximum of resampled values rather than confidence intervals.}
 #'    \item{resampled_values}{If a single group: numeric vector of
@@ -369,6 +376,7 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
         }))
       }
       average_stat=mean(res_vals)
+      median_stat=median(res_vals)
     } else if (bootstrap_rarefaction=="bootstrap") {
       if (!is.null(sample_size)) {
         # Bootstrap with custom sample size
@@ -399,6 +407,7 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
         }
         # Average of resampled estimates for consistency
         average_stat=mean(res_vals)
+        median_stat=median(res_vals)
       } else {
         # Standard bootstrap (original sample size)
         if (use_future) {
@@ -423,6 +432,7 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
           }))
         }
         average_stat=mean(res_vals)  # Average of resampled estimates
+        median_stat=median(res_vals)
       }
     } else {
       stop(
@@ -444,6 +454,7 @@ disparity_resample=function(Data, group=NULL, n_resamples=1000,
 
     resampled_values_list[[g]]=res_vals
     results_rows[[g]]=data.frame(group=g, average=average_stat,
+                                 median=median_stat,
                                  CI_min=CI_min, CI_max=CI_max,
                                  row.names=NULL)
   }
@@ -791,9 +802,16 @@ resolve_bootstrap_sample_size = function(sample_size, group_sizes) {
 
 #' Plot method for disparity_resample objects
 #'
-#' Creates a confidence interval plot for disparity resample results
+#' Creates a confidence interval plot for disparity resample results.
+#' By default, the plotted point represents the median (not the mean) of
+#' the resampled values for each group, so that it is always contained
+#' within the plotted confidence interval. The statistic used for the
+#' point can be changed via \code{point_stat}.
 #'
 #' @param x An object of class "disparity_resample"
+#' @param point_stat Character string identifying the statistic used for
+#'   the plotted point. Either "median" (default) or "average". The error
+#'   bars always represent the confidence interval and are unaffected.
 #' @param point_color A single color or a vector of colors for point estimates.
 #'   If length 1, the same color is used for all points. If length equals the
 #'   number of groups, colors are assigned per group. (default "darkblue")
@@ -804,7 +822,11 @@ resolve_bootstrap_sample_size = function(sample_size, group_sizes) {
 #'
 #' @return A ggplot object
 #' @export
-plot.disparity_resample=function(x, point_color = "darkblue", errorbar_color = "darkred", title = NULL, ...) {
+plot.disparity_resample=function(x, point_stat = "median", point_color = "darkblue", errorbar_color = "darkred", title = NULL, ...) {
+  point_stat = point_stat[1]
+  if (!point_stat %in% c("median", "average")) {
+    stop("point_stat must be either 'median' or 'average'")
+  }
   # Check if results contain groups or single analysis
   if (any(x$results$group == "All") && nrow(x$results) == 1) {
     # Single group case - already labeled as "All"
@@ -817,7 +839,7 @@ plot.disparity_resample=function(x, point_color = "darkblue", errorbar_color = "
   }
   
   # Create plot using internal CI_plot function
-  p=CI_plot(data=plot_data, x_var="group", y_var="average",
+  p=CI_plot(data=plot_data, x_var="group", y_var=point_stat,
             ymin_var="CI_min", ymax_var="CI_max",
             x_lab=x_lab, y_lab=x$chosen_statistic, 
             point_color = point_color, errorbar_color = errorbar_color,
