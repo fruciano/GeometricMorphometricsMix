@@ -27,3 +27,11 @@ checking for future file timestamps ... NOTE
 ```
 
 The local Windows check could not verify the current time, producing this NOTE.
+
+### Previous NOTE: Base package in Suggests
+
+A previous submission did not pass pre-checks giving the following note:
+Base package in Suggests/Enhances imported in NAMESPACE:
+  'utils'
+This has been handled by moving the utils package in the DESCRITPION from the Suggests to the Imports.
+The issue should now be fixed.

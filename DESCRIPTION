@@ -21,11 +21,11 @@ Depends: R (>= 3.5.0),
   corpcor
 Imports:
   methods,
-  mclust
+  mclust,
+  utils
 Suggests: 
   ape,
   Morpho,
-  utils,
   geometry,
   nlshrink,
   lmf,
