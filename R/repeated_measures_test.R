@@ -72,7 +72,7 @@ repeated_measures_test=function(T1, T2, rnames=TRUE, shrink=FALSE) {
 	if ("array" %in% class(T1) && length(dim(T1))==3) {
 		T1=Morpho::vecx(T1)
 			}
-	if ("array" %in% class(T2) && length(dim(T1))==3) {
+	if ("array" %in% class(T2) && length(dim(T2))==3) {
 		T2=Morpho::vecx(T2)
 			}
 	# If an array, transform in a 2D matrix

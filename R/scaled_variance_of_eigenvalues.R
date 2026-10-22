@@ -146,9 +146,10 @@ scaled_variance_of_eigenvalues=function(data_matrix, boot=999,
           }))
       }
 
+    ci_indices = pmax(1L, pmin(boot, round(boot * c(0.025, 0.975))))
     boot_ci_sveig=c(
-      sort(sveig_boot[,1])[c(round(boot*0.025), round(boot*0.975))],
-      sort(sveig_boot[,2])[c(round(boot*0.025), round(boot*0.975))]
+      sort(sveig_boot[,1])[ci_indices],
+      sort(sveig_boot[,2])[ci_indices]
       )
 
     Result=list(mean_boot_sveig=mean(sveig_boot[,1]),

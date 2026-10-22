@@ -1,110 +1,36 @@
-# Tests for GeometricMorphometricsMix Package
+# Unit tests for GeometricMorphometricsMix
 
-This directory contains comprehensive unit tests for the `disparity_resample()` function using the testthat framework.
+The suite uses testthat edition 3. New tests follow the package's `=` assignment convention and use withr to restore random-number settings and other temporary state.
 
-## Test Structure
+## What is tested
 
-### `testthat.R`
-Main test runner file that sets up the testing environment.
+- Existing suites: disparity_resample and its print/plot methods, RVrarefied and its print/plot methods, and RVcomparison.
+- Geometry and transformations: ProjectOrthogonal, reversePCA, rotate_landmarks, rescale_by_landmark_distance, and LM_relativepos_check.
+- Statistical calculations: pls and its print/summary methods, pls_major_axis, repeated_measures_test, scaled_variance_of_eigenvalues, and EscoufierRV.
+- Resampling and comparisons: adjRand_test, BTailTest, critical_angle, TestOfAngle, disparity_test, dist_mean_boot, parallel_analysis and its summary method, and defunct Kmultparallel compatibility errors.
+- Internal ancillary calculations: known distance, variance, replication, and angle-conversion answers.
 
-### Test Files
+Tests use small mathematical examples, independently derived expectations, reconstruction and invariance checks, reproducible permutations/bootstrap runs, output contracts, and selected invalid inputs. They do not establish statistical power, biological validity, or runtime speed. Some exceptional inputs remain untested or have unresolved defects; coverage is not a guarantee of correctness.
 
-1. **`test-disparity_resample.R`** - Main comprehensive test suite
-   - Input validation tests
-   - Data type handling (matrix, data frame, vector, 3D array)
-   - All statistical methods (multivariate variance, mean pairwise distance, etc.)
-   - Bootstrap vs rarefaction methods
-   - Confidence interval calculations
-   - Missing data handling
-   - Edge cases and error conditions
+## Running tests
 
-2. **`test-disparity_resample_helpers.R`** - Internal function tests
-   - Tests for helper functions like `muvar()`, `meanpairwiseEuclideanD()`
-   - Validation function tests
-   - Data preparation function tests
-   - Sample size resolution tests
+From the package root, with dependencies installed:
 
-3. **`test-disparity_resample_methods.R`** - S3 method tests
-   - `print.disparity_resample()` method tests
-   - `plot.disparity_resample()` method tests
-   - Output formatting and display tests
-   - Confidence interval overlap assessment tests
-
-4. **`test-disparity_resample_integration.R`** - Integration and edge case tests
-   - Tests with package datasets
-   - Large dataset performance tests
-   - Extreme value handling
-   - Memory efficiency tests
-   - Cross-platform compatibility tests
-
-## Test Coverage
-
-The test suite covers:
-
-### Core Functionality
-- ✅ All input data types (matrix, data.frame, vector, 3D array)
-- ✅ All statistical methods
-- ✅ Bootstrap and rarefaction resampling
-- ✅ Single and multiple group analyses
-- ✅ Custom sample sizes
-- ✅ Confidence interval calculations
-
-### Input Validation
-- ✅ Parameter validation (CI, n_resamples, statistic, etc.)
-- ✅ Data validation (missing data, empty datasets, etc.)
-- ✅ Group validation (minimum sizes, matching lengths, etc.)
-- ✅ Rarefaction-specific validation
-
-### Statistical Accuracy
-- ✅ Numerical correctness verification
-- ✅ Reproducibility with set.seed()
-- ✅ Edge cases (constant data, extreme values, etc.)
-
-### S3 Methods
-- ✅ Print method formatting and content
-- ✅ Plot method ggplot2 integration
-- ✅ Confidence interval overlap assessment
-- ✅ Range vs confidence interval display
-
-### Dependencies
-- ✅ Optional package handling (geometry, nlshrink, Morpho, etc.)
-- ✅ Graceful degradation when packages unavailable
-
-## Running the Tests
-
-To run all tests:
 ```r
-library(testthat)
-library(GeometricMorphometricsMix)
-test_check("GeometricMorphometricsMix")
+testthat::test_local(".")
+testthat::test_local(".", filter = "geometry-transformations")
 ```
 
-To run specific test files:
+Declared optional dependencies should be available for a full run. Individual tests may skip when their required optional dependencies are unavailable. Existing long-running tests may skip on CRAN.
+
+## Measuring coverage
+
+Install covr as a development tool (it is not required by package users). From the package root:
+
 ```r
-test_file("tests/testthat/test-disparity_resample.R")
+coverage = covr::package_coverage(".", type = "tests")
+covr::percent_coverage(coverage)
+covr::tally_coverage(coverage, by = "line")
 ```
 
-## Test Dependencies
-
-The tests require:
-- **testthat** (>= 3.0.0) - Core testing framework
-- **GeometricMorphometricsMix** - The package being tested
-
-Optional packages (tests will skip if not available):
-- **MASS** - For multivariate normal data generation
-- **geometry** - For convex hull volume tests
-- **nlshrink** - For Claramunt proper variance tests
-- **Morpho** - For 3D array handling tests
-- **ggplot2** - For plot method tests
-
-## Notes
-
-- Tests use `skip_if_not_installed()` to gracefully handle missing optional packages
-- Performance tests are marked with `skip_on_cran()` to avoid CI timeouts
-- All tests use reproducible random seeds for consistency
-- Error messages are tested to ensure they are informative
-
-## Test Statistics
-
-Total test count: ~100+ individual test cases across 4 test files
-Coverage: All major functions and edge cases of `disparity_resample()`
+Use the same dependency versions, platform, and test settings for before/after comparisons. Tests-only coverage excludes vignette and example execution. Do not add exclusions merely to increase the percentage. Review both uncovered code and the quality of assertions on covered code. The revision working area contains the detailed before/after results and reproducible tooling, outside this package.
