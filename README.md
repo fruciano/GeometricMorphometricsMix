@@ -29,7 +29,7 @@ Each function in the package is documented with usage examples and references.
 - **BTailTest** : Comparison of disparity between two groups
 - **critical_angle** : Critical angle for the test of difference between two vectors
 - **disparity_resample** : Obtain resampling estimates (bootstrap or rarefaction) of disparity statistics
-- **disparity_test** : Comparison of disparity between two groups
+- **disparity_compare** : Comparison of disparity between two groups
 - **dist_mean_boot** : Bootstrap estimates of the distance between group means
 - **EscoufierRV** : Computation of Escoufier RV, which quantifies levels of association between blocks of variables (Escoufier 1973 - Biometrics)
 - **LM_relativepos_check** : Check relative position of landmarks, comparing it to a reference specimen (useful to identify switched landmarks and similar in raw data)
@@ -52,7 +52,7 @@ Each function in the package is documented with usage examples and references.
 |--------------|-----------|-------------|
 | **Analysis of Disparity** | `BTailTest` | Traditional comparison of disparity between two groups |
 | | `disparity_resample` | Resampling estimates of disparity |
-| | `disparity_test` | Comparison of disparity between two groups |
+| | `disparity_compare` | Comparison of disparity between two groups |
 | **Integration/Association/Modularity** | `EscoufierRV` | Computation of Escoufier RV coefficient, quantifying association between blocks of variables |
 | | `RVrarefied` | Computation of rarefied estimates of Escoufier RV to account for sample size |
 | | `RVcomparison` | Permutation test for the difference in Escoufier RV between datasets |

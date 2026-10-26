@@ -1,4 +1,4 @@
-# GeometricMorphometricsMix 0.6.1.9000 (development)
+# GeometricMorphometricsMix 0.7.0.0
 
 * Added disparity_compare() for permutation, bootstrap and phylogenetic
   comparisons, supporting differences and ratios of two disparity measures.
