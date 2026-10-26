@@ -1,3 +1,10 @@
+# GeometricMorphometricsMix 0.6.1.9000 (development)
+
+* Added disparity_compare() for permutation, bootstrap and phylogenetic
+  comparisons, supporting differences and ratios of two disparity measures.
+* Added compact printing for disparity_compare() results.
+* Retained disparity_test() as a compatibility wrapper with its existing output.
+
 # GeometricMorphometricsMix 0.6.1.2
 
 * Added median in the output of `disparity_resample()` and made the associated S3 method for plotting use the median for plotting the dot as default
